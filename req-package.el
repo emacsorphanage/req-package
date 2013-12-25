@@ -39,7 +39,15 @@
 
 (defun req-package-form-eval-list (targets skipped evals)
   "form eval list form target list"
-  (cond ((null targets) evals)
+  (cond ((null targets) (if (null skipped)
+
+                            ;; there're no packages skipped,
+                            ;; just return collected data
+                            evals
+
+                          ;; some package were skipped
+                          ;; try to load it now again
+                          (req-package-form-eval-list skipped nil evals)))
 
         ;; if there is no dependencies
         ((null (cadar targets)) (req-package-form-eval-list (cdr targets)
@@ -47,9 +55,17 @@
                                                             (cons (caddar targets) evals)))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (req-package-form-eval-list (cdr targets)
-                                       skipped
-                                       (cons (caddar targets) evals)))))
+        (t (if (req-package-deps-loaded (cadar targets) evals)
+
+               ;; all required packages loaded
+               (req-package-form-eval-list (cdr targets)
+                                           skipped
+                                           (cons (caddar targets) evals))
+
+             ;; some of required packages not loaded
+             (req-package-form-eval-list (cdr targets)
+                                         (cons (car targets) skipped)
+                                         evals)))))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
