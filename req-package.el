@@ -23,16 +23,16 @@
 
      (add-to-list 'req-package-targets TARGET)))
 
-(defun req-package-form-eval-list ()
+(defun req-package-form-eval-list (targets)
   (mapcar (lambda (target) (add-to-list 'req-package-eval-list (caddr target)))
-          req-package-targets))
+          targets))
 
 (defun req-package-eval ()
   (mapcar (lambda (target) (eval target))
           req-package-eval-list))
 
 (defun req-package-finish ()
-  (progn (req-package-form-eval-list)
+  (progn (req-package-form-eval-list req-package-targets)
          (req-package-eval)))
 
 (provide 'req-package)
