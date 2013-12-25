@@ -1,14 +1,23 @@
 req-package
 ===========
 
-req-package is a macro wrapper on top of use-package
-it's goal is to simplify package dependencies management
-when using use-package for your .emacs
+##### Description
 
-usage:
+Req-package is a macro wrapper on top of use-package.
+It's goal is to simplify package dependencies management
+when using use-package for your .emacs.
 
-1) (require 'req-package)
-2) define required packages with dependencies using :require like this:
+##### Usage
+
+* load req-package:
+
+```elisp
+(require 'req-package)
+```
+
+* define required packages with dependencies using **:require** like this:
+
+```elisp
    (req-package dired
    (req-package dired-single
                 :require dired
@@ -19,12 +28,17 @@ usage:
    (req-package flymake-lua
                 :require (flymake lua-mode)
                 :init (...))
-3) (req-package-finish) to start loading packages in right order
+```
+* to start loading packages in right order:
 
-note:
+```elisp
+   (req-package-finish)
+```
 
-all use-package parameters are supported, see use-package manuals
+##### Note
+
+All use-package parameters are supported, see use-package manual
 for additional info.
 
-there are possible troubles with deferred loading provided by use-package.
-if you want to use it, try defer all packages in one dependency tree.
+Also there are possible troubles with deferred loading provided by use-package.
+If you want to use it, try defer all packages in one dependency tree.
