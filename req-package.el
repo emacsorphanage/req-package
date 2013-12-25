@@ -45,7 +45,7 @@
                             ;; just return collected data
                             evals
 
-                          (if (null skippederr)
+                          (if skippederr
 
                               ;; some packages were skipped
                               ;; we did everything we could
