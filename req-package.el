@@ -25,11 +25,21 @@
 
      (add-to-list 'req-package-targets TARGET)))
 
+(defun req-package-package-loaded (dep evals)
+  (cond ((null evals) nil)
+        ((eq (cadar evals) dep) t)
+        (t (req-package-package-loaded dep (cdr evals)))))
+
+(defun req-package-deps-loaded (deps evals)
+  (cond ((null deps) t)
+        ((null (req-package-package-loaded (car deps) evals)) nil)
+        (t (req-package-deps-loaded (cdr deps) evals))))
+
 (defun req-package-form-eval-list (targets skipped)
   "form eval list form target list"
   (cond ((null targets) nil)
 
-        ;; if there is not dependencies
+        ;; if there is no dependencies
         ((null (cadar targets)) (cons (caddar targets)
                                       (req-package-form-eval-list (cdr targets) skipped)))
 
