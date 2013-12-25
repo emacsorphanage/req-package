@@ -37,7 +37,7 @@
         ((null (req-package-package-loaded (car deps) evals)) nil)
         (t (req-package-deps-loaded (cdr deps) evals))))
 
-(defun req-package-form-eval-list (targets skipped evals)
+(defun req-package-form-eval-list (targets skipped evals skippederr)
   "form eval list form target list"
   (cond ((null targets) (if (null skipped)
 
@@ -45,14 +45,24 @@
                             ;; just return collected data
                             evals
 
-                          ;; some package were skipped
-                          ;; try to load it now again
-                          (req-package-form-eval-list skipped nil evals)))
+                          (if (null skippederr)
+
+                              ;; some packages were skipped
+                              ;; we did everything we could
+                              (error "some packages will never be loaded. you need to fix dependencies")
+
+                            ;; some package were skipped
+                            ;; try to load it now again
+                            (req-package-form-eval-list skipped
+                                                        nil
+                                                        evals
+                                                        t))))
 
         ;; if there is no dependencies
         ((null (cadar targets)) (req-package-form-eval-list (cdr targets)
                                                             skipped
-                                                            (cons (caddar targets) evals)))
+                                                            (cons (caddar targets) evals)
+                                                            nil))
 
         ;; there are some dependencies, lets look what we can do with it
         (t (if (req-package-deps-loaded (cadar targets) evals)
@@ -60,12 +70,14 @@
                ;; all required packages loaded
                (req-package-form-eval-list (cdr targets)
                                            skipped
-                                           (cons (caddar targets) evals))
+                                           (cons (caddar targets) evals)
+                                           nil)
 
              ;; some of required packages not loaded
              (req-package-form-eval-list (cdr targets)
                                          (cons (car targets) skipped)
-                                         evals)))))
+                                         evals
+                                         skippederr)))))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
@@ -74,7 +86,7 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil nil)))
+  (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil nil nil)))
          (req-package-eval req-package-eval-list)))
 
 (provide 'req-package)
