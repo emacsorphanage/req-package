@@ -46,8 +46,8 @@
                                       (req-package-form-eval-list (cdr targets) skipped)))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (cons (caddar targets)
-                 (req-package-form-eval-list (cdr targets) skipped)))))
+        (t (let ((tail (req-package-form-eval-list (cdr targets) skipped)))
+             (cons (caddar targets) tail)))))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
