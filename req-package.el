@@ -8,9 +8,11 @@
   "preprocessed list of forms to eval")
 
 (defun req-package-wrap-reqs (reqs)
+  "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
 
 (defmacro req-package (name &rest args)
+  "add package to target list"
   `(let* ((NAME ',name)
           (ARGS ',args)
           (ERRMES "invalid arguments list")
@@ -24,6 +26,7 @@
      (add-to-list 'req-package-targets TARGET)))
 
 (defun req-package-form-eval-list (targets skipped)
+  "form eval list form target list"
   (cond ((null targets) nil)
 
         ;; if there is not dependencies
@@ -35,10 +38,12 @@
                  (req-package-form-eval-list (cdr targets) skipped)))))
 
 (defun req-package-eval (list)
+  "evaluate preprocessed list"
   (mapcar (lambda (target) (eval target))
           list))
 
 (defun req-package-finish ()
+  "start loading process, call this after all req-package invocations"
   (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil)))
          (req-package-eval req-package-eval-list)))
 
