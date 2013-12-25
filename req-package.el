@@ -26,33 +26,46 @@
 
 ;;; Commentary:
 
-;; req-package is a macro wrapper on top of use-package
-;; it's goal is to simplify package dependencies management
-;; when using use-package for your .emacs
+;; Description
 
-;; usage:
+;; req-package is a macro wrapper on top of use-package.
+;; It's goal is to simplify package dependencies management
+;; when using use-package for your .emacs.
 
-;; 1) (require 'req-package)
+;; Usage
+
+;; 1) load req-package:
+
+;;    (require 'req-package)
+
 ;; 2) define required packages with dependencies using :require like this:
-;;      (req-package dired
-;;      (req-package dired-single
-;;                   :require dired
-;;                   :init (...))
-;;      (req-package lua-mode
-;;                   :init (...))
-;;      (req-package flymake)
-;;      (req-package flymake-lua
-;;                   :require (flymake lua-mode)
-;;                   :init (...))
-;; 3) (req-package-finish) to start loading packages in right order
 
-;; note:
+;;    (req-package dired
+;;    (req-package dired-single
+;;                 :require dired
+;;                 :init (...))
+;;    (req-package lua-mode
+;;                 :init (...))
+;;    (req-package flymake)
+;;    (req-package flymake-lua
+;;                 :require (flymake lua-mode)
+;;                 :init (...))
 
-;; all use-package parameters are supported, see use-package manuals
-;; for additional info.
+;; 3) to start loading packages in right order:
 
-;; there are possible troubles with deferred loading provided by use-package.
-;; if you want to use it, try defer all packages in one dependency tree.
+;;    (req-package-finish)
+
+;; Migrate from use-package
+
+;; Just replace all (use-package ...) with (req-package [:require DEPS] ...)
+;; and add (req-package-finish) at the end of your configuration file.
+
+;; Note
+
+;; All use-package parameters are supported, see use-package manual for additional info.
+
+;; Also there are possible troubles with deferred loading provided by use-package.
+;; If you want to use it, try defer all packages in one dependency tree.
 
 ;;; Code:
 
