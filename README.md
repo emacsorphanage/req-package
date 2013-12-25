@@ -3,7 +3,7 @@ req-package
 
 ##### Description
 
-Req-package is a macro wrapper on top of use-package.
+req-package is a macro wrapper on top of use-package.
 It's goal is to simplify package dependencies management
 when using use-package for your .emacs.
 
@@ -34,6 +34,10 @@ when using use-package for your .emacs.
 ```elisp
    (req-package-finish)
 ```
+
+##### Migrate from use-package
+
+Just replace all `(use-package ...)` with `(req-package [:require DEPS] ...)` and add `(req-package-finish)` at the end of your configuration file.
 
 ##### Note
 
