@@ -24,15 +24,22 @@
      (add-to-list 'req-package-targets TARGET)))
 
 (defun req-package-form-eval-list (targets)
-  (mapcar (lambda (target) (add-to-list 'req-package-eval-list (caddr target)))
-          targets))
+  (cond ((null targets) nil)
+
+        ;; if there is not dependencies
+        ((null (cadar targets)) (cons (caddar targets)
+                                      (req-package-form-eval-list (cdr targets))))
+
+        ;; there are some dependencies, lets look what we can do with it
+        (t (cons (caddar targets)
+                 (req-package-form-eval-list (cdr targets))))))
 
 (defun req-package-eval ()
   (mapcar (lambda (target) (eval target))
           req-package-eval-list))
 
 (defun req-package-finish ()
-  (progn (req-package-form-eval-list req-package-targets)
+  (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets)))
          (req-package-eval)))
 
 (provide 'req-package)
