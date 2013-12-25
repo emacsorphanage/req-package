@@ -37,17 +37,19 @@
         ((null (req-package-package-loaded (car deps) evals)) nil)
         (t (req-package-deps-loaded (cdr deps) evals))))
 
-(defun req-package-form-eval-list (targets skipped)
+(defun req-package-form-eval-list (targets skipped evals)
   "form eval list form target list"
-  (cond ((null targets) nil)
+  (cond ((null targets) evals)
 
         ;; if there is no dependencies
-        ((null (cadar targets)) (cons (caddar targets)
-                                      (req-package-form-eval-list (cdr targets) skipped)))
+        ((null (cadar targets)) (req-package-form-eval-list (cdr targets)
+                                                            skipped
+                                                            (cons (caddar targets) evals)))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (let ((tail (req-package-form-eval-list (cdr targets) skipped)))
-             (cons (caddar targets) tail)))))
+        (t (req-package-form-eval-list (cdr targets)
+                                       skipped
+                                       (cons (caddar targets) evals)))))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
@@ -56,7 +58,7 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil)))
+  (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil nil)))
          (req-package-eval req-package-eval-list)))
 
 (provide 'req-package)
