@@ -26,11 +26,13 @@
      (add-to-list 'req-package-targets TARGET)))
 
 (defun req-package-package-loaded (dep evals)
+  "is package already in evals eval list"
   (cond ((null evals) nil)
         ((eq (cadar evals) dep) t)
         (t (req-package-package-loaded dep (cdr evals)))))
 
 (defun req-package-deps-loaded (deps evals)
+  "is package already in evals eval list"
   (cond ((null deps) t)
         ((null (req-package-package-loaded (car deps) evals)) nil)
         (t (req-package-deps-loaded (cdr deps) evals))))
