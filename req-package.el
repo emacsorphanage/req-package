@@ -34,12 +34,12 @@
         (t (cons (caddar targets)
                  (req-package-form-eval-list (cdr targets) skipped)))))
 
-(defun req-package-eval ()
+(defun req-package-eval (list)
   (mapcar (lambda (target) (eval target))
-          req-package-eval-list))
+          list))
 
 (defun req-package-finish ()
   (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil)))
-         (req-package-eval)))
+         (req-package-eval req-package-eval-list)))
 
 (provide 'req-package)
