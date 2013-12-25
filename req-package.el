@@ -1,3 +1,61 @@
+;;; req-package.el --- req-package is a use-package wrapper for package runtime dependencies management
+
+;; Copyright (C) 2013 Edward Knyshov
+
+;; Author: Edward Knyshov <edvorg@gmail.com>
+;; Created: 25 Dec 2013
+;; Version: 0.1
+;; Package-Requires: ((use-package "1.0"))
+;; Keywords: dotemacs startup speed config package
+;; X-URL: https://github.com/edvorg/req-package
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 3, or (at
+;; your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING. If not, write to the
+;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+;; Boston, MA 02111-1307, USA.
+
+;;; Commentary:
+
+;; req-package is a macro wrapper on top of use-package
+;; it's goal is to simplify package dependencies management
+;; when using use-package for your .emacs
+
+;; usage:
+
+;; 1) (require 'req-package)
+;; 2) define required packages with dependencies using :require like this:
+;;      (req-package dired
+;;      (req-package dired-single
+;;                   :require dired
+;;                   :init (...))
+;;      (req-package lua-mode
+;;                   :init (...))
+;;      (req-package flymake)
+;;      (req-package flymake-lua
+;;                   :require (flymake lua-mode)
+;;                   :init (...))
+;; 3) (req-package-finish) to start loading packages in right order
+
+;; note:
+
+;; all use-package parameters are supported, see use-package manuals
+;; for additional info.
+
+;; there are possible troubles with deferred loading provided by use-package.
+;; if you want to use it, try defer all packages in one dependency tree.
+
+;;; Code:
+
 (require 'use-package)
 (require 'cl)
 
@@ -96,3 +154,7 @@
          (req-package-eval req-package-eval-list)))
 
 (provide 'req-package)
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
+;;; use-package.el ends here
