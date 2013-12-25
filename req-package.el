@@ -7,6 +7,9 @@
 (defvar req-package-eval-list nil
   "preprocessed list of forms to eval")
 
+(defvar req-package-debug nil
+  "if not nil, log packages loading order")
+
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
@@ -81,7 +84,10 @@
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
-  (mapcar (lambda (target) (eval target))
+  (mapcar (lambda (target) (progn (if req-package-debug
+                                 (print (concat "loading " (symbol-name (cadr target))))
+                               nil)
+                             (eval target)))
           list))
 
 (defun req-package-finish ()
