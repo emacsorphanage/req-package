@@ -1,4 +1,4 @@
-;;; req-package.el --- req-package is a use-package wrapper for package runtime dependencies management
+;;; req-package.el --- A use-package wrapper for package runtime dependencies management
 
 ;; Copyright (C) 2013 Edward Knyshov
 
