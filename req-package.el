@@ -105,11 +105,11 @@
         ((eq (cadar evals) dep) t)
         (t (req-package-package-loaded dep (cdr evals)))))
 
-(defun req-package-deps-loaded (deps evals)
+(defun req-package-packages-loaded (deps evals)
   "is package already in evals eval list"
   (cond ((null deps) t)
         ((null (req-package-package-loaded (car deps) evals)) nil)
-        (t (req-package-deps-loaded (cdr deps) evals))))
+        (t (req-package-packages-loaded (cdr deps) evals))))
 
 (defun req-package-form-eval-list (targets skipped evals skippederr)
   "form eval list form target list"
@@ -139,7 +139,7 @@
                                                             nil))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (if (req-package-deps-loaded (cadar targets) evals)
+        (t (if (req-package-packages-loaded (cadar targets) evals)
 
                ;; all required packages loaded
                (req-package-form-eval-list (cdr targets)
