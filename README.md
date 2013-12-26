@@ -18,7 +18,7 @@ when using use-package for your .emacs.
 * define required packages with dependencies using **:require** like this:
 
 ```elisp
-   (req-package dired
+   (req-package dired)
    (req-package dired-single
                 :require dired
                 :init (...))
