@@ -46,3 +46,5 @@ for additional info.
 
 Also there are possible troubles with deferred loading provided by use-package.
 If you want to use it, try defer all packages in one dependency tree.
+
+More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
