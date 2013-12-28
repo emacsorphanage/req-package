@@ -180,12 +180,14 @@
   (error (format "%s: cycled dependencies" package)))
 
 (defun req-package-deps-string (deps)
+  "convert list of package dependendcies into string representation"
   (cond ((null deps) "")
         (t (concat (symbol-name (car deps))
                    " "
                    (req-package-deps-string (cdr deps))))))
 
 (defun req-package-gen-evals (packages evals)
+  "extends evals with packages which not already loaded"
   (if packages
       (let* ((tail (req-package-gen-evals (cdr packages) evals)))
         (if (req-package-package-loaded (car packages) evals)
@@ -195,6 +197,7 @@
     nil))
 
 (defun req-package-handle-skip-error (targets skipped evals skippederr)
+  "called when some bunch of packages unable to load more then on time"
   (let* ((nottargeted (req-package-packages-targeted (cadar skipped) skipped)))
     (if nottargeted
         (if req-package-error-on-deps-not-found
