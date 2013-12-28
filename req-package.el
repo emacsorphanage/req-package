@@ -189,16 +189,16 @@
 
 (defun req-package-handle-skip-error (targets skipped evals skippederr)
   (let* ((nottargeted (req-package-packages-targeted (cadar skipped) skipped)))
-  (if nottargeted
-      (if req-package-error-on-deps-not-found
-          (req-package-error-missing-deps (symbol-name (caar skipped))
-                                          (req-package-deps-string nottargeted))
-        (req-package-form-eval-list nil
-                                    (cdr skipped)
-                                    (cons (caddar skipped)
-                                          (append (req-package-gen-evals (cadar skipped)) evals))
-                                    skippederr))
-    (req-package-error-cycled-deps (symbol-name (caar skipped))))))
+    (if nottargeted
+        (if req-package-error-on-deps-not-found
+            (req-package-error-missing-deps (symbol-name (caar skipped))
+                                            (req-package-deps-string nottargeted))
+          (req-package-form-eval-list nil
+                                      (cdr skipped)
+                                      (cons (caddar skipped)
+                                            (append (req-package-gen-evals (cadar skipped)) evals))
+                                      skippederr))
+      (req-package-error-cycled-deps (symbol-name (caar skipped))))))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
