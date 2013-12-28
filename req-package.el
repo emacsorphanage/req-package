@@ -178,6 +178,7 @@
 (defun req-package-deps-string (deps)
   (cond ((null deps) "")
         (t (concat (symbol-name (car deps))
+                   " "
                    (req-package-deps-string (cdr deps))))))
 
 (defun req-package-gen-evals (packages)
