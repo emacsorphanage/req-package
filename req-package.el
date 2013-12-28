@@ -81,6 +81,9 @@
 (defvar req-package-debug nil
   "if not nil, log packages loading order")
 
+(defvar req-package-error-on-deps-not-found nil
+  "if not nil try to load packages from :require automatically")
+
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
@@ -99,6 +102,19 @@
 
      (add-to-list 'req-package-targets TARGET)))
 
+(defun req-package-package-targeted (dep targets)
+  "returns nil if package is in targets or (dep) if not"
+  (cond ((null targets) (list dep))
+        ((eq (caar targets) dep) nil)
+        (t (req-package-package-targeted dep (cdr targets)))))
+
+(defun req-package-packages-targeted (deps targets)
+  "return nil if packages is in tagets or list of missing packages"
+  (cond ((null deps) nil)
+        (t (let ((headdeps (req-package-package-targeted (car deps) targets))
+                 (taildeps (req-package-packages-targeted (cdr deps) targets)))
+             (append headdeps taildeps)))))
+
 (defun req-package-package-loaded (dep evals)
   "is package already in evals eval list"
   (cond ((null evals) nil)
@@ -106,7 +122,7 @@
         (t (req-package-package-loaded dep (cdr evals)))))
 
 (defun req-package-packages-loaded (deps evals)
-  "is package already in evals eval list"
+  "is packages already in evals eval list"
   (cond ((null deps) t)
         ((null (req-package-package-loaded (car deps) evals)) nil)
         (t (req-package-packages-loaded (cdr deps) evals))))
@@ -122,8 +138,8 @@
                           (if skippederr
 
                               ;; some packages were skipped
-                              ;; we did everything we could
-                              (error "some packages will never be loaded. you need to fix dependencies")
+                              ;; try to handle it
+                              (req-package-handle-skip-error targets skipped evals skippederr)
 
                             ;; some package were skipped
                             ;; try to load it now again
@@ -152,6 +168,36 @@
                                          (cons (car targets) skipped)
                                          evals
                                          skippederr)))))
+
+(defun req-package-error-missing-deps (package deps)
+  (error (format "%s: missing dependencies: %s" package deps)))
+
+(defun req-package-error-cycled-deps (package)
+  (error (format "%s: cycled dependencies" package)))
+
+(defun req-package-deps-string (deps)
+  (cond ((null deps) "")
+        (t (concat (symbol-name (car deps))
+                   (req-package-deps-string (cdr deps))))))
+
+(defun req-package-gen-evals (packages)
+  (if packages
+      (cons (list 'use-package (car packages))
+            (req-package-gen-evals (cdr packages)))
+    nil))
+
+(defun req-package-handle-skip-error (targets skipped evals skippederr)
+  (let* ((nottargeted (req-package-packages-targeted (cadar skipped) skipped)))
+  (if nottargeted
+      (if req-package-error-on-deps-not-found
+          (req-package-error-missing-deps (symbol-name (caar skipped))
+                                          (req-package-deps-string nottargeted))
+        (req-package-form-eval-list nil
+                                    (cdr skipped)
+                                    (cons (caddar skipped)
+                                          (append (req-package-gen-evals (cadar skipped)) evals))
+                                    skippederr))
+    (req-package-error-cycled-deps (symbol-name (caar skipped))))))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
