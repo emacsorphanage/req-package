@@ -139,7 +139,10 @@
 
                               ;; some packages were skipped
                               ;; try to handle it
-                              (req-package-handle-skip-error targets skipped evals skippederr)
+                              (req-package-handle-skip-error targets
+                                                             skipped
+                                                             evals
+                                                             skippederr)
 
                             ;; some package were skipped
                             ;; try to load it now again
@@ -151,7 +154,8 @@
         ;; if there is no dependencies
         ((null (cadar targets)) (req-package-form-eval-list (cdr targets)
                                                             skipped
-                                                            (cons (caddar targets) evals)
+                                                            (cons (caddar targets)
+                                                                  evals)
                                                             nil))
 
         ;; there are some dependencies, lets look what we can do with it
@@ -181,10 +185,13 @@
                    " "
                    (req-package-deps-string (cdr deps))))))
 
-(defun req-package-gen-evals (packages)
+(defun req-package-gen-evals (packages evals)
   (if packages
-      (cons (list 'use-package (car packages))
-            (req-package-gen-evals (cdr packages)))
+      (let* ((tail (req-package-gen-evals (cdr packages) evals)))
+        (if (req-package-package-loaded (car packages) evals)
+            tail
+          (cons (list 'use-package (car packages))
+                tail)))
     nil))
 
 (defun req-package-handle-skip-error (targets skipped evals skippederr)
@@ -196,7 +203,9 @@
           (req-package-form-eval-list nil
                                       (cdr skipped)
                                       (cons (caddar skipped)
-                                            (append (req-package-gen-evals (cadar skipped)) evals))
+                                            (append (req-package-gen-evals (cadar skipped)
+                                                                           evals)
+                                                    evals))
                                       skippederr))
       (req-package-error-cycled-deps (symbol-name (caar skipped))))))
 
@@ -210,7 +219,11 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (progn (setq req-package-eval-list (reverse (req-package-form-eval-list req-package-targets nil nil nil)))
+  (progn (setq req-package-eval-list
+               (reverse (req-package-form-eval-list req-package-targets
+                                                    nil
+                                                    nil
+                                                    nil)))
          (req-package-eval req-package-eval-list)))
 
 (provide 'req-package)
