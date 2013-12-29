@@ -89,9 +89,6 @@
 (defvar req-package-debug nil
   "if not nil, log packages loading order")
 
-(defvar req-package-error-on-deps-not-found nil
-  "if not nil try to load packages from :require automatically")
-
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
@@ -106,8 +103,7 @@
                        (if (null (cdr ARGS)) (error ERRMES) t)))
           (USEPACKARGS (if HASREQ (cddr ARGS) ARGS))
           (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil))
-          (TARGET (list NAME REQS (append (req-package-gen-eval NAME)
-                                          USEPACKARGS))))
+          (TARGET (req-package-gen-target NAME REQS USEPACKARGS)))
 
      (add-to-list 'req-package-targets TARGET)))
 
@@ -133,11 +129,11 @@
 (defun req-package-packages-loaded (deps evals)
   "returns nil if packages are in evals or list of missing packages"
   (cond ((null deps) nil)
-        (t (let ((headdeps (req-package-package-loaded (car deps) targets))
-                 (taildeps (req-package-packages-loaded (cdr deps) targets)))
+        (t (let ((headdeps (req-package-package-loaded (car deps) evals))
+                 (taildeps (req-package-packages-loaded (cdr deps) evals)))
              (append headdeps taildeps)))))
 
-(defun req-package-form-eval-list (targets skipped evals skippederr)
+(defun req-package-form-eval-list (alltargets targets skipped evals err)
   "form eval list form target list"
   (cond ((null targets) (if (null skipped)
 
@@ -145,59 +141,67 @@
                             ;; just return collected data
                             evals
 
-                          (if skippederr
+                          (if err
 
                               ;; some packages were skipped
                               ;; try to handle it
-                              (req-package-handle-skip-error targets
-                                                             skipped
-                                                             evals
-                                                             skippederr)
+                              (req-package-error-cycled-deps (symbol-name (caar skipped)))
 
                             ;; some package were skipped
                             ;; try to load it now again
-                            (req-package-form-eval-list skipped
+                            (req-package-form-eval-list alltargets
+                                                        skipped
                                                         nil
                                                         evals
                                                         t))))
 
         ;; if there is no dependencies
-        ((null (cadar targets)) (req-package-form-eval-list (cdr targets)
+        ((null (cadar targets)) (req-package-form-eval-list alltargets
+                                                            (cdr targets)
                                                             skipped
                                                             (cons (caddar targets)
                                                                   evals)
                                                             nil))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (if (null (req-package-packages-loaded (cadar targets) evals))
+        (t (let* ((notloaded1 (req-package-packages-loaded (cadar targets) evals))
+                  (nottargeted1 (req-package-packages-targeted notloaded1 alltargets)))
 
-               ;; all required packages loaded
-               (req-package-form-eval-list (cdr targets)
-                                           skipped
-                                           (cons (caddar targets) evals)
-                                           nil)
+             (if (null notloaded1)
 
-             ;; some of required packages not loaded
-             (req-package-form-eval-list (cdr targets)
-                                         (cons (car targets) skipped)
-                                         evals
-                                         skippederr)))))
+                 ;; all required packages loaded
+                 (req-package-form-eval-list alltargets
+                                             (cdr targets)
+                                             skipped
+                                             (cons (caddar targets)
+                                                   evals)
+                                             nil)
 
-(defun req-package-error-missing-deps (package deps)
-  (error (format "%s: missing dependencies: %s" package deps)))
+               ;; some deps not loaded
+               (if nottargeted1
+
+                   ;; some deps not targeted, auto load
+                   (let* ((newtargets (req-package-gen-targets nottargeted1)))
+                     (req-package-form-eval-list (append newtargets
+                                                         alltargets)
+                                                 (append newtargets
+                                                         targets)
+                                                 skipped
+                                                 evals
+                                                 nil))
+
+                 ;; some of required packages is targeted but not loaded
+                 (req-package-form-eval-list alltargets
+                                             (cdr targets)
+                                             (cons (car targets) skipped)
+                                             evals
+                                             err)))))))
 
 (defun req-package-error-cycled-deps (package)
   (error (format "%s: cycled dependencies" package)))
 
-(defun req-package-deps-string (deps)
-  "convert list of package dependendcies into string representation"
-  (cond ((null deps) "")
-        (t (concat (symbol-name (car deps))
-                   " "
-                   (req-package-deps-string (cdr deps))))))
-
 (defun req-package-gen-eval (package)
-  "generate eval for package. if it is available in repo, try to fetch it"
+  "generates eval for package. if it is available in repo, try to fetch it"
   (let* ((ARCHIVES (cond ((null package-archive-contents) (progn (package-refresh-contents)
                                                                  package-archive-contents))
                          (t package-archive-contents)))
@@ -208,36 +212,27 @@
                      (t (list 'use-package package)))))
     EVAL))
 
-(defun req-package-gen-evals (packages evals)
-  "extends evals with packages which not already loaded"
-  (if packages
-      (let* ((tail (req-package-gen-evals (cdr packages) evals)))
-        (if (null (req-package-package-loaded (car packages) evals))
-            tail
-          (cons (req-package-gen-eval (car packages))
-                tail)))
-    nil))
+(defun req-package-gen-evals (packages)
+  "extends evals with packages"
+  (cond (packages (let* ((tail (req-package-gen-evals (cdr packages))))
+                    (cons (req-package-gen-eval (car packages)) tail)))
+        (t nil)))
 
-(defun req-package-handle-skip-error (targets skipped evals skippederr)
-  "called when some bunch of packages unable to load more then on time"
-  (let* ((nottargeted (req-package-packages-targeted (cadar skipped) skipped)))
-    (if nottargeted
-        (if req-package-error-on-deps-not-found
-            (req-package-error-missing-deps (symbol-name (caar skipped))
-                                            (req-package-deps-string nottargeted))
-          (req-package-form-eval-list nil
-                                      (cdr skipped)
-                                      (cons (caddar skipped)
-                                            (append (req-package-gen-evals (cadar skipped)
-                                                                           evals)
-                                                    evals))
-                                      skippederr))
-      (req-package-error-cycled-deps (symbol-name (caar skipped))))))
+(defun req-package-gen-target (package reqs useargs)
+  "generates target for package. if it is available in repo, try to fetch it"
+  (list package reqs (append (req-package-gen-eval package) useargs)))
+
+(defun req-package-gen-targets (packages)
+  "extends targets with packages"
+  (cond (packages (let* ((tail (req-package-gen-targets (cdr packages))))
+                    (cons (req-package-gen-target (car packages) nil nil) tail)))
+        (t nil)))
 
 (defun req-package-eval (list)
   "evaluate preprocessed list"
   (mapcar (lambda (target) (progn (if req-package-debug
-                                 (print (concat "loading " (symbol-name (cadr target))))
+                                 (print (concat "loading "
+                                                (symbol-name (cadr target))))
                                nil)
                              (eval target)))
           list))
@@ -246,6 +241,7 @@
   "start loading process, call this after all req-package invocations"
   (progn (setq req-package-eval-list
                (reverse (req-package-form-eval-list req-package-targets
+                                                    req-package-targets
                                                     nil
                                                     nil
                                                     nil)))
