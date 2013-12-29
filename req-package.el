@@ -83,9 +83,6 @@
 (defvar req-package-targets nil
   "list of packages to load")
 
-(defvar req-package-eval-list nil
-  "preprocessed list of forms to eval")
-
 (defvar req-package-verbose nil
   "if not nil, log packages loading order")
 
@@ -239,13 +236,13 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (progn (setq req-package-eval-list
-               (reverse (req-package-form-eval-list req-package-targets
-                                                    req-package-targets
-                                                    nil
-                                                    nil
-                                                    nil)))
-         (req-package-eval req-package-eval-list)))
+  (progn (let ((evals
+                (reverse (req-package-form-eval-list req-package-targets
+                                                     req-package-targets
+                                                     nil
+                                                     nil
+                                                     nil))))
+           (req-package-eval evals))))
 
 (provide 'req-package)
 
