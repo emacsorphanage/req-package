@@ -186,13 +186,25 @@
                    " "
                    (req-package-deps-string (cdr deps))))))
 
+(defun req-package-gen-eval (package)
+  "generate eval for package. if it is available in repo, try to fetch it"
+  (let* ((ARCHIVES (cond ((null package-archive-contents) (progn (package-refresh-contents)
+                                                                 package-archive-contents))
+                         (t package-archive-contents)))
+         (AVAIL (some (lambda (elem)
+                        (eq (car elem) package))
+                      ARCHIVES))
+         (EVAL (cond (AVAIL (list 'use-package package ':ensure package))
+                     (t (list 'use-package package)))))
+    EVAL))
+
 (defun req-package-gen-evals (packages evals)
   "extends evals with packages which not already loaded"
   (if packages
       (let* ((tail (req-package-gen-evals (cdr packages) evals)))
         (if (req-package-package-loaded (car packages) evals)
             tail
-          (cons (list 'use-package (car packages))
+          (cons (req-package-gen-eval (car packages))
                 tail)))
     nil))
 
