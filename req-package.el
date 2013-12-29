@@ -225,14 +225,14 @@
                     (cons (req-package-gen-target (car packages) nil nil) tail)))
         (t nil)))
 
-(defun req-package-eval (list)
-  "evaluate preprocessed list"
+(defun req-package-eval (evals)
+  "evaluate preprocessed evals"
   (mapcar (lambda (target) (progn (if req-package-verbose
                                  (print (concat "loading "
                                                 (symbol-name (cadr target))))
                                nil)
                              (eval target)))
-          list))
+          evals))
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
