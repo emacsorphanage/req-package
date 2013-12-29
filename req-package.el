@@ -236,13 +236,12 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (progn (let ((evals
-                (reverse (req-package-form-eval-list req-package-targets
-                                                     req-package-targets
-                                                     nil
-                                                     nil
-                                                     nil))))
-           (req-package-eval evals))))
+  (let ((evals (reverse (req-package-form-eval-list req-package-targets
+                                                    req-package-targets
+                                                    nil
+                                                    nil
+                                                    nil))))
+    (req-package-eval evals)))
 
 (provide 'req-package)
 
