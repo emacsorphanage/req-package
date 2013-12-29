@@ -118,23 +118,24 @@
         (t (req-package-package-targeted dep (cdr targets)))))
 
 (defun req-package-packages-targeted (deps targets)
-  "return nil if packages is in tagets or list of missing packages"
+  "returns nil if packages are in targets or list of missing packages"
   (cond ((null deps) nil)
         (t (let ((headdeps (req-package-package-targeted (car deps) targets))
                  (taildeps (req-package-packages-targeted (cdr deps) targets)))
              (append headdeps taildeps)))))
 
 (defun req-package-package-loaded (dep evals)
-  "is package already in evals eval list"
-  (cond ((null evals) nil)
-        ((eq (cadar evals) dep) t)
+  "returns nil if package is in evals or (dep) if not"
+  (cond ((null evals) (list dep))
+        ((eq (cadar evals) dep) nil)
         (t (req-package-package-loaded dep (cdr evals)))))
 
 (defun req-package-packages-loaded (deps evals)
-  "is packages already in evals eval list"
-  (cond ((null deps) t)
-        ((null (req-package-package-loaded (car deps) evals)) nil)
-        (t (req-package-packages-loaded (cdr deps) evals))))
+  "returns nil if packages are in evals or list of missing packages"
+  (cond ((null deps) nil)
+        (t (let ((headdeps (req-package-package-loaded (car deps) targets))
+                 (taildeps (req-package-packages-loaded (cdr deps) targets)))
+             (append headdeps taildeps)))))
 
 (defun req-package-form-eval-list (targets skipped evals skippederr)
   "form eval list form target list"
@@ -168,7 +169,7 @@
                                                             nil))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (if (req-package-packages-loaded (cadar targets) evals)
+        (t (if (null (req-package-packages-loaded (cadar targets) evals))
 
                ;; all required packages loaded
                (req-package-form-eval-list (cdr targets)
@@ -211,7 +212,7 @@
   "extends evals with packages which not already loaded"
   (if packages
       (let* ((tail (req-package-gen-evals (cdr packages) evals)))
-        (if (req-package-package-loaded (car packages) evals)
+        (if (null (req-package-package-loaded (car packages) evals))
             tail
           (cons (req-package-gen-eval (car packages))
                 tail)))
