@@ -98,7 +98,8 @@
                        (if (null (cdr ARGS)) (error ERRMES) t)))
           (USEPACKARGS (if HASREQ (cddr ARGS) ARGS))
           (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil))
-          (TARGET (list NAME REQS (apply 'list 'use-package NAME USEPACKARGS))))
+          (TARGET (list NAME REQS (append (req-package-gen-eval NAME)
+                                          USEPACKARGS))))
 
      (add-to-list 'req-package-targets TARGET)))
 
