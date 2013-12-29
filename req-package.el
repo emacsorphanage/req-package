@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((use-package "1.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -66,6 +66,14 @@
 
 ;; Also there are possible troubles with deferred loading provided by use-package.
 ;; If you want to use it, try defer all packages in one dependency tree.
+
+;; Changelog:
+
+;; v0.2-auto-fetch:
+;;   There is no need of explicit :ensure in your code now.
+;;   When you req-package it adds :ensure if package is available in your repos.
+;;   Also package deps :ensure'd automatically too.
+;;   just write (req-package pkg1 :require pkg2) and all you need will be installed.
 
 ;;; Code:
 
