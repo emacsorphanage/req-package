@@ -161,8 +161,7 @@
                                                             nil))
 
         ;; there are some dependencies, lets look what we can do with it
-        (t (let* ((notloaded1 (req-package-packages-loaded (cadar targets) evals))
-                  (nottargeted1 (req-package-packages-targeted notloaded1 alltargets)))
+        (t (let* ((notloaded1 (req-package-packages-loaded (cadar targets) evals)))
 
              (if (null notloaded1)
 
@@ -175,24 +174,25 @@
                                              nil)
 
                ;; some deps not loaded
-               (if nottargeted1
+               (let* ((nottargeted1 (req-package-packages-targeted notloaded1 alltargets)))
+                 (if nottargeted1
 
-                   ;; some deps not targeted, auto load
-                   (let* ((newtargets (req-package-gen-targets nottargeted1)))
-                     (req-package-form-eval-list (append newtargets
-                                                         alltargets)
-                                                 (append newtargets
-                                                         targets)
-                                                 skipped
-                                                 evals
-                                                 nil))
+                     ;; some deps not targeted, auto load
+                     (let* ((newtargets (req-package-gen-targets nottargeted1)))
+                       (req-package-form-eval-list (append newtargets
+                                                           alltargets)
+                                                   (append newtargets
+                                                           targets)
+                                                   skipped
+                                                   evals
+                                                   nil))
 
-                 ;; some of required packages is targeted but not loaded
-                 (req-package-form-eval-list alltargets
-                                             (cdr targets)
-                                             (cons (car targets) skipped)
-                                             evals
-                                             err)))))))
+                   ;; some of required packages is targeted but not loaded
+                   (req-package-form-eval-list alltargets
+                                               (cdr targets)
+                                               (cons (car targets) skipped)
+                                               evals
+                                               err))))))))
 
 (defun req-package-error-cycled-deps (package)
   (error (format "%s: cycled dependencies" package)))
