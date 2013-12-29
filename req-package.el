@@ -225,9 +225,9 @@
                     (cons (req-package-gen-target (car packages) nil nil) tail)))
         (t nil)))
 
-(defun req-package-eval (evals)
+(defun req-package-eval (evals verbose)
   "evaluate preprocessed evals"
-  (mapcar (lambda (target) (progn (if req-package-verbose
+  (mapcar (lambda (target) (progn (if verbose
                                  (print (concat "loading "
                                                 (symbol-name (cadr target))))
                                nil)
@@ -241,7 +241,7 @@
                                                     nil
                                                     nil
                                                     nil))))
-    (req-package-eval evals)))
+    (req-package-eval evals req-package-verbose)))
 
 (provide 'req-package)
 
