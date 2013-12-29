@@ -48,3 +48,11 @@ Also there are possible troubles with deferred loading provided by use-package.
 If you want to use it, try defer all packages in one dependency tree.
 
 More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
+
+##### Changelog:
+
+* **v0.2-auto-fetch:**
+    There is no need of explicit `:ensure` in your code now.
+    When you req-package it adds `:ensure` if package is available in your repos.
+    Also package deps `:ensure`'d automatically too.
+    Just write `(req-package pkg1 :require pkg2)` and all you need will be installed.
