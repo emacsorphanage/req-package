@@ -94,14 +94,32 @@
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
 
+(defun req-package-log (err visprefix mes)
+  (let* ((prefix "req-package: ")
+         (noprefix "             ")
+         (splitted (split-string mes "\n"))
+         (titleprefix (if visprefix prefix noprefix))
+         (title (concat titleprefix (car splitted)))
+         (description (mapcar (lambda (line)
+                                (concat "\n" noprefix line))
+                              (cdr splitted)))
+         (fullmes (apply 'concat "" (cons title description))))
+    (if err
+        (error fullmes)
+      (print fullmes))))
+
 (defmacro req-package (name &rest args)
   "add package to target list"
   `(let* ((NAME ',name)
           (ARGS ',args)
-          (ERRMES "req-package: invalid arguments list")
+          (ERRMES "invalid arguments list")
           (HASREQ (and (not (null ARGS))
                        (eq (car ARGS) :require)
-                       (if (null (cdr ARGS)) (error ERRMES) t)))
+                       (if (null (cdr ARGS))
+                           (req-package-log t
+                                            t
+                                            ERRMES)
+                         t)))
           (USEPACKARGS (if HASREQ (cddr ARGS) ARGS))
           (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil))
           (TARGET (req-package-gen-target NAME REQS USEPACKARGS)))
@@ -326,8 +344,7 @@
         (t (concat "\n"
                    (if (null (car cycles))
                        ""
-                     (concat "             "
-                             (substring (req-package-cycle-string (car cycles)) 4)))
+                     (substring (req-package-cycle-string (car cycles)) 4))
                    (req-package-cycles-string (cdr cycles))))))
 
 (defun req-package-error-cycled-deps (skipped before cycles)
@@ -335,8 +352,10 @@
   (if (null skipped)
       (let* ((filtered (req-package-remove-cycles-duplicates cycles
                                                              cycles)))
-        (error (concat "req-package: cycled deps:"
-                       (req-package-cycles-string filtered))))
+        (req-package-log t
+                         t
+                         (concat "cycled deps:"
+                                 (req-package-cycles-string filtered))))
     (let* ((newcycles (req-package-find-cycles (car skipped)
                                                (append before
                                                        (cdr skipped)))))
@@ -377,8 +396,10 @@
 (defun req-package-eval (evals verbose)
   "evaluate eval list and print message if verbose is not nil"
   (mapcar (lambda (target) (progn (if verbose
-                                 (print (concat "req-package: loading "
-                                                (symbol-name (cadr target))))
+                                 (req-package-log nil
+                                                  t
+                                                  (concat "loading "
+                                                          (symbol-name (cadr target))))
                                nil)
                              (eval target)))
           evals))
