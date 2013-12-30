@@ -264,15 +264,16 @@
 
 (defun req-package-error-cycled-deps (skipped before cycles)
   "compute info about error and print corresponding message"
-  (cond ((null skipped) (error (concat "req-package: cycled deps:"
-                                       (req-package-cycles-string cycles))))
-        (t (let* ((newcycles (req-package-find-cycles (car skipped)
-                                                      (append before
-                                                              (cdr skipped)))))
-             (req-package-error-cycled-deps (cdr skipped)
-                                            (cons (car skipped)
-                                                  before)
-                                            (append newcycles cycles))))))
+  (if (null skipped)
+      (error (concat "req-package: cycled deps:"
+                     (req-package-cycles-string cycles)))
+    (let* ((newcycles (req-package-find-cycles (car skipped)
+                                               (append before
+                                                       (cdr skipped)))))
+      (req-package-error-cycled-deps (cdr skipped)
+                                     (cons (car skipped)
+                                           before)
+                                     (append newcycles cycles)))))
 
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
