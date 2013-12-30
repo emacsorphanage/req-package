@@ -56,7 +56,7 @@ Master is used for automatic repo package builds by melpa's travis-ci.
 
 ##### Changelog
 
-* **v0.4-all-cycles**
+* **v0.4-all-cycles**:
     All cycles of your dependencies will be printed now.
     Also there are more handy log messages and some bug fixes.
 * **v0.3-cycles**:
