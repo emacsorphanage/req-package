@@ -29,16 +29,16 @@
 ;; Description
 
 ;; req-package is a macro wrapper on top of use-package.
-;; It's goal is to simplify package dependencies management
+;; It's goal is to simplify package dependencies management,
 ;; when using use-package for your .emacs.
 
 ;; Usage
 
-;; 1) load req-package:
+;; 1) Load req-package:
 
 ;;    (require 'req-package)
 
-;; 2) define required packages with dependencies using :require like this:
+;; 2) Define required packages with dependencies using :require like this:
 
 ;;    (req-package dired)
 ;;    (req-package dired-single
@@ -51,7 +51,7 @@
 ;;                 :require (flymake lua-mode)
 ;;                 :init (...))
 
-;; 3) to start loading packages in right order:
+;; 3) To start loading packages in right order:
 
 ;;    (req-package-finish)
 
@@ -72,7 +72,7 @@
 ;;    v0.3-cycles
 ;;       There are nice error messages about cycled dependencies now.
 ;;       Cycles printed in a way: pkg1 -> [pkg2 -> ...] pkg1.
-;;       It means there're cycle around pkg1.
+;;       It means there is a cycle around pkg1.
 ;;    v0.2-auto-fetch:
 ;;       There is no need of explicit :ensure in your code now.
 ;;       When you req-package it adds :ensure if package is available in your repos.
@@ -135,7 +135,7 @@
              (append headdeps taildeps)))))
 
 (defun req-package-form-eval-list (alltargets targets skipped evals err)
-  "form eval list form target list"
+  "form eval list from target list"
   (cond ((null targets) (if (null skipped)
 
                             ;; there're no packages skipped,
@@ -200,16 +200,19 @@
                                                err))))))))
 
 (defun req-package-find-target (name targets)
+  "find target in targets by name"
   (cond ((null targets) nil)
         ((eq (caar targets) name) (car targets))
         (t (req-package-find-target name (cdr targets)))))
 
 (defun req-package-cut-cycle (target cycle)
+  "remove unnecessary cycle tail"
   (cond ((null cycle) cycle)
         ((eq (car target) (caar cycle)) cycle)
         (t (req-package-cut-cycle target (cdr cycle)))))
 
 (defun req-package-find-cycle (current path graph)
+  "find cycle in graph starting from currend. return cycle path if found or nil"
   (let* ((deps (cadr current)))
     (if (null deps)
         nil
@@ -230,12 +233,14 @@
                                       graph))))))))
 
 (defun req-package-cycle-string (cycle)
+  "convert cycle to string"
   (cond ((null cycle) "")
         (t (concat " -> "
                    (symbol-name (caar cycle))
                    (req-package-cycle-string (cdr cycle))))))
 
 (defun req-package-error-cycled-deps (skipped before)
+  "compute info about error and print corresponding message"
   (cond ((null skipped) (error "req-package: oops, unknown error"))
         (t (let* ((cycle (req-package-find-cycle (car skipped)
                                                  (list (car skipped))
@@ -248,7 +253,7 @@
                                                            before))))))))
 
 (defun req-package-gen-eval (package)
-  "generates eval for package. if it is available in repo, try to fetch it"
+  "generates eval for package. if it is available in repo, add :ensure keyword"
   (let* ((ARCHIVES (cond ((null package-archive-contents) (progn (package-refresh-contents)
                                                                  package-archive-contents))
                          (t package-archive-contents)))
@@ -260,7 +265,7 @@
     EVAL))
 
 (defun req-package-gen-evals (packages)
-  "extends evals with packages"
+  "generates evals for packages"
   (cond (packages (let* ((tail (req-package-gen-evals (cdr packages))))
                     (cons (req-package-gen-eval (car packages)) tail)))
         (t nil)))
@@ -270,13 +275,13 @@
   (list package reqs (append (req-package-gen-eval package) useargs)))
 
 (defun req-package-gen-targets (packages)
-  "extends targets with packages"
+  "generates targets for packages"
   (cond (packages (let* ((tail (req-package-gen-targets (cdr packages))))
                     (cons (req-package-gen-target (car packages) nil nil) tail)))
         (t nil)))
 
 (defun req-package-eval (evals verbose)
-  "evaluate preprocessed evals"
+  "evaluate eval list and print message if verbose is not nil"
   (mapcar (lambda (target) (progn (if verbose
                                  (print (concat "req-package: loading "
                                                 (symbol-name (cadr target))))
