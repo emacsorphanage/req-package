@@ -233,24 +233,91 @@
                                       path
                                       graph))))))))
 
+(defun req-package-simplify-cycle (cycle)
+  "remove unnecessary information from cycle and return it back"
+  (if (null cycle)
+      cycle
+    (cons (caar cycle)
+          (req-package-simplify-cycle (cdr cycle)))))
+
 (defun req-package-find-cycles (from graph)
   "find cycles in graph starting from current. return cycles if found or nil"
   (if (null (cadr from))
       nil
-    (let* ((head (req-package-find-cycle from
-                                         (list from)
-                                         graph))
+    (let* ((head (req-package-simplify-cycle (req-package-find-cycle from
+                                                                     (list from)
+                                                                     graph)))
            (newfrom (list (car from) (cdadr from)))
            (tail (req-package-find-cycles newfrom graph)))
       (if head
           (cons head tail)
         tail))))
 
+(defun req-package-cycle-shift (cycle)
+  "shift cycle to left"
+  (if (null cycle)
+      cycle
+    (let* ((head (car cycle))
+           (tail (cdr cycle))
+           (mid (reverse (cdr (reverse tail)))))
+      (if (null mid)
+          (list head head)
+        (append mid
+                (list head
+                      (car mid)))))))
+
+(defun req-package-cycles-equal-simple (cycle1 cycle2 variants)
+  "return t if cycles is identical or nil if not. not working if cycle1 is reversed cycle2"
+  (cond ((and (null cycle1) (null cycle2)) t)
+        ((or (null cycle1) (null cycle2)) nil)
+        ((null variants) nil)
+        (t (if (eq (car cycle1) (car cycle2))
+               (req-package-cycles-equal-simple (cdr cycle1)
+                                                (cdr cycle2)
+                                                (cdr cycle2))
+             (req-package-cycles-equal-simple cycle1
+                                              (req-package-cycle-shift cycle2)
+                                              (cdr variants))))))
+
+(defun req-package-cycles-equal (cycle1 cycle2)
+  "return t if cycles is identical or nil if not"
+  (let* ((reversed (reverse cycle2)))
+    (or (req-package-cycles-equal-simple cycle1
+                                         cycle2
+                                         cycle2)
+        (req-package-cycles-equal-simple cycle1
+                                         reversed
+                                         reversed))))
+
+(defun req-package-remove-cycle-duplicates (duplicateof cycles)
+  "remove duplicates of cycle from cycles"
+  (if (null cycles)
+      cycles
+    (let* ((tail (req-package-remove-cycle-duplicates duplicateof
+                                                      (cdr cycles))))
+      (if (req-package-cycles-equal duplicateof
+                                    (car cycles))
+          tail
+        (cons (car cycles) tail)))))
+
+(defun req-package-remove-cycles-duplicates (duplicatesof cycles)
+  "remove duplicates of cycles from cycles"
+  (if (null cycles)
+      cycles
+    (if (null duplicatesof)
+        cycles
+      (let* ((duplicateof (car duplicatesof))
+             (newcycles (cons duplicateof
+                              (req-package-remove-cycle-duplicates duplicateof
+                                                                   cycles))))
+        (req-package-remove-cycles-duplicates (cdr duplicatesof)
+                                              newcycles)))))
+
 (defun req-package-cycle-string (cycle)
   "convert cycle to string"
   (cond ((null cycle) "")
         (t (concat " -> "
-                   (symbol-name (caar cycle))
+                   (symbol-name (car cycle))
                    (req-package-cycle-string (cdr cycle))))))
 
 (defun req-package-cycles-string (cycles)
@@ -259,14 +326,17 @@
         (t (concat "\n"
                    (if (null (car cycles))
                        ""
-                     (substring (req-package-cycle-string (car cycles)) 4))
+                     (concat "             "
+                             (substring (req-package-cycle-string (car cycles)) 4)))
                    (req-package-cycles-string (cdr cycles))))))
 
 (defun req-package-error-cycled-deps (skipped before cycles)
   "compute info about error and print corresponding message"
   (if (null skipped)
-      (error (concat "req-package: cycled deps:"
-                     (req-package-cycles-string cycles)))
+      (let* ((filtered (req-package-remove-cycles-duplicates cycles
+                                                             cycles)))
+        (error (concat "req-package: cycled deps:"
+                       (req-package-cycles-string filtered))))
     (let* ((newcycles (req-package-find-cycles (car skipped)
                                                (append before
                                                        (cdr skipped)))))
