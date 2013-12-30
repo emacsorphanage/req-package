@@ -49,13 +49,18 @@ If you want to use it, try defer all packages in one dependency tree.
 
 More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
 
-##### Changelog:
+##### Contribute
 
-* **v0.3-cycles**
+Please, commit and pull-request your changes to **develop** branch.
+Master is used for automatic repo package builds by melpa's travis-ci.
+
+##### Changelog
+
+* **v0.3-cycles**:
     There are nice error messages about cycled dependencies now.
     Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1`.
     It means there is a cycle around `pkg1`.
-* **v0.2-auto-fetch:**
+* **v0.2-auto-fetch**:
     There is no need of explicit `:ensure` in your code now.
     When you req-package it adds `:ensure` if package is available in your repos.
     Also package deps `:ensure`'d automatically too.
