@@ -254,9 +254,10 @@
 
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
-  (let* ((ARCHIVES (cond ((null package-archive-contents) (progn (package-refresh-contents)
-                                                                 package-archive-contents))
-                         (t package-archive-contents)))
+  (let* ((ARCHIVES (if (null package-archive-contents)
+                       (progn (package-refresh-contents)
+                              package-archive-contents)
+                     package-archive-contents))
          (AVAIL (some (lambda (elem)
                         (eq (car elem) package))
                       ARCHIVES))
