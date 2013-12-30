@@ -283,20 +283,22 @@
 (defun req-package-eval (evals verbose)
   "evaluate eval list and print message if verbose is not nil"
   (mapcar (lambda (target) (progn (if verbose
-                                 (print (concat "req-package: loading "
-                                                (symbol-name (cadr target))))
-                               nil)
-                             (eval target)))
+                                      (print (concat "req-package: loading "
+                                                     (symbol-name (cadr target))))
+                                    nil)
+                                  (eval target)))
           evals))
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (let ((evals (reverse (req-package-form-eval-list req-package-targets
-                                                    req-package-targets
-                                                    nil
-                                                    nil
-                                                    nil))))
-    (req-package-eval evals req-package-verbose)))
+  (let* ((targets req-package-targets)
+         (evals (reverse (req-package-form-eval-list targets
+                                                     targets
+                                                     nil
+                                                     nil
+                                                     nil))))
+    (progn (setq req-package-targets nil)
+           (req-package-eval evals req-package-verbose))))
 
 (provide 'req-package)
 
