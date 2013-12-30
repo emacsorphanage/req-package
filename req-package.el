@@ -98,7 +98,7 @@
   "add package to target list"
   `(let* ((NAME ',name)
           (ARGS ',args)
-          (ERRMES "invalid arguments list")
+          (ERRMES "req-package: invalid arguments list")
           (HASREQ (and (not (null ARGS))
                        (eq (car ARGS) :require)
                        (if (null (cdr ARGS)) (error ERRMES) t)))
