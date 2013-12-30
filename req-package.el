@@ -147,6 +147,7 @@
                               ;; some packages were skipped
                               ;; try to handle it
                               (req-package-error-cycled-deps skipped
+                                                             nil
                                                              nil)
 
                             ;; some package were skipped
@@ -212,7 +213,7 @@
         (t (req-package-cut-cycle target (cdr cycle)))))
 
 (defun req-package-find-cycle (current path graph)
-  "find cycle in graph starting from currend. return cycle path if found or nil"
+  "find cycle in graph starting from current. return cycle path if found or nil"
   (let* ((deps (cadr current)))
     (if (null deps)
         nil
@@ -232,6 +233,19 @@
                                       path
                                       graph))))))))
 
+(defun req-package-find-cycles (from graph)
+  "find cycles in graph starting from current. return cycles if found or nil"
+  (if (null (cadr from))
+      nil
+    (let* ((head (req-package-find-cycle from
+                                         (list from)
+                                         graph))
+           (newfrom (list (car from) (cdadr from)))
+           (tail (req-package-find-cycles newfrom graph)))
+      (if head
+          (cons head tail)
+        tail))))
+
 (defun req-package-cycle-string (cycle)
   "convert cycle to string"
   (cond ((null cycle) "")
@@ -239,18 +253,26 @@
                    (symbol-name (caar cycle))
                    (req-package-cycle-string (cdr cycle))))))
 
-(defun req-package-error-cycled-deps (skipped before)
+(defun req-package-cycles-string (cycles)
+  "convert cycles to string"
+  (cond ((null cycles) "")
+        (t (concat "\n"
+                   (if (null (car cycles))
+                       ""
+                     (substring (req-package-cycle-string (car cycles)) 4))
+                   (req-package-cycles-string (cdr cycles))))))
+
+(defun req-package-error-cycled-deps (skipped before cycles)
   "compute info about error and print corresponding message"
-  (cond ((null skipped) (error "req-package: oops, unknown error"))
-        (t (let* ((cycle (req-package-find-cycle (car skipped)
-                                                 (list (car skipped))
-                                                 (append before
-                                                         (cdr skipped)))))
-             (cond (cycle (error (concat "req-package: cycled deps:\n"
-                                         (substring (req-package-cycle-string cycle) 4))))
-                   (t (req-package-error-cycled-deps (cdr skipped)
-                                                     (cons (car skipped)
-                                                           before))))))))
+  (cond ((null skipped) (error (concat "req-package: cycled deps:"
+                                       (req-package-cycles-string cycles))))
+        (t (let* ((newcycles (req-package-find-cycles (car skipped)
+                                                      (append before
+                                                              (cdr skipped)))))
+             (req-package-error-cycled-deps (cdr skipped)
+                                            (cons (car skipped)
+                                                  before)
+                                            (append newcycles cycles))))))
 
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
