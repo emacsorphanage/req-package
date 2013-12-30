@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.2
+;; Version: 0.3
 ;; Package-Requires: ((use-package "1.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -69,6 +69,10 @@
 
 ;; Changelog:
 
+;;    v0.3-cycles
+;;       There are nice error messages about cycled dependencies now.
+;;       Cycles printed in a way: pkg1 -> [pkg2 -> ...] pkg1.
+;;       It means there're cycle around pkg1.
 ;;    v0.2-auto-fetch:
 ;;       There is no need of explicit :ensure in your code now.
 ;;       When you req-package it adds :ensure if package is available in your repos.
@@ -142,7 +146,8 @@
 
                               ;; some packages were skipped
                               ;; try to handle it
-                              (req-package-error-cycled-deps (symbol-name (caar skipped)))
+                              (req-package-error-cycled-deps skipped
+                                                             nil)
 
                             ;; some package were skipped
                             ;; try to load it now again
@@ -194,8 +199,53 @@
                                                evals
                                                err))))))))
 
-(defun req-package-error-cycled-deps (package)
-  (error (format "%s: cycled dependencies" package)))
+(defun req-package-find-target (name targets)
+  (cond ((null targets) nil)
+        ((eq (caar targets) name) (car targets))
+        (t (req-package-find-target name (cdr targets)))))
+
+(defun req-package-cut-cycle (target cycle)
+  (cond ((null cycle) cycle)
+        ((eq (car target) (caar cycle)) cycle)
+        (t (req-package-cut-cycle target (cdr cycle)))))
+
+(defun req-package-find-cycle (current path graph)
+  (let* ((deps (cadr current)))
+    (if (null deps)
+        nil
+      (let* ((firstdep (car deps))
+             (depvisited (req-package-find-target firstdep path)))
+        (if depvisited
+            (req-package-cut-cycle depvisited
+                                   (reverse (cons depvisited path)))
+          (let* ((firstdep (req-package-find-target firstdep graph))
+                 (cycle (req-package-find-cycle firstdep
+                                                (cons firstdep path)
+                                                graph)))
+            (if cycle
+                cycle
+              (req-package-find-cycle (list (car current)
+                                            (cdr deps))
+                                      path
+                                      graph))))))))
+
+(defun req-package-cycle-string (cycle)
+  (cond ((null cycle) "")
+        (t (concat " -> "
+                   (symbol-name (caar cycle))
+                   (req-package-cycle-string (cdr cycle))))))
+
+(defun req-package-error-cycled-deps (skipped before)
+  (cond ((null skipped) (error "req-package: oops, unknown error"))
+        (t (let* ((cycle (req-package-find-cycle (car skipped)
+                                                 (list (car skipped))
+                                                 (append before
+                                                         (cdr skipped)))))
+             (cond (cycle (error (concat "req-package: cycled deps:"
+                                         (req-package-cycle-string cycle))))
+                   (t (req-package-error-cycled-deps (cdr skipped)
+                                                     (cons (car skipped)
+                                                           before))))))))
 
 (defun req-package-gen-eval (package)
   "generates eval for package. if it is available in repo, try to fetch it"
@@ -228,7 +278,7 @@
 (defun req-package-eval (evals verbose)
   "evaluate preprocessed evals"
   (mapcar (lambda (target) (progn (if verbose
-                                 (print (concat "loading "
+                                 (print (concat "req-package: loading "
                                                 (symbol-name (cadr target))))
                                nil)
                              (eval target)))
