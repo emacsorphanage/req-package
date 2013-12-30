@@ -246,8 +246,8 @@
                                                  (list (car skipped))
                                                  (append before
                                                          (cdr skipped)))))
-             (cond (cycle (error (concat "req-package: cycled deps:"
-                                         (req-package-cycle-string cycle))))
+             (cond (cycle (error (concat "req-package: cycled deps:\n"
+                                         (substring (req-package-cycle-string cycle) 4))))
                    (t (req-package-error-cycled-deps (cdr skipped)
                                                      (cons (car skipped)
                                                            before))))))))
