@@ -109,26 +109,26 @@
      (add-to-list 'req-package-targets TARGET)))
 
 (defun req-package-package-targeted (dep targets)
-  "returns nil if package is in targets or (dep) if not"
+  "return nil if package is in targets or (dep) if not"
   (cond ((null targets) (list dep))
         ((eq (caar targets) dep) nil)
         (t (req-package-package-targeted dep (cdr targets)))))
 
 (defun req-package-packages-targeted (deps targets)
-  "returns nil if packages are in targets or list of missing packages"
+  "return nil if packages are in targets or list of missing packages"
   (cond ((null deps) nil)
         (t (let ((headdeps (req-package-package-targeted (car deps) targets))
                  (taildeps (req-package-packages-targeted (cdr deps) targets)))
              (append headdeps taildeps)))))
 
 (defun req-package-package-loaded (dep evals)
-  "returns nil if package is in evals or (dep) if not"
+  "return nil if package is in evals or (dep) if not"
   (cond ((null evals) (list dep))
         ((eq (cadar evals) dep) nil)
         (t (req-package-package-loaded dep (cdr evals)))))
 
 (defun req-package-packages-loaded (deps evals)
-  "returns nil if packages are in evals or list of missing packages"
+  "return nil if packages are in evals or list of missing packages"
   (cond ((null deps) nil)
         (t (let ((headdeps (req-package-package-loaded (car deps) evals))
                  (taildeps (req-package-packages-loaded (cdr deps) evals)))
@@ -253,7 +253,7 @@
                                                            before))))))))
 
 (defun req-package-gen-eval (package)
-  "generates eval for package. if it is available in repo, add :ensure keyword"
+  "generate eval for package. if it is available in repo, add :ensure keyword"
   (let* ((ARCHIVES (cond ((null package-archive-contents) (progn (package-refresh-contents)
                                                                  package-archive-contents))
                          (t package-archive-contents)))
@@ -265,17 +265,17 @@
     EVAL))
 
 (defun req-package-gen-evals (packages)
-  "generates evals for packages"
+  "generate evals for packages"
   (cond (packages (let* ((tail (req-package-gen-evals (cdr packages))))
                     (cons (req-package-gen-eval (car packages)) tail)))
         (t nil)))
 
 (defun req-package-gen-target (package reqs useargs)
-  "generates target for package. if it is available in repo, try to fetch it"
+  "generate target for package. if it is available in repo, try to fetch it"
   (list package reqs (append (req-package-gen-eval package) useargs)))
 
 (defun req-package-gen-targets (packages)
-  "generates targets for packages"
+  "generate targets for packages"
   (cond (packages (let* ((tail (req-package-gen-targets (cdr packages))))
                     (cons (req-package-gen-target (car packages) nil nil) tail)))
         (t nil)))
