@@ -69,6 +69,9 @@
 
 ;; Changelog:
 
+;;    v0.4-all-cycles
+;;       All cycles of your dependencies will be printed.
+;;       Also there are more handy log messages and some bug fixes.
 ;;    v0.3-cycles
 ;;       There are nice error messages about cycled dependencies now.
 ;;       Cycles printed in a way: pkg1 -> [pkg2 -> ...] pkg1.
