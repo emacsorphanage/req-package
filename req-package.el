@@ -284,10 +284,10 @@
 (defun req-package-eval (evals verbose)
   "evaluate eval list and print message if verbose is not nil"
   (mapcar (lambda (target) (progn (if verbose
-                                      (print (concat "req-package: loading "
-                                                     (symbol-name (cadr target))))
-                                    nil)
-                                  (eval target)))
+                                 (print (concat "req-package: loading "
+                                                (symbol-name (cadr target))))
+                               nil)
+                             (eval target)))
           evals))
 
 (defun req-package-finish ()
