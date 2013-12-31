@@ -98,6 +98,9 @@
   (if (atom reqs) (list reqs) reqs))
 
 (defun req-package-log (err visprefix mes)
+  "if err is not nil call error or call print if not.
+if visprefix is not nil add prefix or whitespace if not.
+supports multiline messages"
   (let* ((prefix "req-package: ")
          (noprefix "             ")
          (splitted (split-string mes "\n"))
