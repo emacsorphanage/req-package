@@ -64,8 +64,8 @@
 
 ;;    All use-package parameters are supported, see use-package manual for additional info.
 
-;;    Also there are possible troubles with deferred loading provided by use-package.
-;;    If you want to use it, try defer all packages in one dependency tree.
+;;    Also there are possible troubles with :defer keyword provided by use-package.
+;;    If you want to use it, try :defer all packages in one dependency tree.
 
 ;; Changelog:
 
