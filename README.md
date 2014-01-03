@@ -19,16 +19,16 @@ when using use-package for your .emacs.
 
 ```elisp
    (req-package dired) ;; you can omit this empty requirement because of dired-single
-   
+
    (req-package dired-single
                 :require dired
                 :init (...))
-                
+
    (req-package lua-mode
                 :init (...))
-                
+
    (req-package flymake)
-   
+
    (req-package flymake-lua
                 :require (flymake lua-mode)
                 :init (...))
@@ -38,6 +38,10 @@ when using use-package for your .emacs.
 ```elisp
    (req-package-finish)
 ```
+
+After calling **req-package-finish** targets list is cleaned and
+you can start requiring and loading of new bunch of packages.
+It may be useful when you need to load some package after all.
 
 ##### Migrate from use-package
 
