@@ -60,7 +60,7 @@
 ;;    (req-package-finish)
 
 ;; After calling req-package-finish targets list is cleaned and
-;; you can start requiring and loading of new bunch of packages.
+;; you can start requiring and loading of a bunch of packages.
 ;; It may be useful when you need to load some package after all.
 
 ;; Migrate from use-package
