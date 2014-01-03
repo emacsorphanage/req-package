@@ -18,13 +18,13 @@ when using use-package for your .emacs.
 * Define required packages with dependencies using `:require` like this:
 
 ```elisp
-   (req-package dired)
+   (req-package dired) ;; you can omit this empty requirement
    (req-package dired-single
                 :require dired
                 :init (...))
    (req-package lua-mode
                 :init (...))
-   (req-package flymake)
+   (req-package flymake) ;; and this too :)
    (req-package flymake-lua
                 :require (flymake lua-mode)
                 :init (...))
