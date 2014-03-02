@@ -140,6 +140,8 @@ supports multiline messages"
 
      (add-to-list 'req-package-targets TARGET)))
 
+(put 'req-package 'lisp-indent-function 'defun)
+
 (defun req-package-package-targeted (dep targets)
   "return nil if package is in targets or (dep) if not"
   (cond ((null targets) (list dep))
