@@ -77,6 +77,8 @@
 
 ;; Changelog:
 
+;;    v0.4.1:
+;;       Various tweaks and bug fixes.
 ;;    v0.4-all-cycles:
 ;;       All cycles of your dependencies will be printed.
 ;;       Also there are more handy log messages and some bug fixes.
