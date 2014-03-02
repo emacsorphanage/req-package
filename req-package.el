@@ -1,6 +1,6 @@
 ;;; req-package.el --- A use-package wrapper for package runtime dependencies management
 
-;; Copyright (C) 2013 Edward Knyshov
+;; Copyright (C) 2013-2014 Edward Knyshov
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
@@ -412,12 +412,12 @@ supports multiline messages"
 (defun req-package-eval (evals verbose)
   "evaluate eval list and print message if verbose is not nil"
   (mapcar (lambda (target) (progn (if verbose
-                                 (req-package-log nil
-                                                  t
-                                                  (concat "loading "
-                                                          (symbol-name (cadr target))))
-                               nil)
-                             (eval target)))
+                                      (req-package-log nil
+                                                       t
+                                                       (concat "loading "
+                                                               (symbol-name (cadr target))))
+                                    nil)
+                                  (eval target)))
           evals))
 
 (defun req-package-finish ()
