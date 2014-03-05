@@ -144,6 +144,13 @@ supports multiline messages"
 
 (put 'req-package 'lisp-indent-function 'defun)
 
+(defconst req-package-font-lock-keywords
+  '(("(\\(req-package\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
+     (1 font-lock-keyword-face)
+     (2 font-lock-constant-face nil t))))
+
+(font-lock-add-keywords 'emacs-lisp-mode req-package-font-lock-keywords)
+
 (defun req-package-package-targeted (dep targets)
   "return nil if package is in targets or (dep) if not"
   (cond ((null targets) (list dep))
