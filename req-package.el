@@ -96,6 +96,7 @@
 
 (require 'use-package)
 (require 'cl)
+(require 'package)
 
 (defvar req-package-targets nil
   "list of packages to load")
