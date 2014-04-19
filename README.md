@@ -43,6 +43,20 @@ After calling **req-package-finish** targets list is cleaned and
 you can start requiring and loading a new bunch of packages.
 It may be useful when you need to load some package after all.
 
+**Note** req-package excepts :require keyword strongly after package name.
+
+Do not write something like this:
+
+```elisp
+    (req-package foo :ensure bar :require baz) ;; WRONG
+```
+
+It won't work. The right code will be:
+
+```elisp
+    (req-package foo :require baz :ensure bar) ;; RIGHT
+```
+
 ##### Migrate from use-package
 
 Just replace all `(use-package ...)` with `(req-package [:require DEPS] ...)` and add `(req-package-finish)` at the end of your configuration file.
