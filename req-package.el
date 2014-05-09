@@ -108,6 +108,9 @@
 (require 'cl)
 (require 'package)
 
+(defvar req-package-targets-collected nil
+  "collects required packages")
+
 (defvar req-package-targets nil
   "list of packages to load")
 
@@ -448,7 +451,9 @@ supports multiline messages"
                                                      nil
                                                      nil
                                                      nil))))
-    (progn (setq req-package-targets nil)
+    (progn (setq req-package-targets-collected (append req-package-targets-collected
+                                                       req-package-targets))
+           (setq req-package-targets nil)
            (req-package-eval evals req-package-verbose))))
 
 (provide 'req-package)
