@@ -104,8 +104,9 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl))
+
 (require 'use-package)
-(require 'cl)
 (require 'package)
 
 (defvar req-package-targets-collected nil
