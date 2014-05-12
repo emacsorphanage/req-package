@@ -5,7 +5,7 @@
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
 ;; Version: 0.4.1
-;; Package-Requires: ((use-package "1.0"))
+;; Package-Requires: ((use-package "1.0") (dash "2.6.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
 
@@ -104,10 +104,9 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
-
 (require 'use-package)
 (require 'package)
+(require 'dash)
 
 (defvar req-package-targets-collected nil
   "collects required packages")
@@ -410,7 +409,7 @@ supports multiline messages"
                        (progn (package-refresh-contents)
                               package-archive-contents)
                      package-archive-contents))
-         (AVAIL (some (lambda (elem)
+         (AVAIL (-any? (lambda (elem)
                         (eq (car elem) package))
                       ARCHIVES))
          (EVAL (cond (AVAIL (list 'use-package package ':ensure package))
