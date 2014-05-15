@@ -167,9 +167,7 @@ supports multiline messages"
 
 (defun req-package-package-targeted (dep targets)
   "return nil if package is in targets or (dep) if not"
-  (cond ((null targets) (list dep))
-        ((eq (caar targets) dep) nil)
-        (t (req-package-package-targeted dep (cdr targets)))))
+  (if (-any? (lambda (elem) (eq (car elem) dep)) targets) nil (list dep)))
 
 (defun req-package-packages-targeted (deps targets)
   "return nil if packages are in targets or list of missing packages"
