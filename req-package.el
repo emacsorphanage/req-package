@@ -171,10 +171,9 @@ supports multiline messages"
 
 (defun req-package-packages-targeted (deps targets)
   "return nil if packages are in targets or list of missing packages"
-  (cond ((null deps) nil)
-        (t (let ((headdeps (req-package-package-targeted (car deps) targets))
-                 (taildeps (req-package-packages-targeted (cdr deps) targets)))
-             (append headdeps taildeps)))))
+  (-reduce-from (lambda (memo elem) (if (null (req-package-package-targeted elem targets))
+                                   memo (cons elem memo)))
+                nil (reverse deps)))
 
 (defun req-package-package-loaded (dep evals)
   "return nil if package is in evals or (dep) if not"
