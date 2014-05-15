@@ -420,9 +420,7 @@ supports multiline messages"
 
 (defun req-package-gen-targets (packages)
   "generate targets for packages"
-  (cond (packages (let* ((tail (req-package-gen-targets (cdr packages))))
-                    (cons (req-package-gen-target (car packages) nil nil) tail)))
-        (t nil)))
+  (-map (lambda (elem) (req-package-gen-target elem nil nil)) packages))
 
 (defun req-package-eval (evals verbose)
   "evaluate eval list and print message if verbose is not nil"
