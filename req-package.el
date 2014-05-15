@@ -183,10 +183,9 @@ supports multiline messages"
 
 (defun req-package-packages-loaded (deps evals)
   "return nil if packages are in evals or list of missing packages"
-  (cond ((null deps) nil)
-        (t (let ((headdeps (req-package-package-loaded (car deps) evals))
-                 (taildeps (req-package-packages-loaded (cdr deps) evals)))
-             (append headdeps taildeps)))))
+  (-reduce-from (lambda (memo elem) (if (null (req-package-package-loaded elem evals))
+                                   memo (cons elem memo)))
+                nil (reverse deps)))
 
 (defun req-package-form-eval-list (alltargets targets skipped evals err)
   "form eval list from target list"
