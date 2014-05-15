@@ -412,9 +412,7 @@ supports multiline messages"
 
 (defun req-package-gen-evals (packages)
   "generate evals for packages"
-  (cond (packages (let* ((tail (req-package-gen-evals (cdr packages))))
-                    (cons (req-package-gen-eval (car packages)) tail)))
-        (t nil)))
+  (-map (lambda (elem) (req-package-gen-eval elem)) packages))
 
 (defun req-package-gen-target (package reqs useargs)
   "generate target for package. if it is available in repo, try to fetch it"
