@@ -177,9 +177,7 @@ supports multiline messages"
 
 (defun req-package-package-loaded (dep evals)
   "return nil if package is in evals or (dep) if not"
-  (cond ((null evals) (list dep))
-        ((eq (cadar evals) dep) nil)
-        (t (req-package-package-loaded dep (cdr evals)))))
+  (if (-any? (lambda (elem) (eq (cadr elem) dep)) evals) nil (list dep)))
 
 (defun req-package-packages-loaded (deps evals)
   "return nil if packages are in evals or list of missing packages"
