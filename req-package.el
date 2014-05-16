@@ -63,7 +63,7 @@
 ;; you can start requiring and loading a new bunch of packages.
 ;; It may be useful when you need to load some package after all.
 
-;; Note req-package excepts :require keyword strongly after package name.
+;; Note req-package expects :require keyword strongly after package name.
 
 ;; Do not write something like this:
 
