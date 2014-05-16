@@ -3,7 +3,7 @@ req-package
 
 ##### Description
 
-req-package is a macro wrapper on top of use-package.
+req-package is a macro wrapper on top of [use-package](https://github.com/jwiegley/use-package).
 It's goal is to simplify package dependencies management,
 when using use-package for your .emacs.
 
