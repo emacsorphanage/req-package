@@ -78,6 +78,8 @@ Master is used for automatic repo package builds by melpa's travis-ci.
 
 ##### Changelog
 
+* **v0.4.2**:
+    Bug fixes.
 * **v0.4.1**:
     Various tweaks and bug fixes.
 * **v0.4-all-cycles**:
