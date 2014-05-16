@@ -21,17 +21,17 @@ when using use-package for your .emacs.
    (req-package dired) ;; you can omit this empty requirement because of dired-single
 
    (req-package dired-single
-                :require dired
-                :init (...))
+     :require dired
+     :init (...))
 
    (req-package lua-mode
-                :init (...))
+     :init (...))
 
    (req-package flymake)
 
    (req-package flymake-lua
-                :require (flymake lua-mode)
-                :init (...))
+     :require (flymake lua-mode)
+     :init (...))
 ```
 * To start loading packages in right order:
 
