@@ -22,16 +22,16 @@ when using use-package for your .emacs.
 
    (req-package dired-single
      :require dired
-     :init (...))
+     :config (...))
 
    (req-package lua-mode
-     :init (...))
+     :config (...))
 
    (req-package flymake)
 
    (req-package flymake-lua
      :require (flymake lua-mode)
-     :init (...))
+     :config (...))
 ```
 * To start loading packages in right order:
 
@@ -48,13 +48,13 @@ It may be useful when you need to load some package after all.
 Do not write something like this:
 
 ```elisp
-    (req-package foo :ensure bar :require baz) ;; WRONG
+    (req-package foo :init (...) :require baz) ;; WRONG
 ```
 
 It won't work. The right code will be:
 
 ```elisp
-    (req-package foo :require baz :ensure bar) ;; RIGHT
+    (req-package foo :require baz :init (...)) ;; RIGHT
 ```
 
 ##### Migrate from use-package
@@ -65,9 +65,6 @@ Just replace all `(use-package ...)` with `(req-package [:require DEPS] ...)` an
 
 All use-package parameters are supported, see use-package manual
 for additional info.
-
-Also there are possible troubles with `:defer` keyword provided by use-package.
-If you want to use it, try `:defer` all packages in one dependency tree.
 
 More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
 
