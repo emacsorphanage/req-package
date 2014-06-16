@@ -67,11 +67,11 @@
 
 ;; Do not write something like this:
 
-;;    (req-package foo :ensure bar :require baz) ;; WRONG
+;;    (req-package foo :init (...) :require baz) ;; WRONG
 
 ;; It won't work. The right code will be:
 
-;;    (req-package foo :require baz :ensure bar) ;; RIGHT
+;;    (req-package foo :require baz :init (...)) ;; RIGHT
 
 ;; Migrate from use-package
 
