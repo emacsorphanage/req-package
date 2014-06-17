@@ -39,10 +39,6 @@ when using use-package for your .emacs.
    (req-package-finish)
 ```
 
-After calling **req-package-finish** targets list is cleaned and
-you can start requiring and loading a new bunch of packages.
-It may be useful when you need to load some package after all.
-
 ##### Migrate from use-package
 
 Just replace all `(use-package ...)` with `(req-package [:require DEPS] ...)` and add `(req-package-finish)` at the end of your configuration file.
