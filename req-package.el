@@ -63,16 +63,6 @@
 ;; you can start requiring and loading a new bunch of packages.
 ;; It may be useful when you need to load some package after all.
 
-;; Note req-package expects :require keyword strongly after package name.
-
-;; Do not write something like this:
-
-;;    (req-package foo :init (...) :require baz) ;; WRONG
-
-;; It won't work. The right code will be:
-
-;;    (req-package foo :require baz :init (...)) ;; RIGHT
-
 ;; Migrate from use-package
 
 ;;    Just replace all (use-package ...) with (req-package [:require DEPS] ...)
@@ -151,6 +141,15 @@
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
 
+(defun req-package-get-reqs (args acc)
+  "extract dependencies from arg list"
+  (if (null args)
+      (list nil (reverse acc))
+    (if (eq (car args) :require)
+        (list (req-package-wrap-reqs (car (cdr args)))
+              (append (reverse acc) (cddr args)))
+      (req-package-get-reqs (cdr args) (cons (car args) acc)))))
+
 (defun req-package-patch-config (name args)
   "patch :config section to invoke our callback"
   (if (null args)
@@ -190,16 +189,9 @@
   "add package to target list"
   `(let* ((NAME ',name)
           (ARGS ',args)
-          (ERRMES "invalid arguments list")
-          (HASREQ (and (not (null ARGS))
-                       (eq (car ARGS) :require)
-                       (if (null (cdr ARGS))
-                           (req-package-log t
-                                            t
-                                            ERRMES)
-                         t)))
-          (USEPACKARGS (req-package-patch-config NAME (if HASREQ (cddr ARGS) ARGS)))
-          (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil)))
+          (SPLIT (req-package-get-reqs ARGS nil))
+          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT))))
+          (REQS (car SPLIT)))
 
      (req-package--log-debug "package requested: %s" NAME)
      
@@ -217,20 +209,10 @@
 (defmacro req-package-force (name &rest args)
   "immediatly load some package"
   `(let* ((NAME ',name)
-          (ARGS ',args)
-          (ERRMES "invalid arguments list")
-          (HASREQ (and (not (null ARGS))
-                       (eq (car ARGS) :require)
-                       (if (null (cdr ARGS))
-                           (req-package-log t
-                                            t
-                                            ERRMES)
-                         t)))
-          (USEPACKARGS (req-package-patch-config NAME (if HASREQ (cddr ARGS) ARGS)))
-          (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil)))
+          (ARGS ',args))
 
      (req-package--log-debug "package force-requested: %s" NAME)
-     (eval (append (req-package-gen-eval NAME) USEPACKARGS))))
+     (eval (append (req-package-gen-eval NAME) ARGS))))
 
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
