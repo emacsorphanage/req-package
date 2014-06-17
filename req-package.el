@@ -70,6 +70,8 @@
 
 ;;    However there is now need of :ensure keyword usage. req-package will add it automatically if needed.
 
+;;    Also there is req-package-force function which simulates plain old use-package behavior
+
 ;;    More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
 
 ;; Changelog:
