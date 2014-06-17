@@ -5,7 +5,7 @@
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
 ;; Version: 0.5
-;; Package-Requires: ((use-package "1.0") (dash "2.6.0") (log4e "0.2.0"))
+;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
 
