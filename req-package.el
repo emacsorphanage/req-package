@@ -5,7 +5,7 @@
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
 ;; Version: 0.5
-;; Package-Requires: ((use-package "1.0") (dash "2.6.0"))
+;; Package-Requires: ((use-package "1.0") (dash "2.6.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
 
@@ -111,6 +111,25 @@
 (require 'use-package)
 (require 'package)
 (require 'dash)
+(require 'log4e)
+
+(defgroup req-package nil
+  "A package loading system"
+  :group 'emacs)
+
+(defcustom req-package-log-level 'warn
+  "minimal log level. can be 'fatal, 'error, 'warn, 'info, 'debug, 'trace"
+  :group 'req-package)
+
+(defcustom req-package-detect-cycles nil
+  "detect dependency cycles"
+  :group 'req-package
+  :type 'boolean)
+
+(defcustom req-package-error-on-cycle nil
+  "throw error if cycle is detected"
+  :group 'req-package
+  :type 'boolean)
 
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "package symbol -> list of packages dependent on it")
@@ -138,6 +157,7 @@
       (cons (car args) (req-package-patch-config name (cdr args))))))
 
 (defun req-package-eval (name)
+  "evaluate package request"
   (let* ((EVAL (gethash name
                         req-package-evals
                         (append (req-package-gen-eval name)
@@ -146,9 +166,8 @@
     (eval EVAL)))
 
 (defun req-package-loaded (name)
-  (print "loaded")
-  (print name)
-  (print (gethash name req-package-reqs-reversed nil))
+  "callback for dependency graph load continuation"
+  (req-package--log-info "package loaded: %s" name)
   (let* ((EVALS (-reduce-from 
                  (lambda (memo dependent)
                    (let* ((RANK (- (gethash dependent req-package-ranks 0) 1)))
@@ -175,6 +194,8 @@
           (USEPACKARGS (req-package-patch-config NAME (if HASREQ (cddr ARGS) ARGS)))
           (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil)))
 
+     (req-package--log-debug "package requested: %s" NAME)
+     
      (-each REQS
        (lambda (req)
          (let* ((CURREQREV (gethash req req-package-reqs-reversed nil))
@@ -185,15 +206,6 @@
      (puthash NAME (append (req-package-gen-eval NAME) USEPACKARGS) req-package-evals)
      (puthash NAME (gethash NAME req-package-ranks 0) req-package-ranks)
      (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
-
-(put 'req-package 'lisp-indent-function 'defun)
-
-(defconst req-package-font-lock-keywords
-  '(("(\\(req-package\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
-     (1 font-lock-keyword-face)
-     (2 font-lock-constant-face nil t))))
-
-(font-lock-add-keywords 'emacs-lisp-mode req-package-font-lock-keywords)
 
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
@@ -210,11 +222,28 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
+  (req-package--log-debug "req-package-finish")
   (maphash (lambda (key value)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
                         (req-package-eval key))))
            req-package-ranks))
+
+(put 'req-package 'lisp-indent-function 'defun)
+
+(defconst req-package-font-lock-keywords
+  '(("(\\(req-package\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
+     (1 font-lock-keyword-face)
+     (2 font-lock-constant-face nil t))))
+
+(font-lock-add-keywords 'emacs-lisp-mode req-package-font-lock-keywords)
+
+(log4e:deflogger "req-package" "%t [%l] %m" "%H:%M:%S")
+(req-package--log-set-level req-package-log-level)
+(req-package--log-enable-logging)
+(req-package--log-clear-log)
+(print "setting log level")
+(print req-package-log-level)
 
 (provide 'req-package)
 
