@@ -79,6 +79,7 @@
 ;;       Fixed bugs with defered loading.
 ;;       Significant performance optimization.
 ;;       max-specpdl-size, max-lisp-eval-depth issues completely solved.
+;;       Flexible :require keyword parsing.
 ;;    v0.4.2:
 ;;       Bug fixes.
 ;;    v0.4.1:
