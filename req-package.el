@@ -240,8 +240,16 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
+  (maphash (lambda (key value)
+             (if (eq (gethash key req-package-ranks) -1)
+                 (progn (remhash key req-package-ranks)
+                        (remhash key req-package-evals)
+                        (remhash key req-package-reqs-reversed))))
+           req-package-ranks)
+  
   (req-package--log-debug "package requests finished: %s packages"
                           (hash-table-count req-package-ranks))
+  
   (maphash (lambda (key value)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
@@ -261,8 +269,6 @@
 (req-package--log-set-level req-package-log-level)
 (req-package--log-enable-logging)
 (req-package--log-clear-log)
-(print "setting log level")
-(print req-package-log-level)
 
 (provide 'req-package)
 
