@@ -48,6 +48,8 @@ Just replace all `(use-package ...)` with `(req-package [:require DEPS] ...)` an
 All use-package parameters are supported, see use-package manual
 for additional info.
 
+However there is now need of `:ensure` keyword usage. req-package will add it automatically if needed.
+
 More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
 
 ##### Contribute
