@@ -121,12 +121,12 @@
   "minimal log level. can be 'fatal, 'error, 'warn, 'info, 'debug, 'trace"
   :group 'req-package)
 
-(defcustom req-package-detect-cycles nil
+(defcustom req-package-detect-cycles t
   "detect dependency cycles"
   :group 'req-package
   :type 'boolean)
 
-(defcustom req-package-error-on-cycle nil
+(defcustom req-package-error-on-cycle t
   "throw error if cycle is detected"
   :group 'req-package
   :type 'boolean)
@@ -139,6 +139,12 @@
 
 (defvar req-package-evals (make-hash-table :size 200)
   "package symbol -> loading code prepared for evaluation")
+
+(defvar req-package-visited (make-hash-table :size 200)
+  "package symbol -> is it visited by cycle checktraversal")
+
+(defvar req-package-cycles-count 0
+  "number of cycles detected")
 
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
@@ -238,6 +244,27 @@
                      (t (list 'use-package package)))))
     EVAL))
 
+(defun req-package-detect-cycles-traverse-impl (cur path)
+  "traverse for cycles look up implementation"
+  (puthash cur t req-package-visited)
+  (if (not (-contains? path cur))
+      (-each (gethash cur req-package-reqs-reversed nil)
+        (lambda (dependent)
+          (req-package-detect-cycles-traverse-impl dependent (cons cur path))))
+    (progn (setq req-package-cycles-count (+ req-package-cycles-count 1))
+           (req-package--log-error "cycle detected: %s" (cons cur path)))))
+
+(defun req-package-detect-cycles-traverse ()
+  "traverse for cycles look up"
+  (maphash (lambda (key value)
+             (if (null (gethash key req-package-visited nil))
+                 (req-package-detect-cycles-traverse-impl key nil)))
+           req-package-reqs-reversed)
+
+  (if (and req-package-error-on-cycle (not (eq 0 req-package-cycles-count)))
+      (error "%s cycle(s) detected. see M-x req-package--log-open-log"
+             req-package-cycles-count)))
+
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
   (maphash (lambda (key value)
@@ -246,6 +273,11 @@
                         (remhash key req-package-evals)
                         (remhash key req-package-reqs-reversed))))
            req-package-ranks)
+
+  (if req-package-detect-cycles
+      (progn (clrhash req-package-visited)
+             (setq req-package-cycles-count 0)
+             (req-package-detect-cycles-traverse)))
   
   (req-package--log-debug "package requests finished: %s packages"
                           (hash-table-count req-package-ranks))
