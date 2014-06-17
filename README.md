@@ -79,6 +79,7 @@ Master is used for automatic repo package builds by melpa's travis-ci.
     Major system refactoring.
     Fixed bugs with defered loading.
     Significant performance optimization.
+    max-specpdl-size, max-lisp-eval-depth issues completely solved.
 * **v0.4.2**:
     Bug fixes.
 * **v0.4.1**:
