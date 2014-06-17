@@ -207,6 +207,24 @@
      (puthash NAME (gethash NAME req-package-ranks 0) req-package-ranks)
      (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
 
+(defmacro req-package-force (name &rest args)
+  "immediatly load some package"
+  `(let* ((NAME ',name)
+          (ARGS ',args)
+          (ERRMES "invalid arguments list")
+          (HASREQ (and (not (null ARGS))
+                       (eq (car ARGS) :require)
+                       (if (null (cdr ARGS))
+                           (req-package-log t
+                                            t
+                                            ERRMES)
+                         t)))
+          (USEPACKARGS (req-package-patch-config NAME (if HASREQ (cddr ARGS) ARGS)))
+          (REQS (if HASREQ (req-package-wrap-reqs (cadr ARGS)) nil)))
+
+     (req-package--log-debug "package force-requested: %s" NAME)
+     (eval (append (req-package-gen-eval NAME) USEPACKARGS))))
+
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
   (let* ((ARCHIVES (if (null package-archive-contents)
@@ -222,7 +240,8 @@
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  (req-package--log-debug "req-package-finish")
+  (req-package--log-debug "package requests finished: %s packages"
+                          (hash-table-count req-package-ranks))
   (maphash (lambda (key value)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
