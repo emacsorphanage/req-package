@@ -265,7 +265,7 @@
              (setq req-package-cycles-count 0)
              (req-package-detect-cycles-traverse)))
   
-  (req-package--log-debug "package requests finished: %s packages"
+  (req-package--log-debug "package requests finished: %s packages are waiting"
                           (hash-table-count req-package-ranks))
   
   (maphash (lambda (key value)
