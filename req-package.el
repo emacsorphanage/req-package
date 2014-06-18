@@ -177,7 +177,7 @@
 (defun req-package-loaded (name)
   "callback for dependency graph load continuation"
   (req-package--log-info "package loaded: %s" name)
-  (let* ((EVALS (-reduce-from 
+  (let* ((EVALS (-reduce-from
                  (lambda (memo dependent)
                    (let* ((RANK (- (gethash dependent req-package-ranks 0) 1)))
                      (puthash dependent RANK req-package-ranks)
@@ -197,7 +197,7 @@
           (REQS (car SPLIT)))
 
      (req-package--log-debug "package requested: %s" NAME)
-     
+
      (-each REQS
        (lambda (req)
          (let* ((CURREQREV (gethash req req-package-reqs-reversed nil))
@@ -264,10 +264,10 @@
       (progn (clrhash req-package-visited)
              (setq req-package-cycles-count 0)
              (req-package-detect-cycles-traverse)))
-  
+
   (req-package--log-debug "package requests finished: %s packages are waiting"
                           (hash-table-count req-package-ranks))
-  
+
   (maphash (lambda (key value)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
@@ -275,9 +275,10 @@
            req-package-ranks))
 
 (put 'req-package 'lisp-indent-function 'defun)
+(put 'req-package-force 'lisp-indent-function 'defun)
 
 (defconst req-package-font-lock-keywords
-  '(("(\\(req-package\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
+  '(("(\\(req-package\\|req-package-force\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
      (1 font-lock-keyword-face)
      (2 font-lock-constant-face nil t))))
 
