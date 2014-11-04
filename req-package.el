@@ -299,6 +299,17 @@
   :group 'req-package
   :type 'boolean)
 
+(defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
+  "list of functions to prepare packages installation
+one such function should
+1) check package presence at corresponding repo
+2) check whether it installed or not
+3) install that package if it available and not installed
+4) return nonnil only if package is installed already or
+   successfully installed by this function"
+  :group 'req-package
+  :type 'list)
+
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "package symbol -> list of packages dependent on it")
 
@@ -420,8 +431,9 @@
 
 (defun req-package-prepare (package)
   "prepare package - install if it is present"
-  (or (req-package-try-elpa package)
-      (req-package-try-el-get package)))
+  (-any? (lambda (elem)
+           (funcall elem package))
+         req-package-providers))
 
 (defun req-package-gen-eval (package)
   "generate eval for package and install it if present at el-get/elpa"
