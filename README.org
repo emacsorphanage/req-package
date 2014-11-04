@@ -88,7 +88,10 @@ Master is used for automatic repo package builds by melpa's travis-ci.
     CLOSED: [2014-11-04 Tue 17:49]
     - CLOSING NOTE [2014-11-04 Tue 17:49] \\
       seems done and working
-*** TODO use single documentation of package (DRY)
+*** DONE use single documentation of package (DRY)
+    CLOSED: [2014-11-04 Tue 18:41]
+    - CLOSING NOTE [2014-11-04 Tue 18:41] \\
+      regenerated documentation
 
 ** Changelog
 
