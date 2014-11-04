@@ -59,6 +59,26 @@
 
 ;;    (req-package-finish)
 
+;; El Get
+
+;; There'is another benefit over use-package - el-get support.
+;; No more thinking about sources for your packages.
+;; Just install and configure your el-get.
+;; Here is example:
+
+;;     (require 'req-package'')
+
+;;     (req-package-force el-get
+;;       :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;                    (el-get 'sync)))
+
+;;     (req-package gotham-theme
+;;       :config (print "gotham theme is here and installed from el-get"))
+
+;;     (req-package-finish)
+
+;; You can always switch it off by req-package-use-el-get custom.
+
 ;; Migrate from use-package
 
 ;;    Just replace all (use-package ...) with (req-package [:require DEPS] ...)
