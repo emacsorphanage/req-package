@@ -97,7 +97,10 @@
     - CLOSING NOTE [2014-11-04 Tue 18:41] \\
       regenerated documentation
 
-*** TODO fix issue with elpa packages installation
+*** DONE fix issue with elpa packages installation
+    CLOSED: [2014-11-05 Wed 00:15]
+    - CLOSING NOTE [2014-11-05 Wed 00:15] \\
+      fixed. all packages are installing in req-package-finish loop
 
     elpa packages remain uninstalled until loaded by use-package
     it will be better to install them all at bootstrap launch
