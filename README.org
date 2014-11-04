@@ -41,7 +41,7 @@ To start loading packages in right order:
 
 ** El Get
 
-There'is another benefit over use-package - el-get support.
+There'is another benefit over use-package - =el-get= support.
 No more thinking about sources for your packages.
 Just install and configure your el-get.
 Here is example:
@@ -59,7 +59,7 @@ Here is example:
     (req-package-finish)
 #+END_SRC
 
-You can always switch it off by req-package-use-el-get custom.
+You can always switch it off by =req-package-use-el-get= custom.
 
 ** Migrate from use-package
 
@@ -99,8 +99,8 @@ Master is used for automatic repo package builds by melpa's travis-ci.
     Major system refactoring.
     Fixed bugs with defered loading.
     Significant performance optimization.
-    max-specpdl-size, max-lisp-eval-depth issues completely solved.
-    Flexible :require keyword parsing.
+    =max-specpdl-size=, =max-lisp-eval-depth= issues completely solved.
+    Flexible =:require= keyword parsing.
 *** v0.4.2
     Bug fixes.
 *** v0.4.1
