@@ -59,6 +59,26 @@
 
 ;;    (req-package-finish)
 
+;; El Get
+
+;; There'is another benefit over use-package - el-get support.
+;; No more thinking about sources for your packages.
+;; Just install and configure your el-get.
+;; Here is example:
+
+;;     (require 'req-package'')
+
+;;     (req-package-force el-get
+;;       :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;                    (el-get 'sync)))
+
+;;     (req-package gotham-theme
+;;       :config (print "gotham theme is here and installed from el-get"))
+
+;;     (req-package-finish)
+
+;; You can always switch it off by req-package-use-el-get custom.
+
 ;; Migrate from use-package
 
 ;;    Just replace all (use-package ...) with (req-package [:require DEPS] ...)
@@ -125,6 +145,11 @@
   :group 'req-package
   :type 'boolean)
 
+(defcustom req-package-use-el-get t
+  "you can switch off el-get usage if you want"
+  :group 'req-package
+  :type 'boolean)
+
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "package symbol -> list of packages dependent on it")
 
@@ -139,6 +164,9 @@
 
 (defvar req-package-cycles-count 0
   "number of cycles detected")
+
+(defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
+  "you can check this for el get presense")
 
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
@@ -217,6 +245,15 @@
      (req-package--log-debug "package force-requested: %s" NAME)
      (eval (append (req-package-gen-eval NAME) ARGS))))
 
+(defun req-package-try-el-get (package)
+  (let* ((EL-GET-AVAIL (if (el-get-recipe-filename package) t nil))
+         (INSTALLED (package-installed-p package)))
+    (if (and req-package-el-get-present
+             req-package-use-el-get
+             EL-GET-AVAIL
+             (not INSTALLED))
+        (el-get 'sync package))))
+
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
   (let* ((ARCHIVES (if (null package-archive-contents)
@@ -227,7 +264,8 @@
                          (eq (car elem) package))
                        ARCHIVES))
          (EVAL (cond (AVAIL (list 'use-package package ':ensure package))
-                     (t (list 'use-package package)))))
+                     (t (progn (req-package-try-el-get package)
+                               (list 'use-package package))))))
     EVAL))
 
 (defun req-package-detect-cycles-traverse-impl (cur path)
