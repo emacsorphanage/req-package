@@ -1,7 +1,0 @@
-* feature improvements
-* TODO take package dependencies from it's meta data
-* DONE el-get support
-  CLOSED: [2014-11-04 Tue 17:49]
-  - CLOSING NOTE [2014-11-04 Tue 17:49] \\
-    seems done and working
-* TODO use single documentation of package (DRY)
