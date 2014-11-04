@@ -144,6 +144,13 @@
 
 ** Changelog
 
+*** v0.7
+    - fixed some issues with packages installation
+      all packages will be installed at bootstrap time
+    - custom package providers support by =req-package-providers=
+    - priority feature for cross provider packages loading
+      you can choose, what to try first - elpa, el-get, or something else
+
 *** v0.6
     =el-get= support
 

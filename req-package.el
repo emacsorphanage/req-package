@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.6
+;; Version: 0.7
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -54,13 +54,14 @@
 ;; ..... 1.8.6 DONE custom software sources
 ;; ..... 1.8.7 TODO el-get/elpa packages must be in priority over builtin ones
 ;; .. 1.9 Changelog
-;; ..... 1.9.1 v0.6
-;; ..... 1.9.2 v0.5
-;; ..... 1.9.3 v0.4.2
-;; ..... 1.9.4 v0.4.1
-;; ..... 1.9.5 v0.4-all-cycles
-;; ..... 1.9.6 v0.3-cycles
-;; ..... 1.9.7 v0.2-auto-fetch
+;; ..... 1.9.1 v0.7
+;; ..... 1.9.2 v0.6
+;; ..... 1.9.3 v0.5
+;; ..... 1.9.4 v0.4.2
+;; ..... 1.9.5 v0.4.1
+;; ..... 1.9.6 v0.4-all-cycles
+;; ..... 1.9.7 v0.3-cycles
+;; ..... 1.9.8 v0.2-auto-fetch
 
 
 ;; 1 req-package
@@ -249,13 +250,23 @@
 ;; 1.9 Changelog
 ;; ─────────────
 
-;; 1.9.1 v0.6
+;; 1.9.1 v0.7
+;; ╌╌╌╌╌╌╌╌╌╌
+
+;;   • fixed some issues with packages installation all packages will be
+;;     installed at bootstrap time
+;;   • custom package providers support by `req-package-providers'
+;;   • priority feature for cross provider packages loading you can choose,
+;;     what to try first - elpa, el-get, or something else
+
+
+;; 1.9.2 v0.6
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   `el-get' support
 
 
-;; 1.9.2 v0.5
+;; 1.9.3 v0.5
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   Major system refactoring.  Fixed bugs with defered loading.
@@ -264,26 +275,26 @@
 ;;   keyword parsing.
 
 
-;; 1.9.3 v0.4.2
+;; 1.9.4 v0.4.2
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Bug fixes.
 
 
-;; 1.9.4 v0.4.1
+;; 1.9.5 v0.4.1
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Various tweaks and bug fixes.
 
 
-;; 1.9.5 v0.4-all-cycles
+;; 1.9.6 v0.4-all-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   All cycles of your dependencies will be printed now.  Also there are
 ;;   more handy log messages and some bug fixes.
 
 
-;; 1.9.6 v0.3-cycles
+;; 1.9.7 v0.3-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There are nice error messages about cycled dependencies now.  Cycles
@@ -291,7 +302,7 @@
 ;;   cycle around `pkg1'.
 
 
-;; 1.9.7 v0.2-auto-fetch
+;; 1.9.8 v0.2-auto-fetch
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There is no need of explicit `:ensure' in your code now.  When you
