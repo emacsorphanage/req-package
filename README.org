@@ -84,14 +84,27 @@ Master is used for automatic repo package builds by melpa's travis-ci.
 ** Things to be done
 
 *** TODO take package dependencies from it's meta data
+
 *** DONE el-get support
     CLOSED: [2014-11-04 Tue 17:49]
     - CLOSING NOTE [2014-11-04 Tue 17:49] \\
       seems done and working
+
 *** DONE use single documentation of package (DRY)
     CLOSED: [2014-11-04 Tue 18:41]
     - CLOSING NOTE [2014-11-04 Tue 18:41] \\
       regenerated documentation
+
+*** TODO fix issue with elpa packages installation
+
+    elpa packages remain uninstalled until loaded by use-package
+    it will be better to install them all at bootstrap launch
+
+*** TODO el-get/elpa priority customization
+
+    some users may needs customization for package sources
+    if some package is present at both elpa and el-get
+    we need options to choose where to get packages from
 
 ** Changelog
 

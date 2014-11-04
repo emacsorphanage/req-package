@@ -48,6 +48,8 @@
 ;; ..... 1.7.1 TODO take package dependencies from it's meta data
 ;; ..... 1.7.2 DONE el-get support
 ;; ..... 1.7.3 DONE use single documentation of package (DRY)
+;; ..... 1.7.4 TODO fix issue with elpa packages installation
+;; ..... 1.7.5 TODO el-get/elpa priority customization
 ;; .. 1.8 Changelog
 ;; ..... 1.8.1 v0.6
 ;; ..... 1.8.2 v0.5
@@ -182,6 +184,21 @@
 ;;           regenerated documentation
 
 
+;; 1.7.4 TODO fix issue with elpa packages installation
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   elpa packages remain uninstalled until loaded by use-package it will
+;;   be better to install them all at bootstrap launch
+
+
+;; 1.7.5 TODO el-get/elpa priority customization
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   some users may needs customization for package sources if some package
+;;   is present at both elpa and el-get we need options to choose where to
+;;   get packages from
+
+
 ;; 1.8 Changelog
 ;; ─────────────
 
@@ -234,7 +251,6 @@
 ;;   req-package it adds `:ensure' if package is available in your repos.
 ;;   Also package deps `:ensure''d automatically too.  Just write
 ;;   `(req-package pkg1 :require pkg2)' and all you need will be installed.
-
 
 ;;; Code:
 
