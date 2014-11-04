@@ -392,6 +392,7 @@
           (ARGS ',args))
 
      (req-package--log-debug "package force-requested: %s" NAME)
+     (req-package-prepare NAME)
      (eval (append (req-package-gen-eval NAME) ARGS))))
 
 (defun req-package-try-elpa (package)
@@ -424,7 +425,6 @@
 
 (defun req-package-gen-eval (package)
   "generate eval for package and install it if present at el-get/elpa"
-  (req-package-prepare package)
   (list 'use-package package))
 
 (defun req-package-detect-cycles-traverse-impl (cur path)
@@ -466,6 +466,7 @@
                           (hash-table-count req-package-ranks))
 
   (maphash (lambda (key value)
+             (req-package-prepare key)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
                         (req-package-eval key))))
