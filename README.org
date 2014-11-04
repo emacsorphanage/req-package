@@ -1,0 +1,127 @@
+* req-package
+
+** Description
+
+req-package is a macro wrapper on top of [[https://github.com/jwiegley/use-package][use-package]].
+It's goal is to simplify package dependencies management,
+when using use-package for your .emacs.
+
+** Usage
+
+Load req-package:
+
+#+BEGIN_SRC emacs-lisp
+(require 'req-package)
+#+END_SRC
+
+Define required packages with dependencies using =:require= like this:
+
+#+BEGIN_SRC emacs-lisp
+   (req-package dired) ;; you can omit this empty requirement because of dired-single
+
+   (req-package dired-single
+     :require dired
+     :config (...))
+
+   (req-package lua-mode
+     :config (...))
+
+   (req-package flymake)
+
+   (req-package flymake-lua
+     :require (flymake lua-mode)
+     :config (...))
+#+END_SRC
+
+To start loading packages in right order:
+
+#+BEGIN_SRC emacs-lisp
+   (req-package-finish)
+#+END_SRC
+
+** El Get
+
+There'is another benefit over use-package - =el-get= support.
+No more thinking about sources for your packages.
+Just install and configure your el-get.
+Here is example:
+
+#+BEGIN_SRC emacs-lisp
+    (require 'req-package'')
+
+    (req-package-force el-get
+      :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+                   (el-get 'sync)))
+
+    (req-package gotham-theme
+      :config (print "gotham theme is here and installed from el-get"))
+
+    (req-package-finish)
+#+END_SRC
+
+You can always switch it off by =req-package-use-el-get= custom.
+
+** Migrate from use-package
+
+Just replace all =(use-package ...)= with =(req-package [:require DEPS] ...)= and add =(req-package-finish)= at the end of your configuration file.
+
+** Note
+
+All use-package parameters are supported, see use-package manual
+for additional info.
+
+However there is now need of =:ensure= keyword usage. req-package will add it automatically if needed.
+
+Also there is a =req-package-force= function which simulates plain old use-package behavior
+
+More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
+
+** Contribute
+
+Please, commit and pull-request your changes to =develop= branch.
+Master is used for automatic repo package builds by melpa's travis-ci.
+
+** Things to be done
+
+*** TODO take package dependencies from it's meta data
+*** DONE el-get support
+    CLOSED: [2014-11-04 Tue 17:49]
+    - CLOSING NOTE [2014-11-04 Tue 17:49] \\
+      seems done and working
+*** DONE use single documentation of package (DRY)
+    CLOSED: [2014-11-04 Tue 18:41]
+    - CLOSING NOTE [2014-11-04 Tue 18:41] \\
+      regenerated documentation
+
+** Changelog
+
+*** v0.6
+    =el-get= support
+
+*** v0.5
+    Major system refactoring.
+    Fixed bugs with defered loading.
+    Significant performance optimization.
+    =max-specpdl-size=, =max-lisp-eval-depth= issues completely solved.
+    Flexible =:require= keyword parsing.
+
+*** v0.4.2
+    Bug fixes.
+
+*** v0.4.1
+    Various tweaks and bug fixes.
+
+*** v0.4-all-cycles
+    All cycles of your dependencies will be printed now.
+    Also there are more handy log messages and some bug fixes.
+
+*** v0.3-cycles
+    There are nice error messages about cycled dependencies now.
+    Cycles printed in a way: =pkg1 -> [pkg2 -> ...] pkg1=.
+    It means there is a cycle around =pkg1=.
+
+*** v0.2-auto-fetch
+    There is no need of explicit =:ensure= in your code now.
+    When you req-package it adds =:ensure= if package is available in your repos.
+    Also package deps =:ensure='d automatically too.
+    Just write =(req-package pkg1 :require pkg2)= and all you need will be installed.

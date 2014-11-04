@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.5
+;; Version: 0.6
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -26,78 +26,215 @@
 
 ;;; Commentary:
 
-;; Description
+;; 							━━━━━━━━━━━━━━━━
+;; 								 README
 
-;; req-package is a macro wrapper on top of use-package.
-;; It's goal is to simplify package dependencies management,
-;; when using use-package for your .emacs.
 
-;; Usage
+;; 							 Edward Knyshov
+;; 							━━━━━━━━━━━━━━━━
 
-;; 1) Load req-package:
 
-;;    (require 'req-package)
+;; Table of Contents
+;; ─────────────────
 
-;; 2) Define required packages with dependencies using :require like this:
+;; 1 req-package
+;; .. 1.1 Description
+;; .. 1.2 Usage
+;; .. 1.3 El Get
+;; .. 1.4 Migrate from use-package
+;; .. 1.5 Note
+;; .. 1.6 Contribute
+;; .. 1.7 Things to be done
+;; ..... 1.7.1 TODO take package dependencies from it's meta data
+;; ..... 1.7.2 DONE el-get support
+;; ..... 1.7.3 DONE use single documentation of package (DRY)
+;; .. 1.8 Changelog
+;; ..... 1.8.1 v0.6
+;; ..... 1.8.2 v0.5
+;; ..... 1.8.3 v0.4.2
+;; ..... 1.8.4 v0.4.1
+;; ..... 1.8.5 v0.4-all-cycles
+;; ..... 1.8.6 v0.3-cycles
+;; ..... 1.8.7 v0.2-auto-fetch
 
-;;    (req-package dired) ;; you can omit this empty requirement because of dired-single
 
-;;    (req-package dired-single
-;;      :require dired
-;;      :config (...))
+;; 1 req-package
+;; ═════════════
 
-;;    (req-package lua-mode
-;;      :config (...))
+;; 1.1 Description
+;; ───────────────
 
-;;    (req-package flymake)
+;;   req-package is a macro wrapper on top of [use-package].  It's goal is
+;;   to simplify package dependencies management, when using use-package
+;;   for your .emacs.
 
-;;    (req-package flymake-lua
-;;      :require (flymake lua-mode)
-;;      :config (...))
 
-;; 3) To start loading packages in right order:
+;;   [use-package] https://github.com/jwiegley/use-package
 
-;;    (req-package-finish)
 
-;; Migrate from use-package
+;; 1.2 Usage
+;; ─────────
 
-;;    Just replace all (use-package ...) with (req-package [:require DEPS] ...)
-;;    and add (req-package-finish) at the end of your configuration file.
+;;   Load req-package:
 
-;; Note
+;;   ┌────
+;;   │ (require 'req-package)
+;;   └────
 
-;;    All use-package parameters are supported, see use-package manual for additional info.
+;;   Define required packages with dependencies using `:require' like this:
 
-;;    However there is now need of :ensure keyword usage. req-package will add it automatically if needed.
+;;   ┌────
+;;   │ (req-package dired) ;; you can omit this empty requirement because of dired-single
+;;   │
+;;   │ (req-package dired-single
+;;   │   :require dired
+;;   │   :config (...))
+;;   │
+;;   │ (req-package lua-mode
+;;   │   :config (...))
+;;   │
+;;   │ (req-package flymake)
+;;   │
+;;   │ (req-package flymake-lua
+;;   │   :require (flymake lua-mode)
+;;   │   :config (...))
+;;   └────
 
-;;    Also there is a req-package-force function which simulates plain old use-package behavior
+;;   To start loading packages in right order:
 
-;;    More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
+;;   ┌────
+;;   │ (req-package-finish)
+;;   └────
 
-;; Changelog:
 
-;;    v0.5:
-;;       Major system refactoring.
-;;       Fixed bugs with defered loading.
-;;       Significant performance optimization.
-;;       max-specpdl-size, max-lisp-eval-depth issues completely solved.
-;;       Flexible :require keyword parsing.
-;;    v0.4.2:
-;;       Bug fixes.
-;;    v0.4.1:
-;;       Various tweaks and bug fixes.
-;;    v0.4-all-cycles:
-;;       All cycles of your dependencies will be printed.
-;;       Also there are more handy log messages and some bug fixes.
-;;    v0.3-cycles:
-;;       There are nice error messages about cycled dependencies now.
-;;       Cycles printed in a way: pkg1 -> [pkg2 -> ...] pkg1.
-;;       It means there is a cycle around pkg1.
-;;    v0.2-auto-fetch:
-;;       There is no need of explicit :ensure in your code now.
-;;       When you req-package it adds :ensure if package is available in your repos.
-;;       Also package deps :ensure'd automatically too.
-;;       Just write (req-package pkg1 :require pkg2) and all you need will be installed.
+;; 1.3 El Get
+;; ──────────
+
+;;   There'is another benefit over use-package - `el-get' support.  No more
+;;   thinking about sources for your packages.  Just install and configure
+;;   your el-get.  Here is example:
+
+;;   ┌────
+;;   │ (require 'req-package'')
+;;   │
+;;   │ (req-package-force el-get
+;;   │   :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;   │ 			   (el-get 'sync)))
+;;   │
+;;   │ (req-package gotham-theme
+;;   │   :config (print "gotham theme is here and installed from el-get"))
+;;   │
+;;   │ (req-package-finish)
+;;   └────
+
+;;   You can always switch it off by `req-package-use-el-get' custom.
+
+
+;; 1.4 Migrate from use-package
+;; ────────────────────────────
+
+;;   Just replace all `(use-package ...)' with `(req-package [:require
+;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
+;;   configuration file.
+
+
+;; 1.5 Note
+;; ────────
+
+;;   All use-package parameters are supported, see use-package manual for
+;;   additional info.
+
+;;   However there is now need of `:ensure' keyword usage. req-package will
+;;   add it automatically if needed.
+
+;;   Also there is a `req-package-force' function which simulates plain old
+;;   use-package behavior
+
+;;   More complex req-package usage example can be found at
+;;   [http://github.com/edvorg/emacs-configs].
+
+
+;; 1.6 Contribute
+;; ──────────────
+
+;;   Please, commit and pull-request your changes to `develop' branch.
+;;   Master is used for automatic repo package builds by melpa's travis-ci.
+
+
+;; 1.7 Things to be done
+;; ─────────────────────
+
+;; 1.7.1 TODO take package dependencies from it's meta data
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+
+;; 1.7.2 DONE el-get support
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • CLOSING NOTE [2014-11-04 Tue 17:49]
+;;           seems done and working
+
+
+;; 1.7.3 DONE use single documentation of package (DRY)
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • CLOSING NOTE [2014-11-04 Tue 18:41]
+;;           regenerated documentation
+
+
+;; 1.8 Changelog
+;; ─────────────
+
+;; 1.8.1 v0.6
+;; ╌╌╌╌╌╌╌╌╌╌
+
+;;   `el-get' support
+
+
+;; 1.8.2 v0.5
+;; ╌╌╌╌╌╌╌╌╌╌
+
+;;   Major system refactoring.  Fixed bugs with defered loading.
+;;   Significant performance optimization.  `max-specpdl-size',
+;;   `max-lisp-eval-depth' issues completely solved.  Flexible `:require'
+;;   keyword parsing.
+
+
+;; 1.8.3 v0.4.2
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   Bug fixes.
+
+
+;; 1.8.4 v0.4.1
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   Various tweaks and bug fixes.
+
+
+;; 1.8.5 v0.4-all-cycles
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   All cycles of your dependencies will be printed now.  Also there are
+;;   more handy log messages and some bug fixes.
+
+
+;; 1.8.6 v0.3-cycles
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   There are nice error messages about cycled dependencies now.  Cycles
+;;   printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.  It means there is a
+;;   cycle around `pkg1'.
+
+
+;; 1.8.7 v0.2-auto-fetch
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   There is no need of explicit `:ensure' in your code now.  When you
+;;   req-package it adds `:ensure' if package is available in your repos.
+;;   Also package deps `:ensure''d automatically too.  Just write
+;;   `(req-package pkg1 :require pkg2)' and all you need will be installed.
+
 
 ;;; Code:
 
@@ -125,6 +262,11 @@
   :group 'req-package
   :type 'boolean)
 
+(defcustom req-package-use-el-get t
+  "you can switch off el-get usage if you want"
+  :group 'req-package
+  :type 'boolean)
+
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "package symbol -> list of packages dependent on it")
 
@@ -139,6 +281,9 @@
 
 (defvar req-package-cycles-count 0
   "number of cycles detected")
+
+(defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
+  "you can check this for el get presense")
 
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
@@ -217,6 +362,15 @@
      (req-package--log-debug "package force-requested: %s" NAME)
      (eval (append (req-package-gen-eval NAME) ARGS))))
 
+(defun req-package-try-el-get (package)
+  (let* ((EL-GET-AVAIL (if (el-get-recipe-filename package) t nil))
+         (INSTALLED (package-installed-p package)))
+    (if (and req-package-el-get-present
+             req-package-use-el-get
+             EL-GET-AVAIL
+             (not INSTALLED))
+        (el-get 'sync package))))
+
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
   (let* ((ARCHIVES (if (null package-archive-contents)
@@ -227,7 +381,8 @@
                          (eq (car elem) package))
                        ARCHIVES))
          (EVAL (cond (AVAIL (list 'use-package package ':ensure package))
-                     (t (list 'use-package package)))))
+                     (t (progn (req-package-try-el-get package)
+                               (list 'use-package package))))))
     EVAL))
 
 (defun req-package-detect-cycles-traverse-impl (cur path)
