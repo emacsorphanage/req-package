@@ -125,6 +125,11 @@
   :group 'req-package
   :type 'boolean)
 
+(defcustom req-package-use-el-get t
+  "you can switch off el-get usage if you want"
+  :group 'req-package
+  :type 'boolean)
+
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "package symbol -> list of packages dependent on it")
 
@@ -139,6 +144,9 @@
 
 (defvar req-package-cycles-count 0
   "number of cycles detected")
+
+(defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
+  "you can check this for el get presense")
 
 (defun req-package-wrap-reqs (reqs)
   "listify passed dependencies"
