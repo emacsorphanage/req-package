@@ -59,9 +59,22 @@
     (req-package-finish)
    #+END_SRC
 
-   You can always switch it off by =req-package-use-el-get= custom.
+   Also there, of course, could be dependencies between el-get and elpa packages
 
-   Also there, of course, could be dependencies between el-get and elpa packages.
+** More?
+
+   You can always extend list of package providers or change priorities if you want.
+   in which your packages are being installed.
+   It can be done by customizing =req-package-providers= list.
+   It's list of functions, which can install packages.
+
+   Here are some rules for one such function:
+
+- check package presence at corresponding repo
+- check whether it installed or not
+- install that package if it is available and not installed
+- return nonnil only if package is installed already or
+  successfully installed by this function"
 
 ** Migrate from use-package
 
@@ -105,13 +118,19 @@
     elpa packages remain uninstalled until loaded by use-package
     it will be better to install them all at bootstrap launch
 
-*** TODO el-get/elpa priority customization
+*** DONE el-get/elpa priority customization
+    CLOSED: [2014-11-05 Wed 00:50]
+    - CLOSING NOTE [2014-11-05 Wed 00:50] \\
+      fixed. can be done by =req-package-providers= list reordering
 
     some users may needs customization for package sources
     if some package is present at both elpa and el-get
     we need options to choose where to get packages from
 
-*** TODO custom software sources
+*** DONE custom software sources
+    CLOSED: [2014-11-05 Wed 00:50]
+    - CLOSING NOTE [2014-11-05 Wed 00:50] \\
+      fixed. can be done by adding new function to =req-package-providers=
 
     alongside with elpa and el-get support it will be useful to add your own software sources
     For example - simple wget-based url loader:
