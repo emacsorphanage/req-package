@@ -417,10 +417,14 @@
         (or (el-get 'sync package) t) ;; TODO check for success
       INSTALLED)))
 
+(defun req-package-prepare (package)
+  "prepare package - install if it is present"
+  (or (req-package-try-elpa package)
+      (req-package-try-el-get package)))
+
 (defun req-package-gen-eval (package)
   "generate eval for package and install it if present at el-get/elpa"
-  (or (req-package-try-elpa package)
-      (req-package-try-el-get package))
+  (req-package-prepare package)
   (list 'use-package package))
 
 (defun req-package-detect-cycles-traverse-impl (cur path)
