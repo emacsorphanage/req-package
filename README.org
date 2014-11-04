@@ -2,21 +2,21 @@
 
 ** Description
 
-req-package is a macro wrapper on top of [[https://github.com/jwiegley/use-package][use-package]].
-It's goal is to simplify package dependencies management,
-when using use-package for your .emacs.
+   req-package is a macro wrapper on top of [[https://github.com/jwiegley/use-package][use-package]].
+   It's goal is to simplify package dependencies management,
+   when using use-package for your .emacs.
 
 ** Usage
 
-Load req-package:
+   Load req-package:
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
 (require 'req-package)
-#+END_SRC
+   #+END_SRC
 
-Define required packages with dependencies using =:require= like this:
+   Define required packages with dependencies using =:require= like this:
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
    (req-package dired) ;; you can omit this empty requirement because of dired-single
 
    (req-package dired-single
@@ -31,22 +31,22 @@ Define required packages with dependencies using =:require= like this:
    (req-package flymake-lua
      :require (flymake lua-mode)
      :config (...))
-#+END_SRC
+   #+END_SRC
 
-To start loading packages in right order:
+   To start loading packages in right order:
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
    (req-package-finish)
-#+END_SRC
+   #+END_SRC
 
 ** El Get
 
-There'is another benefit over use-package - =el-get= support.
-No more thinking about sources for your packages.
-Just install and configure your el-get.
-Here is example:
+   There'is another benefit over use-package - =el-get= support.
+   No more thinking about sources for your packages.
+   Just install and configure your el-get.
+   Here is example:
 
-#+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp
     (require 'req-package'')
 
     (req-package-force el-get
@@ -57,29 +57,31 @@ Here is example:
       :config (print "gotham theme is here and installed from el-get"))
 
     (req-package-finish)
-#+END_SRC
+   #+END_SRC
 
-You can always switch it off by =req-package-use-el-get= custom.
+   You can always switch it off by =req-package-use-el-get= custom.
+
+   Also there, of course, could be dependencies between el-get and elpa packages.
 
 ** Migrate from use-package
 
-Just replace all =(use-package ...)= with =(req-package [:require DEPS] ...)= and add =(req-package-finish)= at the end of your configuration file.
+   Just replace all =(use-package ...)= with =(req-package [:require DEPS] ...)= and add =(req-package-finish)= at the end of your configuration file.
 
 ** Note
 
-All use-package parameters are supported, see use-package manual
-for additional info.
+   All use-package parameters are supported, see use-package manual
+   for additional info.
 
-However there is now need of =:ensure= keyword usage. req-package will add it automatically if needed.
+   However there is now need of =:ensure= keyword usage. req-package will add it automatically if needed.
 
-Also there is a =req-package-force= function which simulates plain old use-package behavior
+   Also there is a =req-package-force= function which simulates plain old use-package behavior
 
-More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
+   More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
 
 ** Contribute
 
-Please, commit and pull-request your changes to =develop= branch.
-Master is used for automatic repo package builds by melpa's travis-ci.
+   Please, commit and pull-request your changes to =develop= branch.
+   Master is used for automatic repo package builds by melpa's travis-ci.
 
 ** Things to be done
 
@@ -105,6 +107,16 @@ Master is used for automatic repo package builds by melpa's travis-ci.
     some users may needs customization for package sources
     if some package is present at both elpa and el-get
     we need options to choose where to get packages from
+
+*** TODO custom software sources
+
+    alongside with elpa and el-get support it will be useful to add your own software sources
+    For example - simple wget-based url loader:
+
+    #+BEGIN_SRC emacs-lisp
+    (add-recipe 'test-package "https://raw.githubusercontent.com/edvorg/req-package/master/req-package.el")
+    (req-package test-package)
+    #+END_SRC
 
 ** Changelog
 

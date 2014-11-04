@@ -50,6 +50,7 @@
 ;; ..... 1.7.3 DONE use single documentation of package (DRY)
 ;; ..... 1.7.4 TODO fix issue with elpa packages installation
 ;; ..... 1.7.5 TODO el-get/elpa priority customization
+;; ..... 1.7.6 TODO custom software sources
 ;; .. 1.8 Changelog
 ;; ..... 1.8.1 v0.6
 ;; ..... 1.8.2 v0.5
@@ -131,6 +132,9 @@
 
 ;;   You can always switch it off by `req-package-use-el-get' custom.
 
+;;   Also there, of course, could be dependencies between el-get and elpa
+;;   packages.
+
 
 ;; 1.4 Migrate from use-package
 ;; ────────────────────────────
@@ -197,6 +201,18 @@
 ;;   some users may needs customization for package sources if some package
 ;;   is present at both elpa and el-get we need options to choose where to
 ;;   get packages from
+
+
+;; 1.7.6 TODO custom software sources
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   alongside with elpa and el-get support it will be useful to add your own
+;;   software sources. For example - simple wget-based url loader:
+
+;;   ┌────
+;;   │ (add-recipe 'test-package "https://raw.githubusercontent.com/edvorg/req-package/master/req-package.el")
+;;   │ (req-package test-package)
+;;   └────
 
 
 ;; 1.8 Changelog
