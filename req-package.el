@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.5
+;; Version: 0.6
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -47,14 +47,15 @@
 ;; .. 1.7 Things to be done
 ;; ..... 1.7.1 TODO take package dependencies from it's meta data
 ;; ..... 1.7.2 DONE el-get support
-;; ..... 1.7.3 TODO use single documentation of package (DRY)
+;; ..... 1.7.3 DONE use single documentation of package (DRY)
 ;; .. 1.8 Changelog
-;; ..... 1.8.1 v0.5
-;; ..... 1.8.2 v0.4.2
-;; ..... 1.8.3 v0.4.1
-;; ..... 1.8.4 v0.4-all-cycles
-;; ..... 1.8.5 v0.3-cycles
-;; ..... 1.8.6 v0.2-auto-fetch
+;; ..... 1.8.1 v0.6
+;; ..... 1.8.2 v0.5
+;; ..... 1.8.3 v0.4.2
+;; ..... 1.8.4 v0.4.1
+;; ..... 1.8.5 v0.4-all-cycles
+;; ..... 1.8.6 v0.3-cycles
+;; ..... 1.8.7 v0.2-auto-fetch
 
 
 ;; 1 req-package
@@ -80,7 +81,7 @@
 ;;   │ (require 'req-package)
 ;;   └────
 
-;;   Define required packages with dependencies using `:require` like this:
+;;   Define required packages with dependencies using `:require' like this:
 
 ;;   ┌────
 ;;   │ (req-package dired) ;; you can omit this empty requirement because of dired-single
@@ -109,7 +110,7 @@
 ;; 1.3 El Get
 ;; ──────────
 
-;;   There'is another benefit over use-package - el-get support.  No more
+;;   There'is another benefit over use-package - `el-get' support.  No more
 ;;   thinking about sources for your packages.  Just install and configure
 ;;   your el-get.  Here is example:
 
@@ -126,15 +127,15 @@
 ;;   │ (req-package-finish)
 ;;   └────
 
-;;   You can always switch it off by req-package-use-el-get custom.
+;;   You can always switch it off by `req-package-use-el-get' custom.
 
 
 ;; 1.4 Migrate from use-package
 ;; ────────────────────────────
 
-;;   Just replace all `(use-package …)` with `(req-package [:require DEPS]
-;;   …)` and add `(req-package-finish)` at the end of your configuration
-;;   file.
+;;   Just replace all `(use-package ...)' with `(req-package [:require
+;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
+;;   configuration file.
 
 
 ;; 1.5 Note
@@ -143,10 +144,10 @@
 ;;   All use-package parameters are supported, see use-package manual for
 ;;   additional info.
 
-;;   However there is now need of `:ensure` keyword usage. req-package will
+;;   However there is now need of `:ensure' keyword usage. req-package will
 ;;   add it automatically if needed.
 
-;;   Also there is a `req-package-force` function which simulates plain old
+;;   Also there is a `req-package-force' function which simulates plain old
 ;;   use-package behavior
 
 ;;   More complex req-package usage example can be found at
@@ -156,7 +157,7 @@
 ;; 1.6 Contribute
 ;; ──────────────
 
-;;   Please, commit and pull-request your changes to **develop** branch.
+;;   Please, commit and pull-request your changes to `develop' branch.
 ;;   Master is used for automatic repo package builds by melpa's travis-ci.
 
 
@@ -174,56 +175,66 @@
 ;;           seems done and working
 
 
-;; 1.7.3 TODO use single documentation of package (DRY)
+;; 1.7.3 DONE use single documentation of package (DRY)
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • CLOSING NOTE [2014-11-04 Tue 18:41]
+;;           regenerated documentation
 
 
 ;; 1.8 Changelog
 ;; ─────────────
 
-;; 1.8.1 v0.5
+;; 1.8.1 v0.6
+;; ╌╌╌╌╌╌╌╌╌╌
+
+;;   `el-get' support
+
+
+;; 1.8.2 v0.5
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   Major system refactoring.  Fixed bugs with defered loading.
-;;   Significant performance optimization.  max-specpdl-size,
-;;   max-lisp-eval-depth issues completely solved.  Flexible :require
+;;   Significant performance optimization.  `max-specpdl-size',
+;;   `max-lisp-eval-depth' issues completely solved.  Flexible `:require'
 ;;   keyword parsing.
 
 
-;; 1.8.2 v0.4.2
+;; 1.8.3 v0.4.2
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Bug fixes.
 
 
-;; 1.8.3 v0.4.1
+;; 1.8.4 v0.4.1
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Various tweaks and bug fixes.
 
 
-;; 1.8.4 v0.4-all-cycles
+;; 1.8.5 v0.4-all-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   All cycles of your dependencies will be printed now.  Also there are
 ;;   more handy log messages and some bug fixes.
 
 
-;; 1.8.5 v0.3-cycles
+;; 1.8.6 v0.3-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There are nice error messages about cycled dependencies now.  Cycles
-;;   printed in a way: `pkg1 -> [pkg2 -> …] pkg1`.  It means there is a
-;;   cycle around `pkg1`.
+;;   printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.  It means there is a
+;;   cycle around `pkg1'.
 
 
-;; 1.8.6 v0.2-auto-fetch
+;; 1.8.7 v0.2-auto-fetch
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
-;;   There is no need of explicit `:ensure` in your code now.  When you
-;;   req-package it adds `:ensure` if package is available in your repos.
-;;   Also package deps `:ensure`'d automatically too.  Just write
-;;   `(req-package pkg1 :require pkg2)` and all you need will be installed.
+;;   There is no need of explicit `:ensure' in your code now.  When you
+;;   req-package it adds `:ensure' if package is available in your repos.
+;;   Also package deps `:ensure''d automatically too.  Just write
+;;   `(req-package pkg1 :require pkg2)' and all you need will be installed.
+
 
 ;;; Code:
 
