@@ -121,6 +121,8 @@
     (req-package test-package)
     #+END_SRC
 
+*** TODO el-get/elpa packages must be in priority over builtin ones
+
 ** Changelog
 
 *** v0.6
