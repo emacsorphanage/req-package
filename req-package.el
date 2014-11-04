@@ -294,11 +294,6 @@
   :group 'req-package
   :type 'boolean)
 
-(defcustom req-package-use-el-get t
-  "you can switch off el-get usage if you want"
-  :group 'req-package
-  :type 'boolean)
-
 (defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
   "list of functions to prepare packages installation
 one such function should
@@ -423,7 +418,6 @@ one such function should
   (let* ((AVAIL (if (el-get-recipe-filename package) t nil))
          (INSTALLED (package-installed-p package)))
     (if (and req-package-el-get-present
-             req-package-use-el-get
              AVAIL
              (not INSTALLED))
         (or (el-get 'sync package) t) ;; TODO check for success
