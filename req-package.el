@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.6
+;; Version: 0.7
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -27,7 +27,7 @@
 ;;; Commentary:
 
 ;; 							━━━━━━━━━━━━━━━━
-;; 								 README
+;; 							  REQ-PACKAGE
 
 
 ;; 							 Edward Knyshov
@@ -41,21 +41,27 @@
 ;; .. 1.1 Description
 ;; .. 1.2 Usage
 ;; .. 1.3 El Get
-;; .. 1.4 Migrate from use-package
-;; .. 1.5 Note
-;; .. 1.6 Contribute
-;; .. 1.7 Things to be done
-;; ..... 1.7.1 TODO take package dependencies from it's meta data
-;; ..... 1.7.2 DONE el-get support
-;; ..... 1.7.3 DONE use single documentation of package (DRY)
-;; .. 1.8 Changelog
-;; ..... 1.8.1 v0.6
-;; ..... 1.8.2 v0.5
-;; ..... 1.8.3 v0.4.2
-;; ..... 1.8.4 v0.4.1
-;; ..... 1.8.5 v0.4-all-cycles
-;; ..... 1.8.6 v0.3-cycles
-;; ..... 1.8.7 v0.2-auto-fetch
+;; .. 1.4 More?
+;; .. 1.5 Migrate from use-package
+;; .. 1.6 Note
+;; .. 1.7 Contribute
+;; .. 1.8 Things to be done
+;; ..... 1.8.1 TODO take package dependencies from it's meta data
+;; ..... 1.8.2 DONE el-get support
+;; ..... 1.8.3 DONE use single documentation of package (DRY)
+;; ..... 1.8.4 DONE fix issue with elpa packages installation
+;; ..... 1.8.5 DONE el-get/elpa priority customization
+;; ..... 1.8.6 DONE custom software sources
+;; ..... 1.8.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; .. 1.9 Changelog
+;; ..... 1.9.1 v0.7
+;; ..... 1.9.2 v0.6
+;; ..... 1.9.3 v0.5
+;; ..... 1.9.4 v0.4.2
+;; ..... 1.9.5 v0.4.1
+;; ..... 1.9.6 v0.4-all-cycles
+;; ..... 1.9.7 v0.3-cycles
+;; ..... 1.9.8 v0.2-auto-fetch
 
 
 ;; 1 req-package
@@ -127,10 +133,28 @@
 ;;   │ (req-package-finish)
 ;;   └────
 
-;;   You can always switch it off by `req-package-use-el-get' custom.
+;;   Also there, of course, could be dependencies between el-get and elpa
+;;   packages
 
 
-;; 1.4 Migrate from use-package
+;; 1.4 More?
+;; ─────────
+
+;;   You can always extend list of package providers or change priorities
+;;   if you want.  in which your packages are being installed.  It can be
+;;   done by customizing `req-package-providers' list.  It's list of
+;;   functions, which can install packages.
+
+;;   Here are some rules for one such function:
+
+;;   • check package presence at corresponding repo
+;;   • check whether it installed or not
+;;   • install that package if it is available and not installed
+;;   • return nonnil only if package is installed already or successfully
+;;     installed by this function"
+
+
+;; 1.5 Migrate from use-package
 ;; ────────────────────────────
 
 ;;   Just replace all `(use-package ...)' with `(req-package [:require
@@ -138,7 +162,7 @@
 ;;   configuration file.
 
 
-;; 1.5 Note
+;; 1.6 Note
 ;; ────────
 
 ;;   All use-package parameters are supported, see use-package manual for
@@ -154,44 +178,95 @@
 ;;   [http://github.com/edvorg/emacs-configs].
 
 
-;; 1.6 Contribute
+;; 1.7 Contribute
 ;; ──────────────
 
 ;;   Please, commit and pull-request your changes to `develop' branch.
 ;;   Master is used for automatic repo package builds by melpa's travis-ci.
 
 
-;; 1.7 Things to be done
+;; 1.8 Things to be done
 ;; ─────────────────────
 
-;; 1.7.1 TODO take package dependencies from it's meta data
+;; 1.8.1 TODO take package dependencies from it's meta data
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 
-;; 1.7.2 DONE el-get support
+;; 1.8.2 DONE el-get support
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-04 Tue 17:49]
 ;;           seems done and working
 
 
-;; 1.7.3 DONE use single documentation of package (DRY)
+;; 1.8.3 DONE use single documentation of package (DRY)
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-04 Tue 18:41]
 ;;           regenerated documentation
 
 
-;; 1.8 Changelog
+;; 1.8.4 DONE fix issue with elpa packages installation
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • CLOSING NOTE [2014-11-05 Wed 00:15]
+;;           fixed. all packages are installing in req-package-finish loop
+
+;;   elpa packages remain uninstalled until loaded by use-package it will
+;;   be better to install them all at bootstrap launch
+
+
+;; 1.8.5 DONE el-get/elpa priority customization
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
+;;           fixed. can be done by `req-package-providers' list reordering
+
+;;   some users may needs customization for package sources if some package
+;;   is present at both elpa and el-get we need options to choose where to
+;;   get packages from
+
+
+;; 1.8.6 DONE custom software sources
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
+;;           fixed. can be done by adding new function to
+;;           `req-package-providers'
+
+;;   alongside with elpa and el-get support it will be useful to add your
+;;   own software sources For example - simple wget-based url loader:
+
+;;   ┌────
+;;   │ (add-recipe 'test-package "https://raw.githubusercontent.com/edvorg/req-package/master/req-package.el")
+;;   │ (req-package test-package)
+;;   └────
+
+
+;; 1.8.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+
+;; 1.9 Changelog
 ;; ─────────────
 
-;; 1.8.1 v0.6
+;; 1.9.1 v0.7
+;; ╌╌╌╌╌╌╌╌╌╌
+
+;;   • fixed some issues with packages installation all packages will be
+;;     installed at bootstrap time
+;;   • custom package providers support by `req-package-providers'
+;;   • priority feature for cross provider packages loading you can choose,
+;;     what to try first - elpa, el-get, or something else
+
+
+;; 1.9.2 v0.6
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   `el-get' support
 
 
-;; 1.8.2 v0.5
+;; 1.9.3 v0.5
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   Major system refactoring.  Fixed bugs with defered loading.
@@ -200,26 +275,26 @@
 ;;   keyword parsing.
 
 
-;; 1.8.3 v0.4.2
+;; 1.9.4 v0.4.2
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Bug fixes.
 
 
-;; 1.8.4 v0.4.1
+;; 1.9.5 v0.4.1
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Various tweaks and bug fixes.
 
 
-;; 1.8.5 v0.4-all-cycles
+;; 1.9.6 v0.4-all-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   All cycles of your dependencies will be printed now.  Also there are
 ;;   more handy log messages and some bug fixes.
 
 
-;; 1.8.6 v0.3-cycles
+;; 1.9.7 v0.3-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There are nice error messages about cycled dependencies now.  Cycles
@@ -227,14 +302,13 @@
 ;;   cycle around `pkg1'.
 
 
-;; 1.8.7 v0.2-auto-fetch
+;; 1.9.8 v0.2-auto-fetch
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There is no need of explicit `:ensure' in your code now.  When you
 ;;   req-package it adds `:ensure' if package is available in your repos.
 ;;   Also package deps `:ensure''d automatically too.  Just write
 ;;   `(req-package pkg1 :require pkg2)' and all you need will be installed.
-
 
 ;;; Code:
 
@@ -262,10 +336,16 @@
   :group 'req-package
   :type 'boolean)
 
-(defcustom req-package-use-el-get t
-  "you can switch off el-get usage if you want"
+(defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
+  "list of functions to prepare packages installation
+one such function should
+1) check package presence at corresponding repo
+2) check whether it installed or not
+3) install that package if it available and not installed
+4) return nonnil only if package is installed already or
+   successfully installed by this function"
   :group 'req-package
-  :type 'boolean)
+  :type 'list)
 
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "package symbol -> list of packages dependent on it")
@@ -360,19 +440,10 @@
           (ARGS ',args))
 
      (req-package--log-debug "package force-requested: %s" NAME)
+     (req-package-prepare NAME)
      (eval (append (req-package-gen-eval NAME) ARGS))))
 
-(defun req-package-try-el-get (package)
-  (let* ((EL-GET-AVAIL (if (el-get-recipe-filename package) t nil))
-         (INSTALLED (package-installed-p package)))
-    (if (and req-package-el-get-present
-             req-package-use-el-get
-             EL-GET-AVAIL
-             (not INSTALLED))
-        (el-get 'sync package))))
-
-(defun req-package-gen-eval (package)
-  "generate eval for package. if it is available in repo, add :ensure keyword"
+(defun req-package-try-elpa (package)
   (let* ((ARCHIVES (if (null package-archive-contents)
                        (progn (package-refresh-contents)
                               package-archive-contents)
@@ -380,10 +451,29 @@
          (AVAIL (-any? (lambda (elem)
                          (eq (car elem) package))
                        ARCHIVES))
-         (EVAL (cond (AVAIL (list 'use-package package ':ensure package))
-                     (t (progn (req-package-try-el-get package)
-                               (list 'use-package package))))))
-    EVAL))
+         (INSTALLED (package-installed-p package)))
+    (if (and AVAIL (not INSTALLED))
+        (if (package-install package) t nil)
+      INSTALLED)))
+
+(defun req-package-try-el-get (package)
+  (let* ((AVAIL (if (el-get-recipe-filename package) t nil))
+         (INSTALLED (package-installed-p package)))
+    (if (and req-package-el-get-present
+             AVAIL
+             (not INSTALLED))
+        (or (el-get 'sync package) t) ;; TODO check for success
+      INSTALLED)))
+
+(defun req-package-prepare (package)
+  "prepare package - install if it is present"
+  (-any? (lambda (elem)
+           (funcall elem package))
+         req-package-providers))
+
+(defun req-package-gen-eval (package)
+  "generate eval for package and install it if present at el-get/elpa"
+  (list 'use-package package))
 
 (defun req-package-detect-cycles-traverse-impl (cur path)
   "traverse for cycles look up implementation"
@@ -424,6 +514,7 @@
                           (hash-table-count req-package-ranks))
 
   (maphash (lambda (key value)
+             (req-package-prepare key)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
                         (req-package-eval key))))
