@@ -225,6 +225,15 @@
      (req-package--log-debug "package force-requested: %s" NAME)
      (eval (append (req-package-gen-eval NAME) ARGS))))
 
+(defun req-package-try-el-get (package)
+  (let* ((EL-GET-AVAIL (if (el-get-recipe-filename package) t nil))
+         (INSTALLED (package-installed-p package)))
+    (if (and req-package-el-get-present
+             req-package-use-el-get
+             EL-GET-AVAIL
+             (not INSTALLED))
+        (el-get 'sync package))))
+
 (defun req-package-gen-eval (package)
   "generate eval for package. if it is available in repo, add :ensure keyword"
   (let* ((ARCHIVES (if (null package-archive-contents)
@@ -235,7 +244,8 @@
                          (eq (car elem) package))
                        ARCHIVES))
          (EVAL (cond (AVAIL (list 'use-package package ':ensure package))
-                     (t (list 'use-package package)))))
+                     (t (progn (req-package-try-el-get package)
+                               (list 'use-package package))))))
     EVAL))
 
 (defun req-package-detect-cycles-traverse-impl (cur path)
