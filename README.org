@@ -144,7 +144,12 @@
 
 ** Changelog
 
+*** v0.8
+
+    - bugfixes
+
 *** v0.7
+
     - fixed some issues with packages installation
       all packages will be installed at bootstrap time
     - custom package providers support by =req-package-providers=

@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.7
+;; Version: 0.8
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -54,14 +54,15 @@
 ;; ..... 1.8.6 DONE custom software sources
 ;; ..... 1.8.7 TODO el-get/elpa packages must be in priority over builtin ones
 ;; .. 1.9 Changelog
-;; ..... 1.9.1 v0.7
-;; ..... 1.9.2 v0.6
-;; ..... 1.9.3 v0.5
-;; ..... 1.9.4 v0.4.2
-;; ..... 1.9.5 v0.4.1
-;; ..... 1.9.6 v0.4-all-cycles
-;; ..... 1.9.7 v0.3-cycles
-;; ..... 1.9.8 v0.2-auto-fetch
+;; ..... 1.9.1 v0.8
+;; ..... 1.9.2 v0.7
+;; ..... 1.9.3 v0.6
+;; ..... 1.9.4 v0.5
+;; ..... 1.9.5 v0.4.2
+;; ..... 1.9.6 v0.4.1
+;; ..... 1.9.7 v0.4-all-cycles
+;; ..... 1.9.8 v0.3-cycles
+;; ..... 1.9.9 v0.2-auto-fetch
 
 
 ;; 1 req-package
@@ -168,7 +169,7 @@
 ;;   All use-package parameters are supported, see use-package manual for
 ;;   additional info.
 
-;;   However there is now need of `:ensure' keyword usage. req-package will
+;;   However, there is no need for the `:ensure' keyword; req-package will
 ;;   add it automatically if needed.
 
 ;;   Also there is a `req-package-force' function which simulates plain old
@@ -250,7 +251,13 @@
 ;; 1.9 Changelog
 ;; ─────────────
 
-;; 1.9.1 v0.7
+;; 1.9.1 v0.8
+;; ╌╌╌╌╌╌╌╌╌╌
+
+;;   • bugfixes
+
+
+;; 1.9.2 v0.7
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation all packages will be
@@ -260,13 +267,13 @@
 ;;     what to try first - elpa, el-get, or something else
 
 
-;; 1.9.2 v0.6
+;; 1.9.3 v0.6
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   `el-get' support
 
 
-;; 1.9.3 v0.5
+;; 1.9.4 v0.5
 ;; ╌╌╌╌╌╌╌╌╌╌
 
 ;;   Major system refactoring.  Fixed bugs with defered loading.
@@ -275,26 +282,26 @@
 ;;   keyword parsing.
 
 
-;; 1.9.4 v0.4.2
+;; 1.9.5 v0.4.2
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Bug fixes.
 
 
-;; 1.9.5 v0.4.1
+;; 1.9.6 v0.4.1
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   Various tweaks and bug fixes.
 
 
-;; 1.9.6 v0.4-all-cycles
+;; 1.9.7 v0.4-all-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   All cycles of your dependencies will be printed now.  Also there are
 ;;   more handy log messages and some bug fixes.
 
 
-;; 1.9.7 v0.3-cycles
+;; 1.9.8 v0.3-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There are nice error messages about cycled dependencies now.  Cycles
@@ -302,7 +309,7 @@
 ;;   cycle around `pkg1'.
 
 
-;; 1.9.8 v0.2-auto-fetch
+;; 1.9.9 v0.2-auto-fetch
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   There is no need of explicit `:ensure' in your code now.  When you
@@ -457,13 +464,13 @@ one such function should
       INSTALLED)))
 
 (defun req-package-try-el-get (package)
-  (let* ((AVAIL (if (el-get-recipe-filename package) t nil))
-         (INSTALLED (package-installed-p package)))
-    (if (and req-package-el-get-present
-             AVAIL
-             (not INSTALLED))
-        (or (el-get 'sync package) t) ;; TODO check for success
-      INSTALLED)))
+  (if req-package-el-get-present
+      (let* ((AVAIL (if (el-get-recipe-filename package) t nil))
+             (INSTALLED (package-installed-p package)))
+        (if (and AVAIL (not INSTALLED))
+            (or (el-get 'sync package) t) ;; TODO check for success
+          INSTALLED))
+    nil))
 
 (defun req-package-prepare (package)
   "prepare package - install if it is present"
