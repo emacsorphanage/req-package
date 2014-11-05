@@ -85,7 +85,7 @@
    All use-package parameters are supported, see use-package manual
    for additional info.
 
-   However there is now need of =:ensure= keyword usage. req-package will add it automatically if needed.
+   However, there is no need for the =:ensure= keyword; req-package will add it automatically if needed.
 
    Also there is a =req-package-force= function which simulates plain old use-package behavior
 
