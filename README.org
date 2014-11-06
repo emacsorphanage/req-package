@@ -41,7 +41,7 @@
 
 ** El Get
 
-   There'is another benefit over use-package - =el-get= support.
+   There is another benefit over use-package - =el-get= support.
    No more thinking about sources for your packages.
    Just install and configure your el-get.
    Here is example:
@@ -59,7 +59,7 @@
     (req-package-finish)
    #+END_SRC
 
-   Also there, of course, could be dependencies between el-get and elpa packages
+   Also, of course, there could be dependencies between el-get and elpa packages
 
 ** More?
 
