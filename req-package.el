@@ -117,7 +117,7 @@
 ;; 1.3 El Get
 ;; ──────────
 
-;;   There'is another benefit over use-package - `el-get' support.  No more
+;;   There is another benefit over use-package - `el-get' support.  No more
 ;;   thinking about sources for your packages.  Just install and configure
 ;;   your el-get.  Here is example:
 
@@ -134,7 +134,7 @@
 ;;   │ (req-package-finish)
 ;;   └────
 
-;;   Also there, of course, could be dependencies between el-get and elpa
+;;   Also, of course, there could be dependencies between el-get and elpa
 ;;   packages
 
 
@@ -260,62 +260,65 @@
 ;; 1.9.2 v0.7
 ;; ╌╌╌╌╌╌╌╌╌╌
 
-;;   • fixed some issues with packages installation all packages will be
+;;   • fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
 ;;   • custom package providers support by `req-package-providers'
-;;   • priority feature for cross provider packages loading you can choose,
-;;     what to try first - elpa, el-get, or something else
+;;   • priority feature for cross provider packages loading. you can
+;;     choose, what to try first - elpa, el-get, or something else
 
 
 ;; 1.9.3 v0.6
 ;; ╌╌╌╌╌╌╌╌╌╌
 
-;;   `el-get' support
+;;   • `el-get' support
 
 
 ;; 1.9.4 v0.5
 ;; ╌╌╌╌╌╌╌╌╌╌
 
-;;   Major system refactoring.  Fixed bugs with defered loading.
-;;   Significant performance optimization.  `max-specpdl-size',
-;;   `max-lisp-eval-depth' issues completely solved.  Flexible `:require'
-;;   keyword parsing.
+;;   • Major system refactoring.
+;;   • Fixed bugs with defered loading.
+;;   • Significant performance optimization.
+;;   • `max-specpdl-size', `max-lisp-eval-depth' issues completely solved.
+;;   • Flexible `:require' keyword parsing.
 
 
 ;; 1.9.5 v0.4.2
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
-;;   Bug fixes.
+;;   • Bug fixes.
 
 
 ;; 1.9.6 v0.4.1
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
-;;   Various tweaks and bug fixes.
+;;   • Various tweaks and bug fixes.
 
 
 ;; 1.9.7 v0.4-all-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
-;;   All cycles of your dependencies will be printed now.  Also there are
-;;   more handy log messages and some bug fixes.
+;;   • All cycles of your dependencies will be printed now.
+;;   • Also there are more handy log messages and some bug fixes.
 
 
 ;; 1.9.8 v0.3-cycles
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
-;;   There are nice error messages about cycled dependencies now.  Cycles
-;;   printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.  It means there is a
-;;   cycle around `pkg1'.
+;;   • There are nice error messages about cycled dependencies now.
+;;   • Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.
+;;   • It means there is a cycle around `pkg1'.
 
 
 ;; 1.9.9 v0.2-auto-fetch
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
-;;   There is no need of explicit `:ensure' in your code now.  When you
-;;   req-package it adds `:ensure' if package is available in your repos.
-;;   Also package deps `:ensure''d automatically too.  Just write
-;;   `(req-package pkg1 :require pkg2)' and all you need will be installed.
+;;   • There is no need of explicit `:ensure' in your code now.
+;;   • When you req-package it adds `:ensure' if package is available in
+;;     your repos.
+;;   • Also package deps `:ensure''d automatically too.
+;;   • Just write `(req-package pkg1 :require pkg2)' and all you need will
+;;     be installed.
 
 ;;; Code:
 
