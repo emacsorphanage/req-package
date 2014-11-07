@@ -82,14 +82,20 @@
 
 ** Note
 
-   All use-package parameters are supported, see use-package manual
+   All use-package parameters are supported, see use-package manual.
    for additional info.
 
    However, there is no need for the =:ensure= keyword; req-package will add it automatically if needed.
 
-   Also there is a =req-package-force= function which simulates plain old use-package behavior
+   Also there is a =req-package-force= function which simulates plain old use-package behavior.
 
    More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
+
+** Logging
+
+   You cand use =req-package--log-open-log= to see, what is happening with your configuration.
+   You can choose log level in =req-package= group by =req-package-log-level= custom.
+   These log levels are supported: =fatal=, =error=, =warn=, =info=, =debug=, =trace=.
 
 ** Contribute
 

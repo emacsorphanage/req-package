@@ -44,25 +44,26 @@
 ;; .. 1.4 More?
 ;; .. 1.5 Migrate from use-package
 ;; .. 1.6 Note
-;; .. 1.7 Contribute
-;; .. 1.8 Things to be done
-;; ..... 1.8.1 TODO take package dependencies from it's meta data
-;; ..... 1.8.2 DONE el-get support
-;; ..... 1.8.3 DONE use single documentation of package (DRY)
-;; ..... 1.8.4 DONE fix issue with elpa packages installation
-;; ..... 1.8.5 DONE el-get/elpa priority customization
-;; ..... 1.8.6 DONE custom software sources
-;; ..... 1.8.7 TODO el-get/elpa packages must be in priority over builtin ones
-;; .. 1.9 Changelog
-;; ..... 1.9.1 v0.8
-;; ..... 1.9.2 v0.7
-;; ..... 1.9.3 v0.6
-;; ..... 1.9.4 v0.5
-;; ..... 1.9.5 v0.4.2
-;; ..... 1.9.6 v0.4.1
-;; ..... 1.9.7 v0.4-all-cycles
-;; ..... 1.9.8 v0.3-cycles
-;; ..... 1.9.9 v0.2-auto-fetch
+;; .. 1.7 Logging
+;; .. 1.8 Contribute
+;; .. 1.9 Things to be done
+;; ..... 1.9.1 TODO take package dependencies from it's meta data
+;; ..... 1.9.2 DONE el-get support
+;; ..... 1.9.3 DONE use single documentation of package (DRY)
+;; ..... 1.9.4 DONE fix issue with elpa packages installation
+;; ..... 1.9.5 DONE el-get/elpa priority customization
+;; ..... 1.9.6 DONE custom software sources
+;; ..... 1.9.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; .. 1.10 Changelog
+;; ..... 1.10.1 v0.8
+;; ..... 1.10.2 v0.7
+;; ..... 1.10.3 v0.6
+;; ..... 1.10.4 v0.5
+;; ..... 1.10.5 v0.4.2
+;; ..... 1.10.6 v0.4.1
+;; ..... 1.10.7 v0.4-all-cycles
+;; ..... 1.10.8 v0.3-cycles
+;; ..... 1.10.9 v0.2-auto-fetch
 
 
 ;; 1 req-package
@@ -166,48 +167,57 @@
 ;; 1.6 Note
 ;; ────────
 
-;;   All use-package parameters are supported, see use-package manual for
+;;   All use-package parameters are supported, see use-package manual.  for
 ;;   additional info.
 
 ;;   However, there is no need for the `:ensure' keyword; req-package will
 ;;   add it automatically if needed.
 
 ;;   Also there is a `req-package-force' function which simulates plain old
-;;   use-package behavior
+;;   use-package behavior.
 
 ;;   More complex req-package usage example can be found at
 ;;   [http://github.com/edvorg/emacs-configs].
 
 
-;; 1.7 Contribute
+;; 1.7 Logging
+;; ───────────
+
+;;   You cand use `req-package--log-open-log' to see, what is happening
+;;   with your configuration.  You can choose log level in `req-package'
+;;   group by `req-package-log-level' custom.  These log levels are
+;;   supported: `fatal', `error', `warn', `info', `debug', `trace'.
+
+
+;; 1.8 Contribute
 ;; ──────────────
 
 ;;   Please, commit and pull-request your changes to `develop' branch.
 ;;   Master is used for automatic repo package builds by melpa's travis-ci.
 
 
-;; 1.8 Things to be done
+;; 1.9 Things to be done
 ;; ─────────────────────
 
-;; 1.8.1 TODO take package dependencies from it's meta data
+;; 1.9.1 TODO take package dependencies from it's meta data
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 
-;; 1.8.2 DONE el-get support
+;; 1.9.2 DONE el-get support
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-04 Tue 17:49]
 ;;           seems done and working
 
 
-;; 1.8.3 DONE use single documentation of package (DRY)
+;; 1.9.3 DONE use single documentation of package (DRY)
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-04 Tue 18:41]
 ;;           regenerated documentation
 
 
-;; 1.8.4 DONE fix issue with elpa packages installation
+;; 1.9.4 DONE fix issue with elpa packages installation
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-05 Wed 00:15]
@@ -217,7 +227,7 @@
 ;;   be better to install them all at bootstrap launch
 
 
-;; 1.8.5 DONE el-get/elpa priority customization
+;; 1.9.5 DONE el-get/elpa priority customization
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
@@ -228,7 +238,7 @@
 ;;   get packages from
 
 
-;; 1.8.6 DONE custom software sources
+;; 1.9.6 DONE custom software sources
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
@@ -244,21 +254,21 @@
 ;;   └────
 
 
-;; 1.8.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; 1.9.7 TODO el-get/elpa packages must be in priority over builtin ones
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 
-;; 1.9 Changelog
-;; ─────────────
+;; 1.10 Changelog
+;; ──────────────
 
-;; 1.9.1 v0.8
-;; ╌╌╌╌╌╌╌╌╌╌
+;; 1.10.1 v0.8
+;; ╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • bugfixes
 
 
-;; 1.9.2 v0.7
-;; ╌╌╌╌╌╌╌╌╌╌
+;; 1.10.2 v0.7
+;; ╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
@@ -267,14 +277,14 @@
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
-;; 1.9.3 v0.6
-;; ╌╌╌╌╌╌╌╌╌╌
+;; 1.10.3 v0.6
+;; ╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `el-get' support
 
 
-;; 1.9.4 v0.5
-;; ╌╌╌╌╌╌╌╌╌╌
+;; 1.10.4 v0.5
+;; ╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Major system refactoring.
 ;;   • Fixed bugs with defered loading.
@@ -283,35 +293,35 @@
 ;;   • Flexible `:require' keyword parsing.
 
 
-;; 1.9.5 v0.4.2
-;; ╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.5 v0.4.2
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Bug fixes.
 
 
-;; 1.9.6 v0.4.1
-;; ╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.6 v0.4.1
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Various tweaks and bug fixes.
 
 
-;; 1.9.7 v0.4-all-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.7 v0.4-all-cycles
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • All cycles of your dependencies will be printed now.
 ;;   • Also there are more handy log messages and some bug fixes.
 
 
-;; 1.9.8 v0.3-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.8 v0.3-cycles
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There are nice error messages about cycled dependencies now.
 ;;   • Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.
 ;;   • It means there is a cycle around `pkg1'.
 
 
-;; 1.9.9 v0.2-auto-fetch
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.9 v0.2-auto-fetch
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There is no need of explicit `:ensure' in your code now.
 ;;   • When you req-package it adds `:ensure' if package is available in
