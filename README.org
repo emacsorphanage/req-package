@@ -113,6 +113,10 @@
 
 ** Changelog
 
+*** v0.9
+
+    - =:loader= keyword support
+
 *** v0.8
 
     - bugfixes
