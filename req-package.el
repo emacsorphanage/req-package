@@ -48,12 +48,7 @@
 ;; .. 1.8 Contribute
 ;; .. 1.9 Things to be done
 ;; ..... 1.9.1 TODO take package dependencies from it's meta data
-;; ..... 1.9.2 DONE el-get support
-;; ..... 1.9.3 DONE use single documentation of package (DRY)
-;; ..... 1.9.4 DONE fix issue with elpa packages installation
-;; ..... 1.9.5 DONE el-get/elpa priority customization
-;; ..... 1.9.6 DONE custom software sources
-;; ..... 1.9.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; ..... 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
 ;; .. 1.10 Changelog
 ;; ..... 1.10.1 v0.8
 ;; ..... 1.10.2 v0.7
@@ -173,6 +168,10 @@
 ;;   However, there is no need for the `:ensure' keyword; req-package will
 ;;   add it automatically if needed.
 
+;;   For each package you can manually specify loader fuction by `:loader'
+;;   keyword.  It can be any acceptable item for `req-package-providers'
+;;   list.
+
 ;;   Also there is a `req-package-force' function which simulates plain old
 ;;   use-package behavior.
 
@@ -203,58 +202,7 @@
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 
-;; 1.9.2 DONE el-get support
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-04 Tue 17:49]
-;;           seems done and working
-
-
-;; 1.9.3 DONE use single documentation of package (DRY)
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-04 Tue 18:41]
-;;           regenerated documentation
-
-
-;; 1.9.4 DONE fix issue with elpa packages installation
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-05 Wed 00:15]
-;;           fixed. all packages are installing in req-package-finish loop
-
-;;   elpa packages remain uninstalled until loaded by use-package it will
-;;   be better to install them all at bootstrap launch
-
-
-;; 1.9.5 DONE el-get/elpa priority customization
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
-;;           fixed. can be done by `req-package-providers' list reordering
-
-;;   some users may needs customization for package sources if some package
-;;   is present at both elpa and el-get we need options to choose where to
-;;   get packages from
-
-
-;; 1.9.6 DONE custom software sources
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
-;;           fixed. can be done by adding new function to
-;;           `req-package-providers'
-
-;;   alongside with elpa and el-get support it will be useful to add your
-;;   own software sources For example - simple wget-based url loader:
-
-;;   ┌────
-;;   │ (add-recipe 'test-package "https://raw.githubusercontent.com/edvorg/req-package/master/req-package.el")
-;;   │ (req-package test-package)
-;;   └────
-
-
-;; 1.9.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 

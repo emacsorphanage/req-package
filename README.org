@@ -87,6 +87,9 @@
 
    However, there is no need for the =:ensure= keyword; req-package will add it automatically if needed.
 
+   For each package you can manually specify loader fuction by =:loader= keyword.
+   It can be any acceptable item for =req-package-providers= list.
+
    Also there is a =req-package-force= function which simulates plain old use-package behavior.
 
    More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
