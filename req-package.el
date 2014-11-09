@@ -48,12 +48,7 @@
 ;; .. 1.8 Contribute
 ;; .. 1.9 Things to be done
 ;; ..... 1.9.1 TODO take package dependencies from it's meta data
-;; ..... 1.9.2 DONE el-get support
-;; ..... 1.9.3 DONE use single documentation of package (DRY)
-;; ..... 1.9.4 DONE fix issue with elpa packages installation
-;; ..... 1.9.5 DONE el-get/elpa priority customization
-;; ..... 1.9.6 DONE custom software sources
-;; ..... 1.9.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; ..... 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
 ;; .. 1.10 Changelog
 ;; ..... 1.10.1 v0.8
 ;; ..... 1.10.2 v0.7
@@ -173,6 +168,10 @@
 ;;   However, there is no need for the `:ensure' keyword; req-package will
 ;;   add it automatically if needed.
 
+;;   For each package you can manually specify loader fuction by `:loader'
+;;   keyword.  It can be any acceptable item for `req-package-providers'
+;;   list.
+
 ;;   Also there is a `req-package-force' function which simulates plain old
 ;;   use-package behavior.
 
@@ -203,58 +202,7 @@
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 
-;; 1.9.2 DONE el-get support
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-04 Tue 17:49]
-;;           seems done and working
-
-
-;; 1.9.3 DONE use single documentation of package (DRY)
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-04 Tue 18:41]
-;;           regenerated documentation
-
-
-;; 1.9.4 DONE fix issue with elpa packages installation
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-05 Wed 00:15]
-;;           fixed. all packages are installing in req-package-finish loop
-
-;;   elpa packages remain uninstalled until loaded by use-package it will
-;;   be better to install them all at bootstrap launch
-
-
-;; 1.9.5 DONE el-get/elpa priority customization
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
-;;           fixed. can be done by `req-package-providers' list reordering
-
-;;   some users may needs customization for package sources if some package
-;;   is present at both elpa and el-get we need options to choose where to
-;;   get packages from
-
-
-;; 1.9.6 DONE custom software sources
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-;;   • CLOSING NOTE [2014-11-05 Wed 00:50]
-;;           fixed. can be done by adding new function to
-;;           `req-package-providers'
-
-;;   alongside with elpa and el-get support it will be useful to add your
-;;   own software sources For example - simple wget-based url loader:
-
-;;   ┌────
-;;   │ (add-recipe 'test-package "https://raw.githubusercontent.com/edvorg/req-package/master/req-package.el")
-;;   │ (req-package test-package)
-;;   └────
-
-
-;; 1.9.7 TODO el-get/elpa packages must be in priority over builtin ones
+;; 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 
@@ -379,24 +327,27 @@ one such function should
 (defvar req-package-visited (make-hash-table :size 200)
   "package symbol -> is it visited by cycle checktraversal")
 
+(defvar req-package-loaders (make-hash-table :size 200)
+  "package symbol -> loader function to load package by")
+
 (defvar req-package-cycles-count 0
   "number of cycles detected")
 
 (defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
   "you can check this for el get presense")
 
-(defun req-package-wrap-reqs (reqs)
+(defun req-package-wrap-args (reqs)
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
 
-(defun req-package-get-reqs (args acc)
+(defun req-package-extract-arg (key args acc)
   "extract dependencies from arg list"
   (if (null args)
       (list nil (reverse acc))
-    (if (eq (car args) :require)
-        (list (req-package-wrap-reqs (car (cdr args)))
+    (if (eq (car args) key)
+        (list (req-package-wrap-args (car (cdr args)))
               (append (reverse acc) (cddr args)))
-      (req-package-get-reqs (cdr args) (cons (car args) acc)))))
+      (req-package-extract-arg key (cdr args) (cons (car args) acc)))))
 
 (defun req-package-patch-config (name args)
   "patch :config section to invoke our callback"
@@ -437,9 +388,11 @@ one such function should
   "add package to target list"
   `(let* ((NAME ',name)
           (ARGS ',args)
-          (SPLIT (req-package-get-reqs ARGS nil))
-          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT))))
-          (REQS (car SPLIT)))
+          (SPLIT1 (req-package-extract-arg :require ARGS nil))
+          (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
+          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
+          (REQS (car SPLIT1))
+          (LOADER (car SPLIT2)))
 
      (req-package--log-debug "package requested: %s" NAME)
 
@@ -450,6 +403,7 @@ one such function should
            (puthash req (cons NAME CURREQREV) req-package-reqs-reversed)
            (puthash req (gethash req req-package-ranks 0) req-package-ranks)
            (puthash NAME (+ CURRANK 1) req-package-ranks))))
+     (puthash NAME LOADER req-package-loaders)
      (puthash NAME (append (req-package-gen-eval NAME) USEPACKARGS) req-package-evals)
      (puthash NAME (gethash NAME req-package-ranks 0) req-package-ranks)
      (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
@@ -457,11 +411,16 @@ one such function should
 (defmacro req-package-force (name &rest args)
   "immediatly load some package"
   `(let* ((NAME ',name)
-          (ARGS ',args))
+          (ARGS ',args)
+          (SPLIT1 (req-package-extract-arg :require ARGS nil))
+          (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
+          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
+          (REQS (car SPLIT1))
+          (LOADER (car SPLIT2)))
 
      (req-package--log-debug "package force-requested: %s" NAME)
-     (req-package-prepare NAME)
-     (eval (append (req-package-gen-eval NAME) ARGS))))
+     (req-package-prepare NAME LOADER)
+     (eval (append (req-package-gen-eval NAME) USEPACKARGS))))
 
 (defun req-package-try-elpa (package)
   (let* ((ARCHIVES (if (null package-archive-contents)
@@ -485,11 +444,12 @@ one such function should
           INSTALLED))
     nil))
 
-(defun req-package-prepare (package)
+(defun req-package-prepare (package &optional loader)
   "prepare package - install if it is present"
-  (-any? (lambda (elem)
-           (funcall elem package))
-         req-package-providers))
+  (if (not (and loader (funcall (car loader) package)))
+      (-any? (lambda (elem)
+               (funcall elem package))
+             req-package-providers)))
 
 (defun req-package-gen-eval (package)
   "generate eval for package and install it if present at el-get/elpa"
@@ -522,6 +482,7 @@ one such function should
   ;;            (if (eq (gethash key req-package-ranks) -1)
   ;;                (progn (remhash key req-package-ranks)
   ;;                       (remhash key req-package-evals)
+  ;;                       (remhash key req-package-loaders)
   ;;                       (remhash key req-package-reqs-reversed))))
   ;;          req-package-ranks)
 
@@ -534,7 +495,7 @@ one such function should
                           (hash-table-count req-package-ranks))
 
   (maphash (lambda (key value)
-             (req-package-prepare key)
+             (req-package-prepare key (gethash key req-package-loaders nil))
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
                         (req-package-eval key))))
