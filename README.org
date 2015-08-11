@@ -2,9 +2,27 @@
 
 ** Description
 
-   req-package is a macro wrapper on top of [[https://github.com/jwiegley/use-package][use-package]].
-   It's goal is to simplify package dependencies management,
-   when using use-package for your .emacs.
+   req-package solves one single problem - make order of package configurations
+   in your init.el right without continuous reordering your code while still
+   providing ambrosian [[https://github.com/jwiegley/use-package][use-package]] goodness.
+   It makes your .emacs.d code more strict, modular and error prone.
+   You can look here, how I divided my code in separate modules
+   and how simple it looks https://github.com/edvorg/emacs-configs/tree/master/init.d .
+
+   Remember, how often you tackled into problem, when you need to require one package,
+   do some configuration, then the same with second and so on. Sometimes it becomes too complex.
+   Especially in cases when one package have more than one dependency.
+   You can draw a graph of dependencies in your configuration, and, I'm sure, it's complex.
+   req-package creates this graph for you and makes a correct traverse on it.
+   The syntax is almost the same as with use-package, but it provides a few additional keywords:
+   1) :require - a parameter to specify dependencies
+   2) :loader - an optional parameter to specify where to get package (el-get, elpa, etc.)
+
+   Interesting thing is that packages are installed automatically once req-package-finish function is executed.
+   So there is no need for things like cask or save-packages.
+   You just write a configuration with packages you need and they will be there.
+   req-package will try to use elpa, el-get or any package system provided by you
+   to find and install your packages.
 
 ** Usage
 

@@ -26,16 +26,8 @@
 
 ;;; Commentary:
 
-;; 							━━━━━━━━━━━━━━━━
-;; 							  REQ-PACKAGE
-
-
-;; 							 Edward Knyshov
-;; 							━━━━━━━━━━━━━━━━
-
-
 ;; Table of Contents
-;; ─────────────────
+;; _________________
 
 ;; 1 req-package
 ;; .. 1.1 Description
@@ -63,80 +55,103 @@
 
 
 ;; 1 req-package
-;; ═════════════
+;; =============
 
 ;; 1.1 Description
-;; ───────────────
+;; ~~~~~~~~~~~~~~~
 
-;;   req-package is a macro wrapper on top of [use-package].  It's goal is
-;;   to simplify package dependencies management, when using use-package
-;;   for your .emacs.
+;;   req-package solves one single problem - make order of package
+;;   configurations in your init.el right without continuous reordering
+;;   your code while still providing ambrosian [use-package] goodness.  It
+;;   makes your .emacs.d code more strict, modular and error prone.  You
+;;   can look here, how I divided my code in separate modules and how
+;;   simple it looks
+;;   [https://github.com/edvorg/emacs-configs/tree/master/init.d] .
+
+;;   Remember, how often you tackled into problem, when you need to require
+;;   one package, do some configuration, then the same with second and so
+;;   on. Sometimes it becomes too complex.  Especially in cases when one
+;;   package have more than one dependency.  You can draw a graph of
+;;   dependencies in your configuration, and, I'm sure, it's complex.
+;;   req-package creates this graph for you and makes a correct traverse on
+;;   it.  The syntax is almost the same as with use-package, but it
+;;   provides a few additional keywords:
+;;   1) :require - a parameter to specify dependencies
+;;   2) :loader - an optional parameter to specify where to get package
+;;      (el-get, elpa, etc.)
+
+;;   Interesting thing is that packages are installed automatically once
+;;   req-package-finish function is executed.  So there is no need for
+;;   things like cask or save-packages.  You just write a configuration
+;;   with packages you need and they will be there.  req-package will try
+;;   to use elpa, el-get or any package system provided by you to find and
+;;   install your packages.
 
 
 ;;   [use-package] https://github.com/jwiegley/use-package
 
 
 ;; 1.2 Usage
-;; ─────────
+;; ~~~~~~~~~
 
 ;;   Load req-package:
 
-;;   ┌────
-;;   │ (require 'req-package)
-;;   └────
+;;   ,----
+;;   | (require 'req-package)
+;;   `----
 
 ;;   Define required packages with dependencies using `:require' like this:
 
-;;   ┌────
-;;   │ (req-package dired) ;; you can omit this empty requirement because of dired-single
-;;   │
-;;   │ (req-package dired-single
-;;   │   :require dired
-;;   │   :config (...))
-;;   │
-;;   │ (req-package lua-mode
-;;   │   :config (...))
-;;   │
-;;   │ (req-package flymake)
-;;   │
-;;   │ (req-package flymake-lua
-;;   │   :require (flymake lua-mode)
-;;   │   :config (...))
-;;   └────
+;;   ,----
+;;   | (req-package dired) ;; you can omit this empty requirement because of dired-single
+;;   |
+;;   | (req-package dired-single
+;;   |   :require dired
+;;   |   :config (...))
+;;   |
+;;   | (req-package lua-mode
+;;   |   :config (...))
+;;   |
+;;   | (req-package flymake)
+;;   |
+;;   | (req-package flymake-lua
+;;   |   :require (flymake lua-mode)
+;;   |   :config (...))
+;;   `----
 
 ;;   To start loading packages in right order:
 
-;;   ┌────
-;;   │ (req-package-finish)
-;;   └────
+;;   ,----
+;;   | (req-package-finish)
+;;   `----
 
 
 ;; 1.3 El Get
-;; ──────────
+;; ~~~~~~~~~~
 
 ;;   There is another benefit over use-package - `el-get' support.  No more
 ;;   thinking about sources for your packages.  Just install and configure
 ;;   your el-get.  Here is example:
 
-;;   ┌────
-;;   │ (require 'req-package'')
-;;   │
-;;   │ (req-package-force el-get
-;;   │   :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-;;   │ 			   (el-get 'sync)))
-;;   │
-;;   │ (req-package gotham-theme
-;;   │   :config (print "gotham theme is here and installed from el-get"))
-;;   │
-;;   │ (req-package-finish)
-;;   └────
+;;   ,----
+;;   | (require 'req-package'')
+;;   |
+;;   | (req-package-force el-get
+;;   |   :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;   |                (el-get 'sync)))
+;;   |
+;;   | (req-package gotham-theme
+;;   |   :config (print "gotham theme is here and installed from el-get"))
+;;   |
+;;   | (req-package-finish)
+;;   `----
 
 ;;   Also, of course, there could be dependencies between el-get and elpa
 ;;   packages
 
 
 ;; 1.4 More?
-;; ─────────
+;; ~~~~~~~~~
 
 ;;   You can always extend list of package providers or change priorities
 ;;   if you want.  in which your packages are being installed.  It can be
@@ -145,15 +160,15 @@
 
 ;;   Here are some rules for one such function:
 
-;;   • check package presence at corresponding repo
-;;   • check whether it installed or not
-;;   • install that package if it is available and not installed
-;;   • return nonnil only if package is installed already or successfully
+;;   - check package presence at corresponding repo
+;;   - check whether it installed or not
+;;   - install that package if it is available and not installed
+;;   - return nonnil only if package is installed already or successfully
 ;;     installed by this function"
 
 
 ;; 1.5 Migrate from use-package
-;; ────────────────────────────
+;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ;;   Just replace all `(use-package ...)' with `(req-package [:require
 ;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
@@ -161,7 +176,7 @@
 
 
 ;; 1.6 Note
-;; ────────
+;; ~~~~~~~~
 
 ;;   All use-package parameters are supported, see use-package manual.  for
 ;;   additional info.
@@ -181,7 +196,7 @@
 
 
 ;; 1.7 Logging
-;; ───────────
+;; ~~~~~~~~~~~
 
 ;;   You cand use `req-package--log-open-log' to see, what is happening
 ;;   with your configuration.  You can choose log level in `req-package'
@@ -190,99 +205,99 @@
 
 
 ;; 1.8 Contribute
-;; ──────────────
+;; ~~~~~~~~~~~~~~
 
 ;;   Please, commit and pull-request your changes to `develop' branch.
 ;;   Master is used for automatic repo package builds by melpa's travis-ci.
 
 
 ;; 1.9 Things to be done
-;; ─────────────────────
+;; ~~~~~~~~~~~~~~~~~~~~~
 
 ;; 1.9.1 TODO take package dependencies from it's meta data
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; --------------------------------------------------------
 
 
 ;; 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; ---------------------------------------------------------------------
 
 
 ;; 1.10 Changelog
-;; ──────────────
+;; ~~~~~~~~~~~~~~
 
 ;; 1.10.1 v0.9
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; -----------
 
-;;   • `:loader' keyword support
+;;   - `:loader' keyword support
 
 
 ;; 1.10.2 v0.8
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; -----------
 
-;;   • bugfixes
+;;   - bugfixes
 
 
 ;; 1.10.3 v0.7
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; -----------
 
-;;   • fixed some issues with packages installation. all packages will be
+;;   - fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
-;;   • custom package providers support by `req-package-providers'
-;;   • priority feature for cross provider packages loading. you can
+;;   - custom package providers support by `req-package-providers'
+;;   - priority feature for cross provider packages loading. you can
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
 ;; 1.10.4 v0.6
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; -----------
 
-;;   • `el-get' support
+;;   - `el-get' support
 
 
 ;; 1.10.5 v0.5
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; -----------
 
-;;   • Major system refactoring.
-;;   • Fixed bugs with defered loading.
-;;   • Significant performance optimization.
-;;   • `max-specpdl-size', `max-lisp-eval-depth' issues completely solved.
-;;   • Flexible `:require' keyword parsing.
+;;   - Major system refactoring.
+;;   - Fixed bugs with defered loading.
+;;   - Significant performance optimization.
+;;   - `max-specpdl-size', `max-lisp-eval-depth' issues completely solved.
+;;   - Flexible `:require' keyword parsing.
 
 
 ;; 1.10.6 v0.4.2
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; -------------
 
-;;   • Bug fixes.
+;;   - Bug fixes.
 
 
 ;; 1.10.7 v0.4.1
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; -------------
 
-;;   • Various tweaks and bug fixes.
+;;   - Various tweaks and bug fixes.
 
 
 ;; 1.10.8 v0.4-all-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; ----------------------
 
-;;   • All cycles of your dependencies will be printed now.
-;;   • Also there are more handy log messages and some bug fixes.
+;;   - All cycles of your dependencies will be printed now.
+;;   - Also there are more handy log messages and some bug fixes.
 
 
 ;; 1.10.9 v0.3-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; ------------------
 
-;;   • There are nice error messages about cycled dependencies now.
-;;   • Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.
-;;   • It means there is a cycle around `pkg1'.
+;;   - There are nice error messages about cycled dependencies now.
+;;   - Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.
+;;   - It means there is a cycle around `pkg1'.
 
 
 ;; 1.10.10 v0.2-auto-fetch
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; -----------------------
 
-;;   • There is no need of explicit `:ensure' in your code now.
-;;   • When you req-package it adds `:ensure' if package is available in
+;;   - There is no need of explicit `:ensure' in your code now.
+;;   - When you req-package it adds `:ensure' if package is available in
 ;;     your repos.
-;;   • Also package deps `:ensure''d automatically too.
-;;   • Just write `(req-package pkg1 :require pkg2)' and all you need will
+;;   - Also package deps `:ensure''d automatically too.
+;;   - Just write `(req-package pkg1 :require pkg2)' and all you need will
 ;;     be installed.
 
 ;;; Code:
