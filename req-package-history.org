@@ -37,3 +37,12 @@
     (add-recipe 'test-package "https://raw.githubusercontent.com/edvorg/req-package/master/req-package.el")
     (req-package test-package)
     #+END_SRC
+
+*** TODO fix dependencies betweeb many req-package-finish calls
+    this code snipped doesn't work now
+    #+BEGIN_SRC emacs-lisp
+    (req-package foo)
+    (req-package-finish)
+    (req-package bar :require foo)
+    (req-package-finish)
+    #+END_SRC
