@@ -133,6 +133,10 @@
 
 *** v0.9
 
+    - proper errors handling. see `req-package--log-open-log` for messages
+
+*** v0.9
+
     - =:loader= keyword support
 
 *** v0.8

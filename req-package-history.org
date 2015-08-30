@@ -46,3 +46,10 @@
     (req-package bar :require foo)
     (req-package-finish)
     #+END_SRC
+
+*** DONE handle errors
+    CLOSED: [2015-08-30 Sun 19:40]
+    - CLOSING NOTE [2015-08-30 Sun 19:40] \\
+      all errors from non deferred code are handled now
+
+*** TODO handle deferred code errors from =use-package=

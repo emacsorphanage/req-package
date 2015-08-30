@@ -378,7 +378,7 @@ one such function should
     (if (eq (car args) :config)
         (cons ':config
               (cons (list 'progn
-                          (car (cdr args))
+                          (list 'req-package-handle-loading (list 'quote name) (list 'lambda nil (car (cdr args))))
                           (list 'req-package-loaded (list 'quote name)))
                     (cddr args)))
       (cons (car args) (req-package-patch-config name (cdr args))))))
@@ -389,8 +389,9 @@ one such function should
                         req-package-evals
                         (append (req-package-gen-eval name)
                                 (req-package-patch-config name
-                                                          nil)))))
-    (eval EVAL)))
+                                                          nil))))
+         (NAME name))
+    (req-package-handle-loading NAME (lambda () (eval EVAL)))))
 
 (defun req-package-loaded (name)
   "callback for dependency graph load continuation"
@@ -438,11 +439,18 @@ one such function should
           (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
           (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
           (REQS (car SPLIT1))
-          (LOADER (car SPLIT2)))
-
+          (LOADER (car SPLIT2))
+          (EVAL (append (req-package-gen-eval NAME) USEPACKARGS)))
      (req-package--log-debug "package force-requested: %s" NAME)
-     (req-package-prepare NAME LOADER)
-     (eval (append (req-package-gen-eval NAME) USEPACKARGS))))
+     (req-package-handle-loading NAME
+                                 (lambda ()
+                                   (req-package-prepare NAME LOADER)
+                                   (eval EVAL)))))
+
+(defun req-package-handle-loading (name f)
+  (condition-case-unless-debug e
+      (funcall f)
+    (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
 
 (defun req-package-try-elpa (package)
   (let* ((ARCHIVES (if (null package-archive-contents)
