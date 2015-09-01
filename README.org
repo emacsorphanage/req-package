@@ -131,7 +131,7 @@
 
 ** Changelog
 
-*** v0.9
+*** v1.0
 
     - proper errors handling. see `req-package--log-open-log` for messages
 
