@@ -323,16 +323,6 @@
   "minimal log level. can be 'fatal, 'error, 'warn, 'info, 'debug, 'trace"
   :group 'req-package)
 
-(defcustom req-package-detect-cycles t
-  "detect dependency cycles"
-  :group 'req-package
-  :type 'boolean)
-
-(defcustom req-package-error-on-cycle t
-  "throw error if cycle is detected"
-  :group 'req-package
-  :type 'boolean)
-
 (defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
   "list of functions to prepare packages installation
 one such function should
@@ -352,9 +342,6 @@ one such function should
 
 (defvar req-package-evals (make-hash-table :size 200)
   "package symbol -> loading code prepared for evaluation")
-
-(defvar req-package-visited (make-hash-table :size 200)
-  "package symbol -> is it visited by cycle checktraversal")
 
 (defvar req-package-loaders (make-hash-table :size 200)
   "package symbol -> loader function to load package by")
@@ -492,26 +479,25 @@ one such function should
   "generate eval for package and install it if present at el-get/elpa"
   (list 'use-package package))
 
-(defun req-package-detect-cycles-traverse-impl (cur path)
+(defun req-package-detect-cycles-traverse-impl (visited cur path)
   "traverse for cycles look up implementation"
-  (puthash cur t req-package-visited)
+  (puthash cur t visited)
   (if (not (-contains? path cur))
       (-each (gethash cur req-package-reqs-reversed nil)
         (lambda (dependent)
-          (req-package-detect-cycles-traverse-impl dependent (cons cur path))))
+          (req-package-detect-cycles-traverse-impl visited dependent (cons cur path))))
     (progn (setq req-package-cycles-count (+ req-package-cycles-count 1))
            (req-package--log-error "cycle detected: %s" (cons cur path)))))
 
-(defun req-package-detect-cycles-traverse ()
+(defun req-package-detect-cycles-traverse (visited)
   "traverse for cycles look up"
   (maphash (lambda (key value)
-             (if (null (gethash key req-package-visited nil))
-                 (req-package-detect-cycles-traverse-impl key nil)))
+             (if (null (gethash key visited nil))
+                 (req-package-detect-cycles-traverse-impl visited key nil)))
            req-package-reqs-reversed)
-
-  (if (and req-package-error-on-cycle (not (eq 0 req-package-cycles-count)))
-      (error "%s cycle(s) detected. see M-x req-package--log-open-log"
-             req-package-cycles-count)))
+  (if (not (eq 0 req-package-cycles-count))
+      (message "%s cycle(s) detected. see M-x req-package--log-open-log"
+               req-package-cycles-count)))
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
@@ -523,10 +509,8 @@ one such function should
   ;;                       (remhash key req-package-reqs-reversed))))
   ;;          req-package-ranks)
 
-  (if req-package-detect-cycles
-      (progn (clrhash req-package-visited)
-             (setq req-package-cycles-count 0)
-             (req-package-detect-cycles-traverse)))
+  (progn (setq req-package-cycles-count 0)
+         (req-package-detect-cycles-traverse (make-hash-table :size 200)))
 
   (req-package--log-debug "package requests finished: %s packages are waiting"
                           (hash-table-count req-package-ranks))
