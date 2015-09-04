@@ -65,7 +65,7 @@
    Here is example:
 
    #+BEGIN_SRC emacs-lisp
-    (require 'req-package'')
+    (require 'req-package)
 
     (req-package-force el-get
       :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
@@ -105,7 +105,7 @@
 
    However, there is no need for the =:ensure= keyword; req-package will add it automatically if needed.
 
-   For each package you can manually specify loader fuction by =:loader= keyword.
+   For each package you can manually specify loader function by =:loader= keyword.
    It can be any acceptable item for =req-package-providers= list.
 
    Also there is a =req-package-force= function which simulates plain old use-package behavior.
@@ -114,7 +114,7 @@
 
 ** Logging
 
-   You cand use =req-package--log-open-log= to see, what is happening with your configuration.
+   You can use =req-package--log-open-log= to see, what is happening with your configuration.
    You can choose log level in =req-package= group by =req-package-log-level= custom.
    These log levels are supported: =fatal=, =error=, =warn=, =info=, =debug=, =trace=.
 
