@@ -5,7 +5,7 @@
    req-package solves one single problem - make order of package configurations
    in your init.el right without continuous reordering your code while still
    providing ambrosian [[https://github.com/jwiegley/use-package][use-package]] goodness.
-   It makes your .emacs.d code more strict, modular and error prone.
+   It makes your .emacs.d code more strict and modular, and less error prone.
    You can look here, how I divided my code in separate modules
    and how simple it looks https://github.com/edvorg/emacs-configs/tree/master/init.d .
 
