@@ -1,9 +1,10 @@
 * req-package
 
-  [[http://www.gnu.org/licenses/gpl-3.0.txt][file:https://img.shields.io/badge/license-GPL_3-green.svg]]
-  [[http://melpa.org/#/req-package][file:http://melpa.org/packages/req-package-badge.svg]]
-  [[http://stable.melpa.org/#/req-package][file:http://stable.melpa.org/packages/req-package-badge.svg]]
+  [[http://www.gnu.org/licenses/gpl-3.0.txt][https://img.shields.io/badge/license-GPL_3-green.svg]]
+  [[http://melpa.org/#/req-package][http://melpa.org/packages/req-package-badge.svg]]
+  [[http://stable.melpa.org/#/req-package][http://stable.melpa.org/packages/req-package-badge.svg]]
   [[https://travis-ci.org/edvorg/req-package][https://travis-ci.org/edvorg/req-package.svg]]
+  [[https://coveralls.io/github/edvorg/req-package?branch=develop][https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
 
 ** Description
 
