@@ -320,7 +320,7 @@
   :group 'emacs)
 
 (defcustom req-package-log-level 'warn
-  "minimal log level. can be 'fatal, 'error, 'warn, 'info, 'debug, 'trace"
+  "minimal log level. may be any level supported by log4e"
   :group 'req-package)
 
 (defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
@@ -378,15 +378,16 @@ one such function should
 
 (defun req-package-patch-config (name args)
   "patch :config section to invoke our callback"
-  (if (null args)
-      (list ':config (list 'req-package-loaded (list 'quote name)))
-    (if (eq (car args) :config)
-        (cons ':config
-              (cons (list 'progn
-                          (list 'req-package-handle-loading (list 'quote name) (list 'lambda nil (car (cdr args))))
-                          (list 'req-package-loaded (list 'quote name)))
-                    (cddr args)))
-      (cons (car args) (req-package-patch-config name (cdr args))))))
+  (let ((callback (list 'req-package-loaded (list 'quote name))))
+    (if (null args)
+        (list ':config callback)
+      (if (eq (car args) :config)
+          (cons ':config
+                (cons (list 'progn
+                            (list 'req-package-handle-loading (list 'quote name) (list 'lambda () (car (cdr args))))
+                            callback)
+                      (cddr args)))
+        (cons (car args) (req-package-patch-config name (cdr args)))))))
 
 (defun req-package-eval (name)
   "evaluate package request"
