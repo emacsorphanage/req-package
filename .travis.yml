@@ -16,4 +16,5 @@ before_install:
 install:
   - cask install
 script:
-  - make compile test
+  - cask exec ert-runner
+  - cask exec ecukes
