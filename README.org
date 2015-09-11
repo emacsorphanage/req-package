@@ -134,6 +134,7 @@
 *** v1.0
 
     - proper errors handling. see `req-package--log-open-log` for messages
+    - smart add-hook function which invokes function if mode is loaded
 
 *** v0.9
 

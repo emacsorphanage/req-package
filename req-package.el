@@ -352,6 +352,17 @@ one such function should
 (defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
   "you can check this for el get presense")
 
+(defun req-package-add-hook-execute-impl (m h f)
+  "add function F to hook H and execute it if mode M is already activated"
+  (if (or (assoc m minor-mode-list) (equal major-mode m))
+      (funcall f))
+  (add-hook h f))
+
+(defun req-package-add-hook-execute (m f)
+  "add function F to mode M and execute it if already activated"
+  (let ((h (intern (concat (symbol-name m) "-hook"))))
+    (req-package-add-hook-execute-impl m h f)))
+
 (defun req-package-wrap-args (reqs)
   "listify passed dependencies"
   (if (atom reqs) (list reqs) reqs))
@@ -524,6 +535,8 @@ one such function should
 
 (put 'req-package 'lisp-indent-function 'defun)
 (put 'req-package-force 'lisp-indent-function 'defun)
+(put 'req-package-add-hook-execute 'lisp-indent-function 'defun)
+(put 'req-package-add-hook-execute-impl 'lisp-indent-function 'defun)
 
 (defconst req-package-font-lock-keywords
   '(("(\\(req-package\\|req-package-force\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
