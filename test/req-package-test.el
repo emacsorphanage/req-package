@@ -17,4 +17,7 @@
   (should (equal '(:init 5 :config (req-package-loaded (quote foo)))
                  (req-package-patch-config 'foo '(:init 5)))))
 
+(ert-deftest req-package-gen-eval-test ()
+  (should (equal '(use-package bar) (req-package-gen-eval 'bar))))
+
 (provide 'req-package-test)
