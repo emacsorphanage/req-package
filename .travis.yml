@@ -17,4 +17,3 @@ install:
   - cask install
 script:
   - cask exec ert-runner
-  - cask exec ecukes
