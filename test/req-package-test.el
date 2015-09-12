@@ -48,6 +48,17 @@
   (expect "joker"
     (with-mock
       (stub gethash => "joker")
-      (req-package-eval 'evil))))
+      (req-package-eval 'evil)))
+  (desc "req-package-add-hook-execute should return hook value if invoked")
+  (expect "loaded"
+    (with-mock
+      (stub add-hook)
+      (mock (req-package-mode-loaded-p 'supermode) => t)
+      (req-package-add-hook-execute-impl 'supermode 'supermode-hook (lambda () "loaded"))))
+  (expect nil
+    (with-mock
+      (stub add-hook)
+      (mock (req-package-mode-loaded-p 'supermode) => nil)
+      (req-package-add-hook-execute 'supermode (lambda () "loaded")))))
 
 (provide 'req-package-test)

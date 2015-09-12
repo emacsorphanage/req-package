@@ -365,11 +365,15 @@ one such function should
 (defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
   "you can check this for el get presense")
 
+(defun req-package-mode-loaded-p (mode)
+  "return true if MODE is loaded now"
+  (or (assoc mode minor-mode-list) (equal major-mode mode)))
+
 (defun req-package-add-hook-execute-impl (m h f)
   "add function F to hook H and execute it if mode M is already activated"
-  (if (or (assoc m minor-mode-list) (equal major-mode m))
-      (funcall f))
-  (add-hook h f))
+  (add-hook h f)
+  (if (req-package-mode-loaded-p m)
+      (funcall f)))
 
 (defun req-package-add-hook-execute (m f)
   "add function F to mode M and execute it if already activated"
