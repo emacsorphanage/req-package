@@ -310,10 +310,23 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-(require 'use-package)
 (require 'package)
-(require 'dash)
-(require 'log4e)
+
+(defun req-package-bootstrap (package)
+  "refresh package archives, check package presence and install if it's not installed"
+  (if (null (require package nil t))
+      (progn (let* ((ARCHIVES (if (null package-archive-contents)
+                                  (progn (package-refresh-contents)
+                                         package-archive-contents)
+                                package-archive-contents))
+                    (AVAIL (assoc package ARCHIVES)))
+               (if AVAIL
+                   (package-install package)))
+             (require package))))
+
+(req-package-bootstrap 'use-package)
+(req-package-bootstrap 'dash)
+(req-package-bootstrap 'log4e)
 
 (defgroup req-package nil
   "A package loading system"
