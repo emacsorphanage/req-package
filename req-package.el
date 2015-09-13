@@ -321,12 +321,15 @@
                                 package-archive-contents))
                     (AVAIL (assoc package ARCHIVES)))
                (if AVAIL
-                   (package-install package)))
-             (require package))))
+                   (package-install package))))))
 
 (req-package-bootstrap 'use-package)
 (req-package-bootstrap 'dash)
 (req-package-bootstrap 'log4e)
+
+(require 'use-package)
+(require 'dash)
+(require 'log4e)
 
 (defgroup req-package nil
   "A package loading system"
