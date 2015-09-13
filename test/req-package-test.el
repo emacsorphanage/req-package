@@ -1,6 +1,3 @@
-(when (require 'undercover nil t)
-  (undercover "req-package.el"))
-
 (require 'req-package)
 (require 'ert)
 (require 'ert-expectations)
