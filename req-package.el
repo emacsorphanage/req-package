@@ -348,6 +348,7 @@
 (require 'log4e)
 (require 'ht)
 (require 'req-package-providers)
+(require 'req-package-hooks)
 
 (defgroup req-package nil
   "A package loading system"
@@ -371,21 +372,6 @@
 
 (defvar req-package-cycles-count 0
   "Number of cycles detected.")
-
-(defun req-package-mode-loaded-p (mode)
-  "Return true if MODE is loaded now."
-  (or (assoc mode minor-mode-list) (equal major-mode mode)))
-
-(defun req-package-add-hook-execute-impl (m h f)
-  "Add function F to hook H and execute it if mode M is already activated"
-  (add-hook h f)
-  (if (req-package-mode-loaded-p m)
-      (funcall f)))
-
-(defun req-package-add-hook-execute (m f)
-  "Add function F to mode M and execute it if already activated"
-  (let ((h (intern (concat (symbol-name m) "-hook"))))
-    (req-package-add-hook-execute-impl m h f)))
 
 (defun req-package-wrap-args (reqs)
   "Listify dependencies passed passed in REQS."
