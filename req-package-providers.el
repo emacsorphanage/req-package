@@ -1,15 +1,17 @@
-;;; package --- summary:
+;;; req-package-providers.el --- summary:
 ;;; commentary:
 ;;; code:
 
 (require 'ht)
 (require 'dash)
 
-(defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
+(defconst req-package-providers-el-get-present
+  (if (require 'el-get nil t) t nil)
   "You can check this for el get presense.")
 
-(defcustom req-package-providers-map (ht ('elpa '(req-package-install-elpa req-package-present-elpa))
-                                         ('el-get '(req-package-install-el-get req-package-present-el-get)))
+(defcustom req-package-providers-map
+  (ht ('elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
+      ('el-get '(req-package-providers-install-el-get req-package-providers-present-el-get)))
   "Providers map provider -> (installer avaible-checker)."
   :group 'req-package
   :type 'list)
@@ -20,11 +22,11 @@
   :group 'req-package
   :type 'list)
 
-(defun req-package-get-providers ()
+(defun req-package-providers-get ()
   "Just get package providers list."
   req-package-providers-map)
 
-(defun req-package-present-elpa (package)
+(defun req-package-providers-present-elpa (package)
   "Return t if PACKAGE is available for installation."
   (let* ((ARCHIVES (if (null package-archive-contents)
                        (progn (package-refresh-contents)
@@ -35,36 +37,36 @@
                        ARCHIVES)))
     AVAIL))
 
-(defun req-package-install-elpa (package)
+(defun req-package-providers-install-elpa (package)
   "Install PACKAGE with elpa."
   (let* ((INSTALLED (package-installed-p package)))
     (if (not INSTALLED)
         (if (package-install package) t nil)
       INSTALLED)))
 
-(defun req-package-present-el-get (package)
+(defun req-package-providers-present-el-get (package)
   "Return t if PACKAGE is available for installation."
-  (if req-package-el-get-present
+  (if req-package-providers-el-get-present
       (let* ((AVAIL (if (el-get-recipe-filename package) t nil)))
         AVAIL)
     nil))
 
-(defun req-package-install-el-get (package)
+(defun req-package-providers-install-el-get (package)
   "Install PACKAGE with el-get."
-  (if req-package-el-get-present
+  (if req-package-providers-el-get-present
       (let* ((INSTALLED (el-get-package-installed-p package)))
         (if (not INSTALLED)
             (or (el-get 'sync package) t) ;; TODO check for success
           INSTALLED))
     nil))
 
-(defun req-package-prepare (package &optional loader)
+(defun req-package-providers-prepare (package &optional loader)
   "Prepare PACKAGE - install if it is present using LOADER if specified."
   (req-package--log-debug (format "installing package %s" package))
   (condition-case e
       (if (functionp loader)
           (funcall loader package)
-        (let* ((providers (req-package-get-providers))
+        (let* ((providers (req-package-providers-get))
                (provider (if (and loader (symbolp loader))
                              loader
                            (-first (lambda (elem)

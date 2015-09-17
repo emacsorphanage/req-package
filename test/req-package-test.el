@@ -25,13 +25,13 @@
               (equal before after)))
   (desc "with-debug-on-error should return function call value")
   (expect "foo" (with-debug-on-error nil (lambda () "foo")))
-  (desc "req-package-wrap-args should wrap atom in list")
-  (expect '(1) (req-package-wrap-args 1))
-  (desc "req-package-wrap-args should do nothing with list")
-  (expect '(1) (req-package-wrap-args '(1)))
-  (desc "req-package-extract-arg should extract value specified after keyword")
-  (expect '(6) (car (req-package-extract-arg :init '(:config 5 :init 6) nil)))
-  (expect '(5) (car (req-package-extract-arg :config'(:config 5 :init 6) nil)))
+  (desc "req-package-args-wrap should wrap atom in list")
+  (expect '(1) (req-package-args-wrap 1))
+  (desc "req-package-args-wrap should do nothing with list")
+  (expect '(1) (req-package-args-wrap '(1)))
+  (desc "req-package-args-extract-arg should extract value specified after keyword")
+  (expect '(6) (car (req-package-args-extract-arg :init '(:config 5 :init 6) nil)))
+  (expect '(5) (car (req-package-args-extract-arg :config'(:config 5 :init 6) nil)))
   (desc "req-package-patch-config should include req-package-loaded callback in :config")
   (expect '(:config (req-package-loaded (quote foo)))
     (req-package-patch-config 'foo '()))
@@ -54,35 +54,35 @@
     (with-mock
       (stub gethash => "joker")
       (req-package-eval 'evil)))
-  (desc "req-package-add-hook-execute should return hook value if invoked")
+  (desc "req-package-hooks-add-execute should return hook value if invoked")
   (expect "loaded"
     (with-mock
       (stub add-hook)
-      (mock (req-package-mode-loaded-p 'supermode) => t)
-      (req-package-add-hook-execute-impl 'supermode 'supermode-hook (lambda () "loaded"))))
+      (mock (req-package-hooks-mode-loaded-p 'supermode) => t)
+      (req-package-hooks-add-execute-impl 'supermode 'supermode-hook (lambda () "loaded"))))
   (expect nil
     (with-mock
       (stub add-hook)
-      (mock (req-package-mode-loaded-p 'supermode) => nil)
-      (req-package-add-hook-execute 'supermode (lambda () "loaded"))))
-  (desc "req-package-get-providers is just a getter for req-package-providers-map")
-  (expect req-package-providers-map (req-package-get-providers))
-  (desc "req-package-prepare should install package with recommended provider")
+      (mock (req-package-hooks-mode-loaded-p 'supermode) => nil)
+      (req-package-hooks-add-execute 'supermode (lambda () "loaded"))))
+  (desc "req-package-providers-get is just a getter for req-package-providers-map")
+  (expect req-package-providers-map (req-package-providers-get))
+  (desc "req-package-providers-prepare should install package with recommended provider")
   (expect "package-1 installed"
-    (req-package-prepare 'package-1 (lambda (p) (format "%s installed" p))))
+    (req-package-providers-prepare 'package-1 (lambda (p) (format "%s installed" p))))
   (expect "package-2 installed"
     (with-mock
-      (stub req-package-get-providers => (ht ('foo-provider (list (lambda (p) (format "%s installed" p))))))
-      (req-package-prepare 'package-2 'foo-provider)))
-  (desc "req-package-prepare should install package with one of req-package-providers")
+      (stub req-package-providers-get => (ht ('foo-provider (list (lambda (p) (format "%s installed" p))))))
+      (req-package-providers-prepare 'package-2 'foo-provider)))
+  (desc "req-package-providers-prepare should install package with one of req-package-providers")
   (expect "package-3 installed"
     (with-mock
-      (stub req-package-get-providers => (ht ('foo-provider (list (lambda (p) (format "%s installed" p)) (lambda (p) t)))))
-      (req-package-prepare 'package-3)))
-  (desc "req-package-prepare should return nil if no providers found")
+      (stub req-package-providers-get => (ht ('foo-provider (list (lambda (p) (format "%s installed" p)) (lambda (p) t)))))
+      (req-package-providers-prepare 'package-3)))
+  (desc "req-package-providers-prepare should return nil if no providers found")
   (expect nil
     (with-mock
-      (stub req-package-get-providers => (ht-create))
-      (req-package-prepare 'package-4))))
+      (stub req-package-providers-get => (ht-create))
+      (req-package-providers-prepare 'package-4))))
 
 (provide 'req-package-test)

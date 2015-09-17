@@ -391,7 +391,7 @@
                         req-package-evals
                         (append (req-package-gen-eval name)
                                 (req-package-patch-config name
-                                               nil))))
+                                                          nil))))
          (NAME name))
     (req-package-handle-loading NAME (lambda () (eval EVAL)))))
 
@@ -413,8 +413,8 @@
   "Add package NAME with ARGS to target list."
   `(let* ((NAME ',name)
           (ARGS ',args)
-          (SPLIT1 (req-package-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
+          (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
+          (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
           (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
           (REQS (car SPLIT1))
           (LOADER (car SPLIT2)))
@@ -437,17 +437,17 @@
   "Immediatly load package NAME with ARGS."
   `(let* ((NAME ',name)
           (ARGS ',args)
-          (SPLIT1 (req-package-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
+          (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
+          (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
           (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
           (REQS (car SPLIT1))
           (LOADER (car SPLIT2))
           (EVAL (append (req-package-gen-eval NAME) USEPACKARGS)))
      (req-package--log-debug "package force-requested: %s" NAME)
      (req-package-handle-loading NAME
-                      (lambda ()
-                        (req-package-prepare NAME LOADER)
-                        (eval EVAL)))))
+                                 (lambda ()
+                                   (req-package-providers-prepare NAME LOADER)
+                                   (eval EVAL)))))
 
 (defun req-package-handle-loading (name f)
   "Error handle for package NAME loading process by calling F."
@@ -461,11 +461,11 @@
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
-  (req-package-detect-cycles)
+  (req-package-cycles-detect)
   (req-package--log-debug "package requests finished: %s packages are waiting"
-               (hash-table-count req-package-ranks))
+                          (hash-table-count req-package-ranks))
   (maphash (lambda (key value)
-             (req-package-prepare key (gethash key req-package-loaders nil)))
+             (req-package-providers-prepare key (gethash key req-package-loaders nil)))
            req-package-ranks)
   (maphash (lambda (key value)
              (if (eq (gethash key req-package-ranks 0) 0)
@@ -475,8 +475,8 @@
 
 (put 'req-package 'lisp-indent-function 'defun)
 (put 'req-package-force 'lisp-indent-function 'defun)
-(put 'req-package-add-hook-execute 'lisp-indent-function 'defun)
-(put 'req-package-add-hook-execute-impl 'lisp-indent-function 'defun)
+(put 'req-package-hooks-add-execute 'lisp-indent-function 'defun)
+(put 'req-package-hooks-add-execute-impl 'lisp-indent-function 'defun)
 
 (defconst req-package-font-lock-keywords
   '(("(\\(req-package\\|req-package-force\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
