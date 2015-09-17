@@ -502,6 +502,7 @@ one such function should
 
 (defun req-package-prepare (package &optional loader)
   "prepare package - install if it is present"
+  (req-package--log-debug (format "installing package %s" package))
   (if (not (and loader (funcall (car loader) package)))
       (-any? (lambda (elem)
                (funcall elem package))
@@ -540,15 +541,14 @@ one such function should
   ;;                       (remhash key req-package-loaders)
   ;;                       (remhash key req-package-reqs-reversed))))
   ;;          req-package-ranks)
-
   (progn (setq req-package-cycles-count 0)
          (req-package-detect-cycles-traverse (make-hash-table :size 200)))
-
   (req-package--log-debug "package requests finished: %s packages are waiting"
-                          (hash-table-count req-package-ranks))
-
+               (hash-table-count req-package-ranks))
   (maphash (lambda (key value)
-             (req-package-prepare key (gethash key req-package-loaders nil))
+             (req-package-prepare key (gethash key req-package-loaders nil)))
+           req-package-ranks)
+  (maphash (lambda (key value)
              (if (eq (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
                         (req-package-eval key))))
