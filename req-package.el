@@ -364,7 +364,9 @@
 
 (defcustom req-package-providers-priority (ht ('elpa 0)
                                    ('el-get 1))
-  "Priority system for package providers")
+  "Priority system for package providers"
+  :group 'req-package
+  :type 'list)
 
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "Package symbol -> list of packages dependent on it.")
