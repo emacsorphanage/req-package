@@ -5,7 +5,7 @@
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
 ;; Version: 0.9
-;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
+;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0") (ht "0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
 
@@ -58,15 +58,37 @@
 ;; 1 req-package
 ;; ═════════════
 
+;;   [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
+;;   [[file:http://melpa.org/packages/req-package-badge.svg]]
+;;   [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
+;;   [[file:https://travis-ci.org/edvorg/req-package.svg]]
+;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+
+
+;;   [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
+;;   http://www.gnu.org/licenses/gpl-3.0.txt
+
+;;   [[file:http://melpa.org/packages/req-package-badge.svg]]
+;;   http://melpa.org/#/req-package
+
+;;   [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
+;;   http://stable.melpa.org/#/req-package
+
+;;   [[file:https://travis-ci.org/edvorg/req-package.svg]]
+;;   https://travis-ci.org/edvorg/req-package
+
+;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+;;   https://coveralls.io/github/edvorg/req-package?branch=develop
+
 ;; 1.1 Description
 ;; ───────────────
 
 ;;   req-package solves one single problem - make order of package
 ;;   configurations in your init.el right without continuous reordering
 ;;   your code while still providing ambrosian [use-package] goodness.  It
-;;   makes your .emacs.d code more strict, modular and error prone.  You
-;;   can look here, how I divided my code in separate modules and how
-;;   simple it looks
+;;   makes your .emacs.d code more strict and modular, and less error
+;;   prone.  You can look here, how I divided my code in separate modules
+;;   and how simple it looks
 ;;   [https://github.com/edvorg/emacs-configs/tree/master/init.d] .
 
 ;;   Remember, how often you tackled into problem, when you need to require
@@ -135,7 +157,7 @@
 ;;   your el-get.  Here is example:
 
 ;;   ┌────
-;;   │ (require 'req-package'')
+;;   │ (require 'req-package)
 ;;   │
 ;;   │ (req-package-force el-get
 ;;   │   :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
@@ -156,16 +178,8 @@
 
 ;;   You can always extend list of package providers or change priorities
 ;;   if you want.  in which your packages are being installed.  It can be
-;;   done by customizing `req-package-providers' list.  It's list of
-;;   functions, which can install packages.
-
-;;   Here are some rules for one such function:
-
-;;   • check package presence at corresponding repo
-;;   • check whether it installed or not
-;;   • install that package if it is available and not installed
-;;   • return nonnil only if package is installed already or successfully
-;;     installed by this function"
+;;   done by customizing `req-package-providers' map.  It's a mapping
+;;   loader-symbol -> (list install-function package-present-p-function)
 
 
 ;; 1.5 Migrate from use-package
@@ -185,9 +199,8 @@
 ;;   However, there is no need for the `:ensure' keyword; req-package will
 ;;   add it automatically if needed.
 
-;;   For each package you can manually specify loader fuction by `:loader'
-;;   keyword.  It can be any acceptable item for `req-package-providers'
-;;   list.
+;;   For each package you can manually specify loader function by `:loader'
+;;   keyword.  It can be any key for `req-package-providers' map.
 
 ;;   Also there is a `req-package-force' function which simulates plain old
 ;;   use-package behavior.
@@ -199,10 +212,10 @@
 ;; 1.7 Logging
 ;; ───────────
 
-;;   You cand use `req-package--log-open-log' to see, what is happening
-;;   with your configuration.  You can choose log level in `req-package'
-;;   group by `req-package-log-level' custom.  These log levels are
-;;   supported: `fatal', `error', `warn', `info', `debug', `trace'.
+;;   You can use `req-package--log-open-log' to see, what is happening with
+;;   your configuration.  You can choose log level in `req-package' group
+;;   by `req-package-log-level' custom.  These log levels are supported:
+;;   `fatal', `error', `warn', `info', `debug', `trace'.
 
 
 ;; 1.8 Contribute
@@ -230,6 +243,8 @@
 ;; ╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • proper errors handling. see `req-package–log-open-log` for messages
+;;   • smart add-hook which invokes function if mode is loaded
+;;   • refactor providers system
 
 
 ;; 1.10.2 v0.9
@@ -313,7 +328,7 @@
 (require 'package)
 
 (defun req-package-bootstrap (package)
-  "refresh package archives, check package presence and install if it's not installed"
+  "Refresh package archives, check PACKAGE presence and install if it's not installed."
   (if (null (require package nil t))
       (progn (let* ((ARCHIVES (if (null package-archive-contents)
                                   (progn (package-refresh-contents)
@@ -326,69 +341,66 @@
 (req-package-bootstrap 'use-package)
 (req-package-bootstrap 'dash)
 (req-package-bootstrap 'log4e)
+(req-package-bootstrap 'ht)
 
 (require 'use-package)
 (require 'dash)
 (require 'log4e)
+(require 'ht)
 
 (defgroup req-package nil
   "A package loading system"
   :group 'emacs)
 
 (defcustom req-package-log-level 'warn
-  "minimal log level. may be any level supported by log4e"
+  "Minimal log level, may be any level supported by log4e."
   :group 'req-package)
 
-(defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
-  "list of functions to prepare packages installation
-one such function should
-1) check package presence at corresponding repo
-2) check whether it installed or not
-3) install that package if it available and not installed
-4) return nonnil only if package is installed already or
-   successfully installed by this function"
+(defcustom req-package-providers (ht ('elpa '(req-package-install-elpa req-package-present-elpa))
+                          ('el-get '(req-package-install-el-get req-package-present-el-get)))
+  "Providers map provider -> (installer avaible-checker)"
   :group 'req-package
   :type 'list)
 
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
-  "package symbol -> list of packages dependent on it")
+  "Package symbol -> list of packages dependent on it.")
 
 (defvar req-package-ranks (make-hash-table :size 200)
-  "package symbol -> list of packages dependent on it")
+  "Package symbol -> list of packages dependent on it.")
 
 (defvar req-package-evals (make-hash-table :size 200)
-  "package symbol -> loading code prepared for evaluation")
+  "Package symbol -> loading code prepared for evaluation.")
 
 (defvar req-package-loaders (make-hash-table :size 200)
-  "package symbol -> loader function to load package by")
+  "Package symbol -> loader function to load package by.")
 
 (defvar req-package-cycles-count 0
-  "number of cycles detected")
+  "Number of cycles detected.")
 
 (defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
-  "you can check this for el get presense")
+  "You can check this for el get presense.")
 
 (defun req-package-mode-loaded-p (mode)
-  "return true if MODE is loaded now"
+  "Return true if MODE is loaded now."
   (or (assoc mode minor-mode-list) (equal major-mode mode)))
 
 (defun req-package-add-hook-execute-impl (m h f)
-  "add function F to hook H and execute it if mode M is already activated"
+  "Add function F to hook H and execute it if mode M is already activated"
   (add-hook h f)
   (if (req-package-mode-loaded-p m)
       (funcall f)))
 
 (defun req-package-add-hook-execute (m f)
-  "add function F to mode M and execute it if already activated"
+  "Add function F to mode M and execute it if already activated"
   (let ((h (intern (concat (symbol-name m) "-hook"))))
     (req-package-add-hook-execute-impl m h f)))
 
 (defun req-package-wrap-args (reqs)
-  "listify passed dependencies"
+  "Listify dependencies passed passed in REQS."
   (if (atom reqs) (list reqs) reqs))
 
 (defun req-package-extract-arg (key args acc)
-  "extract dependencies from arg list"
+  "Extract KEY value from ARGS list accummulating with ACC."
   (if (null args)
       (list nil (reverse acc))
     (if (eq (car args) key)
@@ -397,7 +409,7 @@ one such function should
       (req-package-extract-arg key (cdr args) (cons (car args) acc)))))
 
 (defun req-package-patch-config (name args)
-  "patch :config section to invoke our callback"
+  "Patch package NAME :config section in ARGS to invoke our callbacks."
   (let ((callback (list 'req-package-loaded (list 'quote name))))
     (if (null args)
         (list ':config callback)
@@ -410,17 +422,17 @@ one such function should
         (cons (car args) (req-package-patch-config name (cdr args)))))))
 
 (defun req-package-eval (name)
-  "evaluate package request"
+  "Evaluate package NAME request."
   (let* ((EVAL (gethash name
                         req-package-evals
                         (append (req-package-gen-eval name)
                                 (req-package-patch-config name
-                                                          nil))))
+                                               nil))))
          (NAME name))
     (req-package-handle-loading NAME (lambda () (eval EVAL)))))
 
 (defun req-package-loaded (name)
-  "callback for dependency graph load continuation"
+  "Called after package NAME loaded to continue dependency graph traverse."
   (req-package--log-info "package loaded: %s" name)
   (let* ((EVALS (-reduce-from
                  (lambda (memo dependent)
@@ -434,7 +446,7 @@ one such function should
                    (req-package-eval name)))))
 
 (defmacro req-package (name &rest args)
-  "add package to target list"
+  "Add package NAME with ARGS to target list."
   `(let* ((NAME ',name)
           (ARGS ',args)
           (SPLIT1 (req-package-extract-arg :require ARGS nil))
@@ -458,7 +470,7 @@ one such function should
      (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
 
 (defmacro req-package-force (name &rest args)
-  "immediatly load some package"
+  "Immediatly load package NAME with ARGS."
   `(let* ((NAME ',name)
           (ARGS ',args)
           (SPLIT1 (req-package-extract-arg :require ARGS nil))
@@ -469,53 +481,76 @@ one such function should
           (EVAL (append (req-package-gen-eval NAME) USEPACKARGS)))
      (req-package--log-debug "package force-requested: %s" NAME)
      (req-package-handle-loading NAME
-                                 (lambda ()
-                                   (req-package-prepare NAME LOADER)
-                                   (eval EVAL)))))
+                      (lambda ()
+                        (req-package-prepare NAME LOADER)
+                        (eval EVAL)))))
 
 (defun req-package-handle-loading (name f)
+  "Error handle for package NAME loading process by calling F."
   (condition-case-unless-debug e
       (funcall f)
     (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
 
-(defun req-package-try-elpa (package)
+(defun req-package-present-elpa (package)
+  "Return t if PACKAGE is available for installation."
   (let* ((ARCHIVES (if (null package-archive-contents)
                        (progn (package-refresh-contents)
                               package-archive-contents)
                      package-archive-contents))
          (AVAIL (-any? (lambda (elem)
                          (eq (car elem) package))
-                       ARCHIVES))
-         (INSTALLED (package-installed-p package)))
-    (if (and AVAIL (not INSTALLED))
+                       ARCHIVES)))
+    AVAIL))
+
+(defun req-package-install-elpa (package)
+  "Install PACKAGE with elpa."
+  (let* ((INSTALLED (package-installed-p package)))
+    (if (not INSTALLED)
         (if (package-install package) t nil)
       INSTALLED)))
 
-(defun req-package-try-el-get (package)
+(defun req-package-present-el-get (package)
+  "Return t if PACKAGE is available for installation."
+  (let* ((AVAIL (if (el-get-recipe-filename package) t nil)))
+    AVAIL))
+
+(defun req-package-install-el-get (package)
+  "Install PACKAGE with el-get."
   (if req-package-el-get-present
-      (let* ((AVAIL (if (el-get-recipe-filename package) t nil))
-             (INSTALLED (package-installed-p package)))
-        (if (and AVAIL (not INSTALLED))
+      (let* ((INSTALLED (package-installed-p package)))
+        (if (not INSTALLED)
             (or (el-get 'sync package) t) ;; TODO check for success
           INSTALLED))
     nil))
 
+(defun req-package-get-providers ()
+  "Just get package providers list."
+  req-package-providers)
+
 (defun req-package-prepare (package &optional loader)
-  "prepare package - install if it is present"
+  "Prepare PACKAGE - install if it is present using LOADER if specified."
   (req-package--log-debug (format "installing package %s" package))
   (condition-case e
-      (if (not (and loader (funcall (car loader) package)))
-          (-any? (lambda (elem)
-                   (funcall elem package))
-                 req-package-providers))
+      (if (functionp loader)
+          (funcall loader package)
+        (let* ((providers (req-package-get-providers))
+               (provider (if (and loader (symbolp loader))
+                             loader
+                           (-first (lambda (elem)
+                                     (funcall (second (ht-get providers elem)) package))
+                                   (ht-keys providers))))
+               (installer (first (ht-get providers provider))))
+          (if installer
+              (funcall installer package)
+            (error (format "provider not found for package %s" package)))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
 (defun req-package-gen-eval (package)
-  "generate eval for package and install it if present at el-get/elpa"
+  "Generate eval for PACKAGE and install it if present at el-get/elpa."
   (list 'use-package package))
 
 (defun req-package-detect-cycles-traverse-impl (visited cur path)
-  "traverse for cycles look up implementation"
+  "Traverse for cycles look up implementation"
   (puthash cur t visited)
   (if (not (-contains? path cur))
       (-each (gethash cur req-package-reqs-reversed nil)
@@ -525,7 +560,7 @@ one such function should
            (req-package--log-error "cycle detected: %s" (cons cur path)))))
 
 (defun req-package-detect-cycles-traverse (visited)
-  "traverse for cycles look up"
+  "Traverse for cycles look up"
   (maphash (lambda (key value)
              (if (null (gethash key visited nil))
                  (req-package-detect-cycles-traverse-impl visited key nil)))
@@ -535,7 +570,7 @@ one such function should
                req-package-cycles-count)))
 
 (defun req-package-finish ()
-  "start loading process, call this after all req-package invocations"
+  "Start loading process, call this after all req-package invocations."
   (progn (setq req-package-cycles-count 0)
          (req-package-detect-cycles-traverse (make-hash-table :size 200)))
   (req-package--log-debug "package requests finished: %s packages are waiting"

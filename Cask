@@ -5,6 +5,11 @@
 
 (files "*.el")
 
+(depends-on "log4e")
+(depends-on "ht")
+(depends-on "use-package")
+(depends-on "dash")
+
 (development
  (depends-on "undercover")
  (depends-on "f")

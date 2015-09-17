@@ -67,6 +67,20 @@
     (with-mock
       (stub add-hook)
       (mock (req-package-mode-loaded-p 'supermode) => nil)
-      (req-package-add-hook-execute 'supermode (lambda () "loaded")))))
+      (req-package-add-hook-execute 'supermode (lambda () "loaded"))))
+  (desc "req-package-get-providers is just a getter for req-package-providers")
+  (expect req-package-providers (req-package-get-providers))
+  (desc "req-package-prepare should install package with recommended provider")
+  (expect "package-1 installed"
+    (req-package-prepare 'package-1 (lambda (p) (format "%s installed" p))))
+  (expect "package-2 installed"
+    (with-mock
+      (stub req-package-get-providers => (ht ('foo-provider (list (lambda (p) (format "%s installed" p))))))
+      (req-package-prepare 'package-2 'foo-provider)))
+  (desc "req-package-prepare should install package with one of req-package-providers")
+  (expect "package-3 installed"
+    (with-mock
+      (stub req-package-get-providers => (ht ('foo-provider (list (lambda (p) (format "%s installed" p)) (lambda (p) t)))))
+      (req-package-prepare 'package-3))))
 
 (provide 'req-package-test)

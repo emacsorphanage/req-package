@@ -35,7 +35,7 @@
    Load req-package:
 
    #+BEGIN_SRC emacs-lisp
-(require 'req-package)
+   (require 'req-package)
    #+END_SRC
 
    Define required packages with dependencies using =:require= like this:
@@ -89,16 +89,8 @@
 
    You can always extend list of package providers or change priorities if you want.
    in which your packages are being installed.
-   It can be done by customizing =req-package-providers= list.
-   It's list of functions, which can install packages.
-
-   Here are some rules for one such function:
-
-- check package presence at corresponding repo
-- check whether it installed or not
-- install that package if it is available and not installed
-- return nonnil only if package is installed already or
-  successfully installed by this function"
+   It can be done by customizing =req-package-providers= map.
+   It's a mapping loader-symbol -> (list install-function package-present-p-function)
 
 ** Migrate from use-package
 
@@ -112,7 +104,7 @@
    However, there is no need for the =:ensure= keyword; req-package will add it automatically if needed.
 
    For each package you can manually specify loader function by =:loader= keyword.
-   It can be any acceptable item for =req-package-providers= list.
+   It can be any key for =req-package-providers= map.
 
    Also there is a =req-package-force= function which simulates plain old use-package behavior.
 
@@ -141,6 +133,7 @@
 
     - proper errors handling. see `req-package--log-open-log` for messages
     - smart add-hook which invokes function if mode is loaded
+    - refactor providers system
 
 *** v0.9
 
