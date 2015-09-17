@@ -82,7 +82,7 @@
     (with-mock
       (stub req-package-get-providers => (ht ('foo-provider (list (lambda (p) (format "%s installed" p)) (lambda (p) t)))))
       (req-package-prepare 'package-3)))
-  (desc "req-package-prepare should return nil if not providers found")
+  (desc "req-package-prepare should return nil if no providers found")
   (expect nil
     (with-mock
       (stub req-package-get-providers => (ht-create))
