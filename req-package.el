@@ -525,7 +525,7 @@
 (defun req-package-install-el-get (package)
   "Install PACKAGE with el-get."
   (if req-package-el-get-present
-      (let* ((INSTALLED (package-installed-p package)))
+      (let* ((INSTALLED (el-get-package-installed-p package)))
         (if (not INSTALLED)
             (or (el-get 'sync package) t) ;; TODO check for success
           INSTALLED))
