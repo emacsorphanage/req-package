@@ -178,7 +178,7 @@
 
 ;;   You can always extend list of package providers or change priorities
 ;;   if you want.  in which your packages are being installed.  It can be
-;;   done by customizing `req-package-providers' map.  It's a mapping
+;;   done by customizing `req-package-providers-map' map.  It's a mapping
 ;;   loader-symbol -> (list install-function package-present-p-function)
 
 
@@ -200,7 +200,7 @@
 ;;   add it automatically if needed.
 
 ;;   For each package you can manually specify loader function by `:loader'
-;;   keyword.  It can be any key for `req-package-providers' map.
+;;   keyword.  It can be any key for `req-package-providers-map' map.
 
 ;;   Also there is a `req-package-force' function which simulates plain old
 ;;   use-package behavior.
@@ -264,7 +264,7 @@
 
 ;;   • fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
-;;   • custom package providers support by `req-package-providers'
+;;   • custom package providers support by `req-package-providers-map'
 ;;   • priority feature for cross provider packages loading. you can
 ;;     choose, what to try first - elpa, el-get, or something else
 
@@ -347,6 +347,7 @@
 (require 'dash)
 (require 'log4e)
 (require 'ht)
+(require 'req-package-providers)
 
 (defgroup req-package nil
   "A package loading system"
@@ -355,18 +356,6 @@
 (defcustom req-package-log-level 'warn
   "Minimal log level, may be any level supported by log4e."
   :group 'req-package)
-
-(defcustom req-package-providers (ht ('elpa '(req-package-install-elpa req-package-present-elpa))
-                          ('el-get '(req-package-install-el-get req-package-present-el-get)))
-  "Providers map provider -> (installer avaible-checker)"
-  :group 'req-package
-  :type 'list)
-
-(defcustom req-package-providers-priority (ht ('elpa 0)
-                                   ('el-get 1))
-  "Priority system for package providers"
-  :group 'req-package
-  :type 'list)
 
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "Package symbol -> list of packages dependent on it.")
@@ -382,9 +371,6 @@
 
 (defvar req-package-cycles-count 0
   "Number of cycles detected.")
-
-(defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
-  "You can check this for el get presense.")
 
 (defun req-package-mode-loaded-p (mode)
   "Return true if MODE is loaded now."
@@ -497,66 +483,8 @@
       (funcall f)
     (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
 
-(defun req-package-present-elpa (package)
-  "Return t if PACKAGE is available for installation."
-  (let* ((ARCHIVES (if (null package-archive-contents)
-                       (progn (package-refresh-contents)
-                              package-archive-contents)
-                     package-archive-contents))
-         (AVAIL (-any? (lambda (elem)
-                         (eq (car elem) package))
-                       ARCHIVES)))
-    AVAIL))
-
-(defun req-package-install-elpa (package)
-  "Install PACKAGE with elpa."
-  (let* ((INSTALLED (package-installed-p package)))
-    (if (not INSTALLED)
-        (if (package-install package) t nil)
-      INSTALLED)))
-
-(defun req-package-present-el-get (package)
-  "Return t if PACKAGE is available for installation."
-  (if req-package-el-get-present
-      (let* ((AVAIL (if (el-get-recipe-filename package) t nil)))
-        AVAIL)
-    nil))
-
-(defun req-package-install-el-get (package)
-  "Install PACKAGE with el-get."
-  (if req-package-el-get-present
-      (let* ((INSTALLED (el-get-package-installed-p package)))
-        (if (not INSTALLED)
-            (or (el-get 'sync package) t) ;; TODO check for success
-          INSTALLED))
-    nil))
-
-(defun req-package-get-providers ()
-  "Just get package providers list."
-  req-package-providers)
-
-(defun req-package-prepare (package &optional loader)
-  "Prepare PACKAGE - install if it is present using LOADER if specified."
-  (req-package--log-debug (format "installing package %s" package))
-  (condition-case e
-      (if (functionp loader)
-          (funcall loader package)
-        (let* ((providers (req-package-get-providers))
-               (provider (if (and loader (symbolp loader))
-                             loader
-                           (-first (lambda (elem)
-                                     (funcall (second (ht-get providers elem)) package))
-                                   (-sort (lambda (a b) (< (ht-get req-package-providers-priority a -1)
-                                                      (ht-get req-package-providers-priority b -1)))
-                                          (ht-keys providers)))))
-               (installer (first (ht-get providers provider))))
-          (if installer
-              (funcall installer package)
-            (error (format "provider not found for package %s" package)))))
-    (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
-
 (defun req-package-gen-eval (package)
-  "Generate eval for PACKAGE and install it if present at el-get/elpa."
+  "Generate eval for PACKAGE."
   (list 'use-package package))
 
 (defun req-package-detect-cycles-traverse-impl (visited cur path)

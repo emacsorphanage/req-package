@@ -65,8 +65,8 @@
       (stub add-hook)
       (mock (req-package-mode-loaded-p 'supermode) => nil)
       (req-package-add-hook-execute 'supermode (lambda () "loaded"))))
-  (desc "req-package-get-providers is just a getter for req-package-providers")
-  (expect req-package-providers (req-package-get-providers))
+  (desc "req-package-get-providers is just a getter for req-package-providers-map")
+  (expect req-package-providers-map (req-package-get-providers))
   (desc "req-package-prepare should install package with recommended provider")
   (expect "package-1 installed"
     (req-package-prepare 'package-1 (lambda (p) (format "%s installed" p))))

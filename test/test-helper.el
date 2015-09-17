@@ -1,4 +1,4 @@
 (when (require 'undercover nil t)
-  (undercover "req-package.el"))
+  (undercover "*.el"))
 
 (provide 'test-helper)
