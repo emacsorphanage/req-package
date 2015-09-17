@@ -503,10 +503,12 @@ one such function should
 (defun req-package-prepare (package &optional loader)
   "prepare package - install if it is present"
   (req-package--log-debug (format "installing package %s" package))
-  (if (not (and loader (funcall (car loader) package)))
-      (-any? (lambda (elem)
-               (funcall elem package))
-             req-package-providers)))
+  (condition-case e
+      (if (not (and loader (funcall (car loader) package)))
+          (-any? (lambda (elem)
+                   (funcall elem package))
+                 req-package-providers))
+    (error (req-package--log-error (format "unable to install package %s" package)))))
 
 (defun req-package-gen-eval (package)
   "generate eval for package and install it if present at el-get/elpa"
