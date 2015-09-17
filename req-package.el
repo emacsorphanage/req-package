@@ -349,6 +349,7 @@
 (require 'ht)
 (require 'req-package-providers)
 (require 'req-package-hooks)
+(require 'req-package-args)
 
 (defgroup req-package nil
   "A package loading system"
@@ -372,19 +373,6 @@
 
 (defvar req-package-cycles-count 0
   "Number of cycles detected.")
-
-(defun req-package-wrap-args (reqs)
-  "Listify dependencies passed passed in REQS."
-  (if (atom reqs) (list reqs) reqs))
-
-(defun req-package-extract-arg (key args acc)
-  "Extract KEY value from ARGS list accummulating with ACC."
-  (if (null args)
-      (list nil (reverse acc))
-    (if (eq (car args) key)
-        (list (req-package-wrap-args (car (cdr args)))
-              (append (reverse acc) (cddr args)))
-      (req-package-extract-arg key (cdr args) (cons (car args) acc)))))
 
 (defun req-package-patch-config (name args)
   "Patch package NAME :config section in ARGS to invoke our callbacks."
