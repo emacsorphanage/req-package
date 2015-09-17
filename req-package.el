@@ -508,7 +508,7 @@ one such function should
           (-any? (lambda (elem)
                    (funcall elem package))
                  req-package-providers))
-    (error (req-package--log-error (format "unable to install package %s" package)))))
+    (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
 (defun req-package-gen-eval (package)
   "generate eval for package and install it if present at el-get/elpa"
