@@ -534,13 +534,6 @@ one such function should
 
 (defun req-package-finish ()
   "start loading process, call this after all req-package invocations"
-  ;; (maphash (lambda (key value)
-  ;;            (if (eq (gethash key req-package-ranks) -1)
-  ;;                (progn (remhash key req-package-ranks)
-  ;;                       (remhash key req-package-evals)
-  ;;                       (remhash key req-package-loaders)
-  ;;                       (remhash key req-package-reqs-reversed))))
-  ;;          req-package-ranks)
   (progn (setq req-package-cycles-count 0)
          (req-package-detect-cycles-traverse (make-hash-table :size 200)))
   (req-package--log-debug "package requests finished: %s packages are waiting"
