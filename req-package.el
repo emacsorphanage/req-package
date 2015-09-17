@@ -511,8 +511,10 @@
 
 (defun req-package-present-el-get (package)
   "Return t if PACKAGE is available for installation."
-  (let* ((AVAIL (if (el-get-recipe-filename package) t nil)))
-    AVAIL))
+  (if req-package-el-get-present
+      (let* ((AVAIL (if (el-get-recipe-filename package) t nil)))
+        AVAIL)
+    nil))
 
 (defun req-package-install-el-get (package)
   "Install PACKAGE with el-get."
