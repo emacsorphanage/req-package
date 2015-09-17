@@ -9,13 +9,13 @@
   "You can check this for el get presense.")
 
 (defcustom req-package-providers-map (ht ('elpa '(req-package-install-elpa req-package-present-elpa))
-                          ('el-get '(req-package-install-el-get req-package-present-el-get)))
+                                         ('el-get '(req-package-install-el-get req-package-present-el-get)))
   "Providers map provider -> (installer avaible-checker)."
   :group 'req-package
   :type 'list)
 
 (defcustom req-package-providers-priority (ht ('elpa 0)
-                                   ('el-get 1))
+                                              ('el-get 1))
   "Priority system for package providers."
   :group 'req-package
   :type 'list)
