@@ -362,6 +362,10 @@
   :group 'req-package
   :type 'list)
 
+(defcustom req-package-providers-priority (ht ('elpa 0)
+                                   ('el-get 1))
+  "Priority system for package providers")
+
 (defvar req-package-reqs-reversed (make-hash-table :size 200)
   "Package symbol -> list of packages dependent on it.")
 
@@ -540,7 +544,9 @@
                              loader
                            (-first (lambda (elem)
                                      (funcall (second (ht-get providers elem)) package))
-                                   (ht-keys providers))))
+                                   (-sort (lambda (a b) (< (ht-get req-package-providers-priority a -2)
+                                                      (ht-get req-package-providers-priority b -1)))
+                                          (ht-keys providers)))))
                (installer (first (ht-get providers provider))))
           (if installer
               (funcall installer package)
