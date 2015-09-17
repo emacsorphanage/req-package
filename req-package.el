@@ -350,6 +350,7 @@
 (require 'req-package-providers)
 (require 'req-package-hooks)
 (require 'req-package-args)
+(require 'req-package-cycles)
 
 (defgroup req-package nil
   "A package loading system"
@@ -370,9 +371,6 @@
 
 (defvar req-package-loaders (make-hash-table :size 200)
   "Package symbol -> loader function to load package by.")
-
-(defvar req-package-cycles-count 0
-  "Number of cycles detected.")
 
 (defun req-package-patch-config (name args)
   "Patch package NAME :config section in ARGS to invoke our callbacks."
@@ -461,30 +459,9 @@
   "Generate eval for PACKAGE."
   (list 'use-package package))
 
-(defun req-package-detect-cycles-traverse-impl (visited cur path)
-  "Traverse for cycles look up implementation"
-  (puthash cur t visited)
-  (if (not (-contains? path cur))
-      (-each (gethash cur req-package-reqs-reversed nil)
-        (lambda (dependent)
-          (req-package-detect-cycles-traverse-impl visited dependent (cons cur path))))
-    (progn (setq req-package-cycles-count (+ req-package-cycles-count 1))
-           (req-package--log-error "cycle detected: %s" (cons cur path)))))
-
-(defun req-package-detect-cycles-traverse (visited)
-  "Traverse for cycles look up"
-  (maphash (lambda (key value)
-             (if (null (gethash key visited nil))
-                 (req-package-detect-cycles-traverse-impl visited key nil)))
-           req-package-reqs-reversed)
-  (if (not (eq 0 req-package-cycles-count))
-      (message "%s cycle(s) detected. see M-x req-package--log-open-log"
-               req-package-cycles-count)))
-
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
-  (progn (setq req-package-cycles-count 0)
-         (req-package-detect-cycles-traverse (make-hash-table :size 200)))
+  (req-package-detect-cycles)
   (req-package--log-debug "package requests finished: %s packages are waiting"
                (hash-table-count req-package-ranks))
   (maphash (lambda (key value)
