@@ -392,7 +392,7 @@
                         req-package-evals
                         (append (req-package-gen-eval name)
                                 (req-package-patch-config name
-                                                          nil))))
+                                               nil))))
          (NAME name))
     (req-package-handle-loading NAME (lambda () (eval EVAL)))))
 
@@ -446,9 +446,9 @@
           (EVAL (append (req-package-gen-eval NAME) USEPACKARGS)))
      (req-package--log-debug "package force-requested: %s" NAME)
      (req-package-handle-loading NAME
-                                 (lambda ()
-                                   (req-package-providers-prepare NAME LOADER)
-                                   (eval EVAL)))))
+                      (lambda ()
+                        (req-package-providers-prepare NAME LOADER)
+                        (eval EVAL)))))
 
 (defun req-package-handle-loading (name f)
   "Error handle for package NAME loading process by calling F."
@@ -464,7 +464,7 @@
   "Start loading process, call this after all req-package invocations."
   (req-package-cycles-detect)
   (req-package--log-debug "package requests finished: %s packages are waiting"
-                          (hash-table-count req-package-ranks))
+               (hash-table-count req-package-ranks))
   (maphash (lambda (key value)
              (req-package-providers-prepare key (gethash key req-package-loaders nil)))
            req-package-ranks)

@@ -74,7 +74,7 @@
                                    (-sort (lambda (a b) (< (ht-get req-package-providers-priority a -1)
                                                       (ht-get req-package-providers-priority b -1)))
                                           (ht-keys providers)))))
-               (installer (first (ht-get providers provider))))
+               (installer (car (ht-get providers provider))))
           (if installer
               (funcall installer package)
             (error "provider not found"))))
