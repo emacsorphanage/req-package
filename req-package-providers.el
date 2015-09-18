@@ -77,7 +77,7 @@
                (installer (first (ht-get providers provider))))
           (if installer
               (funcall installer package)
-            (error (format "provider not found for package %s" package)))))
+            (error "provider not found"))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
 (provide 'req-package-providers)
