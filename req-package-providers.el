@@ -41,7 +41,7 @@
 (defun req-package-providers-install-elpa (package)
   "Install PACKAGE with elpa."
   (let* ((INSTALLED (package-installed-p package)))
-    (if (not INSTALLED)
+    (if (or (not INSTALLED) (package-built-in-p package))
         (if (package-install package) t nil)
       INSTALLED)))
 
