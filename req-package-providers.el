@@ -4,6 +4,7 @@
 
 (require 'ht)
 (require 'dash)
+(require 'package)
 
 (defconst req-package-providers-el-get-present
   (if (require 'el-get nil t) t nil)
@@ -77,7 +78,8 @@
                (installer (car (ht-get providers provider))))
           (if installer
               (funcall installer package)
-            (error "provider not found"))))
+            (when (and (not (package-built-in-p package)) (not (require package nil t)))
+              (error "provider not found")))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
 (provide 'req-package-providers)
