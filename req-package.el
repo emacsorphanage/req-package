@@ -366,10 +366,10 @@
   "Minimal log level, may be any level supported by log4e."
   :group 'req-package)
 
-(defvar req-package-reqs-reversed (make-hash-table :size 200)
+(defvar req-package-deps-of (make-hash-table :size 200)
   "Package symbol -> list of packages dependent on it.")
 
-(defvar req-package-ranks (make-hash-table :size 200)
+(defvar req-package-deps-left (make-hash-table :size 200)
   "Package symbol -> list of packages dependent on it.")
 
 (defvar req-package-evals (make-hash-table :size 200)
@@ -396,13 +396,13 @@
   (req-package--log-info "package loaded: %s" name)
   (let* ((EVALS (-reduce-from
                  (lambda (memo dependent)
-                   (let* ((RANK (- (gethash dependent req-package-ranks 0) 1)))
-                     (puthash dependent RANK req-package-ranks)
-                     (if (equal 0 RANK) (cons dependent memo) memo)))
+                   (let* ((DEPS-LEFT (- (gethash dependent req-package-deps-left 0) 1)))
+                     (puthash dependent DEPS-LEFT req-package-deps-left)
+                     (if (equal 0 DEPS-LEFT) (cons dependent memo) memo)))
                  nil
-                 (gethash name req-package-reqs-reversed nil))))
+                 (gethash name req-package-deps-of nil))))
     (-each EVALS (lambda (name)
-                   (puthash name -1 req-package-ranks)
+                   (puthash name -1 req-package-deps-left)
                    (req-package-eval name)))))
 
 (defun req-package-handle-loading (name f)
@@ -426,24 +426,23 @@
           (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
           (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
           (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
-          (REQUIRE (-flatten (car SPLIT1)))
+          (DEPS (-flatten (car SPLIT1)))
           (LOADER (car SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
           (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
           (REST (cadr SPLIT4))
           (EVAL (req-package-gen-eval NAME INIT CONFIG REST)))
      (req-package--log-debug "package requested: %s" NAME)
-     (-each REQUIRE
+     (-each DEPS
        (lambda (req)
-         (let* ((CURREQREV (gethash req req-package-reqs-reversed nil))
-                (CURRANK (gethash NAME req-package-ranks 0)))
-           (puthash req (cons NAME CURREQREV) req-package-reqs-reversed)
-           (puthash req (gethash req req-package-ranks 0) req-package-ranks)
-           (puthash NAME (+ CURRANK 1) req-package-ranks))))
+         (let* ((DEPS-OF (gethash req req-package-deps-of nil))
+                (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
+           (puthash req (cons NAME DEPS-OF) req-package-deps-of)
+           (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+           (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left))))
      (puthash NAME LOADER req-package-loaders)
      (puthash NAME EVAL req-package-evals)
-     (puthash NAME (gethash NAME req-package-ranks 0) req-package-ranks)
-     (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
+     (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)))
 
 (defmacro req-package-force (name &rest args)
   "Immediatly load package NAME with ARGS."
@@ -453,7 +452,7 @@
           (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
           (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
           (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
-          (REQUIRE (-flatten (car SPLIT1)))
+          (DEPS (-flatten (car SPLIT1)))
           (LOADER (car SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
           (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
@@ -467,17 +466,17 @@
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
-  (req-package-cycles-detect)
+  (req-package-cycles-detect req-package-deps-of)
   (req-package--log-debug "package requests finished: %s packages are waiting"
-               (hash-table-count req-package-ranks))
+               (hash-table-count req-package-deps-left))
   (maphash (lambda (key value)
              (req-package-providers-prepare key (gethash key req-package-loaders nil)))
-           req-package-ranks)
+           req-package-deps-left)
   (maphash (lambda (key value)
-             (if (equal (gethash key req-package-ranks 0) 0)
-                 (progn (puthash key -1 req-package-ranks)
+             (if (equal (gethash key req-package-deps-left 0) 0)
+                 (progn (puthash key -1 req-package-deps-left)
                         (req-package-eval key))))
-           req-package-ranks))
+           req-package-deps-left))
 
 (put 'req-package 'lisp-indent-function 'defun)
 (put 'req-package-force 'lisp-indent-function 'defun)
