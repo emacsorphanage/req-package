@@ -53,7 +53,7 @@
    (req-package flymake)
 
    (req-package flymake-lua
-     :require (flymake lua-mode)
+     :require flymake lua-mode
      :config (...))
    #+END_SRC
 
@@ -74,11 +74,13 @@
     (require 'req-package)
 
     (req-package-force el-get
-      :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-                   (el-get 'sync)))
+      :init
+      (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+      (el-get 'sync))
 
     (req-package gotham-theme
-      :config (print "gotham theme is here and installed from el-get"))
+      :config
+      (print "gotham theme is here and installed from el-get"))
 
     (req-package-finish)
    #+END_SRC
@@ -134,6 +136,7 @@
     - proper errors handling. see `req-package--log-open-log` for messages
     - smart add-hook which invokes function if mode is loaded
     - refactor providers system
+    - no need for progn in :init, :config and :require sections
 
 *** v0.9
 

@@ -80,6 +80,7 @@
 ;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
 ;;   https://coveralls.io/github/edvorg/req-package?branch=develop
 
+
 ;; 1.1 Description
 ;; ───────────────
 
@@ -138,7 +139,7 @@
 ;;   │ (req-package flymake)
 ;;   │
 ;;   │ (req-package flymake-lua
-;;   │   :require (flymake lua-mode)
+;;   │   :require flymake lua-mode
 ;;   │   :config (...))
 ;;   └────
 
@@ -160,11 +161,13 @@
 ;;   │ (require 'req-package)
 ;;   │
 ;;   │ (req-package-force el-get
-;;   │   :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-;;   │                (el-get 'sync)))
+;;   │   :init
+;;   │   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;   │   (el-get 'sync))
 ;;   │
 ;;   │ (req-package gotham-theme
-;;   │   :config (print "gotham theme is here and installed from el-get"))
+;;   │   :config
+;;   │   (print "gotham theme is here and installed from el-get"))
 ;;   │
 ;;   │ (req-package-finish)
 ;;   └────
@@ -178,7 +181,7 @@
 
 ;;   You can always extend list of package providers or change priorities
 ;;   if you want.  in which your packages are being installed.  It can be
-;;   done by customizing `req-package-providers-map' map.  It's a mapping
+;;   done by customizing `req-package-providers' map.  It's a mapping
 ;;   loader-symbol -> (list install-function package-present-p-function)
 
 
@@ -200,7 +203,7 @@
 ;;   add it automatically if needed.
 
 ;;   For each package you can manually specify loader function by `:loader'
-;;   keyword.  It can be any key for `req-package-providers-map' map.
+;;   keyword.  It can be any key for `req-package-providers' map.
 
 ;;   Also there is a `req-package-force' function which simulates plain old
 ;;   use-package behavior.
@@ -245,6 +248,7 @@
 ;;   • proper errors handling. see `req-package–log-open-log` for messages
 ;;   • smart add-hook which invokes function if mode is loaded
 ;;   • refactor providers system
+;;   • no need for progn in :init, :config and :require sections
 
 
 ;; 1.10.2 v0.9
@@ -264,7 +268,7 @@
 
 ;;   • fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
-;;   • custom package providers support by `req-package-providers-map'
+;;   • custom package providers support by `req-package-providers'
 ;;   • priority feature for cross provider packages loading. you can
 ;;     choose, what to try first - elpa, el-get, or something else
 
@@ -373,26 +377,18 @@
 (defvar req-package-loaders (make-hash-table :size 200)
   "Package symbol -> loader function to load package by.")
 
-(defun req-package-patch-config (name args)
+(defun req-package-patch-config (name form)
   "Patch package NAME :config section in ARGS to invoke our callbacks."
-  (let ((callback (list 'req-package-loaded (list 'quote name))))
-    (if (null args)
-        (list ':config callback)
-      (if (eq (car args) :config)
-          (cons ':config
-                (cons (list 'progn
-                            (list 'req-package-handle-loading (list 'quote name) (list 'lambda () (car (cdr args))))
-                            callback)
-                      (cddr args)))
-        (cons (car args) (req-package-patch-config name (cdr args)))))))
+  (list 'progn
+        (list 'req-package-handle-loading (list 'quote name) (list 'lambda () form))
+        (list 'req-package-loaded (list 'quote name))))
 
 (defun req-package-eval (name)
   "Evaluate package NAME request."
   (let* ((EVAL (gethash name
                         req-package-evals
                         (append (req-package-gen-eval name)
-                                (req-package-patch-config name
-                                               nil))))
+                                (list :config (req-package-patch-config name nil)))))
          (NAME name))
     (req-package-handle-loading NAME (lambda () (eval EVAL)))))
 
@@ -416,13 +412,18 @@
           (ARGS ',args)
           (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
           (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
-          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
-          (REQS (car SPLIT1))
-          (LOADER (car SPLIT2)))
-
+          (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
+          (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
+          (REQUIRE (-flatten (car SPLIT1)))
+          (LOADER (car SPLIT2))
+          (INIT (cons 'progn (car SPLIT3)))
+          (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
+          (EVAL (append (req-package-gen-eval NAME)
+                        (list :config CONFIG)
+                        (list :init INIT)
+                        (cadr SPLIT4))))
      (req-package--log-debug "package requested: %s" NAME)
-
-     (-each REQS
+     (-each REQUIRE
        (lambda (req)
          (let* ((CURREQREV (gethash req req-package-reqs-reversed nil))
                 (CURRANK (gethash NAME req-package-ranks 0)))
@@ -430,7 +431,7 @@
            (puthash req (gethash req req-package-ranks 0) req-package-ranks)
            (puthash NAME (+ CURRANK 1) req-package-ranks))))
      (puthash NAME LOADER req-package-loaders)
-     (puthash NAME (append (req-package-gen-eval NAME) USEPACKARGS) req-package-evals)
+     (puthash NAME EVAL req-package-evals)
      (puthash NAME (gethash NAME req-package-ranks 0) req-package-ranks)
      (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
 
@@ -440,15 +441,21 @@
           (ARGS ',args)
           (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
           (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
-          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
-          (REQS (car SPLIT1))
+          (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
+          (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
+          (REQUIRE (-flatten (car SPLIT1)))
           (LOADER (car SPLIT2))
-          (EVAL (append (req-package-gen-eval NAME) USEPACKARGS)))
+          (INIT (cons 'progn (car SPLIT3)))
+          (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
+          (EVAL (append (req-package-gen-eval NAME)
+                        (list :config CONFIG)
+                        (list :init INIT)
+                        (cadr SPLIT4))))
      (req-package--log-debug "package force-requested: %s" NAME)
      (req-package-handle-loading NAME
-                      (lambda ()
-                        (req-package-providers-prepare NAME LOADER)
-                        (eval EVAL)))))
+                                 (lambda ()
+                                   (req-package-providers-prepare NAME LOADER)
+                                   (eval EVAL)))))
 
 (defun req-package-handle-loading (name f)
   "Error handle for package NAME loading process by calling F."
