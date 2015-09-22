@@ -26,7 +26,7 @@
   :group 'req-package
   :type 'list)
 
-(defun req-package-providers-get ()
+(defun req-package-providers-get-map ()
   "Just get package providers list."
   req-package-providers-map)
 
@@ -74,7 +74,7 @@
   (condition-case e
       (if (functionp loader)
           (funcall loader package)
-        (let* ((providers (req-package-providers-get))
+        (let* ((providers (req-package-providers-get-map))
                (provider (if (and loader (symbolp loader))
                              loader
                            (-first (lambda (elem)
