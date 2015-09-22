@@ -385,10 +385,8 @@
 
 (defun req-package-eval (name)
   "Evaluate package NAME request."
-  (let* ((EVAL (gethash name
-                        req-package-evals
-                        (append (req-package-gen-eval name)
-                                (list :config (req-package-patch-config name nil)))))
+  (let* ((DEFAULT (req-package-gen-eval name (list 'progn) (req-package-patch-config name nil) nil))
+         (EVAL (gethash name req-package-evals DEFAULT))
          (NAME name))
     (req-package-handle-loading NAME (lambda () (eval EVAL)))))
 
@@ -418,10 +416,8 @@
           (LOADER (car SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
           (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
-          (EVAL (append (req-package-gen-eval NAME)
-                        (list :config CONFIG)
-                        (list :init INIT)
-                        (cadr SPLIT4))))
+          (REST (cadr SPLIT4))
+          (EVAL (req-package-gen-eval NAME INIT CONFIG REST)))
      (req-package--log-debug "package requested: %s" NAME)
      (-each REQUIRE
        (lambda (req)
@@ -447,10 +443,8 @@
           (LOADER (car SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
           (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
-          (EVAL (append (req-package-gen-eval NAME)
-                        (list :config CONFIG)
-                        (list :init INIT)
-                        (cadr SPLIT4))))
+          (REST (cadr SPLIT4))
+          (EVAL (req-package-gen-eval NAME INIT CONFIG REST)))
      (req-package--log-debug "package force-requested: %s" NAME)
      (req-package-handle-loading NAME
                                  (lambda ()
@@ -463,9 +457,12 @@
       (funcall f)
     (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
 
-(defun req-package-gen-eval (package)
+(defun req-package-gen-eval (package init config rest)
   "Generate eval for PACKAGE."
-  (list 'use-package package))
+  (append (list 'use-package package)
+          (list :init init)
+          (list :config config)
+          rest))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."

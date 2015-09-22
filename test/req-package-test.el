@@ -37,7 +37,8 @@
   (expect '(progn (req-package-handle-loading (quote foo) (lambda nil nil)) (req-package-loaded (quote foo)))
     (req-package-patch-config 'foo '()))
   (desc "req-package-gen-eval should generate valid use-package form")
-  (expect '(use-package bar) (req-package-gen-eval 'bar))
+  (expect '(use-package bar :init nil :config nil)
+    (req-package-gen-eval 'bar nil nil nil))
   (desc "req-package-handle-loading should return eval value")
   (expect 1
     (req-package-handle-loading 'foo (lambda () 1)))
