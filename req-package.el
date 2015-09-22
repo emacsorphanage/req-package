@@ -366,16 +366,16 @@
   "Minimal log level, may be any level supported by log4e."
   :group 'req-package)
 
-(defvar req-package-deps-of (make-hash-table :size 200)
+(defvar req-package-required-by (make-hash-table :size 200 :test 'equal)
   "Package symbol -> list of packages dependent on it.")
 
-(defvar req-package-deps-left (make-hash-table :size 200)
+(defvar req-package-deps-left (make-hash-table :size 200 :test 'equal)
   "Package symbol -> list of packages dependent on it.")
 
-(defvar req-package-evals (make-hash-table :size 200)
+(defvar req-package-evals (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loading code prepared for evaluation.")
 
-(defvar req-package-loaders (make-hash-table :size 200)
+(defvar req-package-loaders (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loader function to load package by.")
 
 (defun req-package-patch-config (name form)
@@ -400,7 +400,7 @@
                      (puthash dependent DEPS-LEFT req-package-deps-left)
                      (if (equal 0 DEPS-LEFT) (cons dependent memo) memo)))
                  nil
-                 (gethash name req-package-deps-of nil))))
+                 (gethash name req-package-required-by nil))))
     (-each EVALS (lambda (name)
                    (puthash name -1 req-package-deps-left)
                    (req-package-eval name)))))
@@ -435,9 +435,9 @@
      (req-package--log-debug "package requested: %s" NAME)
      (-each DEPS
        (lambda (req)
-         (let* ((DEPS-OF (gethash req req-package-deps-of nil))
+         (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
                 (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
-           (puthash req (cons NAME DEPS-OF) req-package-deps-of)
+           (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
            (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
            (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left))))
      (puthash NAME LOADER req-package-loaders)
@@ -466,7 +466,7 @@
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
-  (req-package-cycles-detect req-package-deps-of)
+  (req-package-cycles-detect req-package-required-by)
   (req-package--log-debug "package requests finished: %s packages are waiting"
                (hash-table-count req-package-deps-left))
   (maphash (lambda (key value)
