@@ -12,13 +12,16 @@
 
 (defcustom req-package-providers-map
   (ht ('elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
-      ('el-get '(req-package-providers-install-el-get req-package-providers-present-el-get)))
+      ('el-get '(req-package-providers-install-el-get req-package-providers-present-el-get))
+      ('built-in '(req-package-providers-install-built-in req-package-providers-present-built-in)))
   "Providers map provider -> (installer avaible-checker)."
   :group 'req-package
   :type 'list)
 
-(defcustom req-package-providers-priority (ht ('elpa 0)
-                                              ('el-get 1))
+(defcustom req-package-providers-priority
+  (ht ('elpa 0)
+      ('el-get 1)
+      ('built-in 2))
   "Priority system for package providers."
   :group 'req-package
   :type 'list)
@@ -40,26 +43,30 @@
 
 (defun req-package-providers-install-elpa (package)
   "Install PACKAGE with elpa."
-  (let* ((INSTALLED (package-installed-p package)))
-    (if (or (not INSTALLED) (package-built-in-p package))
-        (if (package-install package) t nil)
+  (let ((INSTALLED (package-installed-p package))) ;; TODO check that it's not a built in one
+    (if (not INSTALLED)
+        (package-install package)
       INSTALLED)))
 
 (defun req-package-providers-present-el-get (package)
   "Return t if PACKAGE is available for installation."
-  (if req-package-providers-el-get-present
-      (let* ((AVAIL (if (el-get-recipe-filename package) t nil)))
-        AVAIL)
-    nil))
+  (when req-package-providers-el-get-present
+    (el-get-recipe-filename package)))
 
 (defun req-package-providers-install-el-get (package)
   "Install PACKAGE with el-get."
-  (if req-package-providers-el-get-present
-      (let* ((INSTALLED (el-get-package-installed-p package)))
-        (if (not INSTALLED)
-            (or (el-get 'sync package) t) ;; TODO check for success
-          INSTALLED))
-    nil))
+  (when req-package-providers-el-get-present
+    (let* ((INSTALLED (el-get-package-installed-p package)))
+      (if (not INSTALLED)
+          (el-get 'sync package)
+        INSTALLED))))
+
+(defun req-package-providers-present-built-in (package)
+  (package-built-in-p package))
+
+(defun req-package-providers-install-built-in (package)
+  (unless (package-built-in-p package)
+    (error "package is not built-in")))
 
 (defun req-package-providers-prepare (package &optional loader)
   "Prepare PACKAGE - install if it is present using LOADER if specified."
@@ -78,8 +85,8 @@
                (installer (car (ht-get providers provider))))
           (if installer
               (funcall installer package)
-            (when (and (not (package-built-in-p package)) (not (require package nil t)))
-              (error "provider not found")))))
+            (when (not (require package nil t))
+              (error "neither provider nor file found")))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
 (provide 'req-package-providers)
