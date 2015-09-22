@@ -248,7 +248,8 @@
 ;;   • proper errors handling. see `req-package–log-open-log` for messages
 ;;   • smart add-hook which invokes function if mode is loaded
 ;;   • refactor providers system
-;;   • no need for progn in :init, :config and :require sections
+;;   • no need to use progn in :init and :config sections
+;;   • no need to use list literal in :require section
 
 
 ;; 1.10.2 v0.9
@@ -378,7 +379,7 @@
   "Package symbol -> loader function to load package by.")
 
 (defun req-package-patch-config (name form)
-  "Patch package NAME :config section in ARGS to invoke our callbacks."
+  "Wrap package NAME :config FORM into progn with callbacks."
   (list 'progn
         (list 'req-package-handle-loading (list 'quote name) (list 'lambda () form))
         (list 'req-package-loaded (list 'quote name))))
@@ -403,6 +404,19 @@
     (-each EVALS (lambda (name)
                    (puthash name -1 req-package-ranks)
                    (req-package-eval name)))))
+
+(defun req-package-handle-loading (name f)
+  "Error handle for package NAME loading process by calling F."
+  (condition-case-unless-debug e
+      (funcall f)
+    (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
+
+(defun req-package-gen-eval (package init config rest)
+  "Generate eval for PACKAGE."
+  (append (list 'use-package package)
+          (list :init init)
+          (list :config config)
+          rest))
 
 (defmacro req-package (name &rest args)
   "Add package NAME with ARGS to target list."
@@ -447,22 +461,9 @@
           (EVAL (req-package-gen-eval NAME INIT CONFIG REST)))
      (req-package--log-debug "package force-requested: %s" NAME)
      (req-package-handle-loading NAME
-                                 (lambda ()
-                                   (req-package-providers-prepare NAME LOADER)
-                                   (eval EVAL)))))
-
-(defun req-package-handle-loading (name f)
-  "Error handle for package NAME loading process by calling F."
-  (condition-case-unless-debug e
-      (funcall f)
-    (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
-
-(defun req-package-gen-eval (package init config rest)
-  "Generate eval for PACKAGE."
-  (append (list 'use-package package)
-          (list :init init)
-          (list :config config)
-          rest))
+                      (lambda ()
+                        (req-package-providers-prepare NAME LOADER)
+                        (eval EVAL)))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."

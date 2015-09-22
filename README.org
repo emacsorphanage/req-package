@@ -136,7 +136,8 @@
     - proper errors handling. see `req-package--log-open-log` for messages
     - smart add-hook which invokes function if mode is loaded
     - refactor providers system
-    - no need for progn in :init, :config and :require sections
+    - no need to use progn in :init and :config sections
+    - no need to use list literal in :require section
 
 *** v0.9
 
