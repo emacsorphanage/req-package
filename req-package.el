@@ -398,7 +398,7 @@
                  (lambda (memo dependent)
                    (let* ((RANK (- (gethash dependent req-package-ranks 0) 1)))
                      (puthash dependent RANK req-package-ranks)
-                     (if (eq 0 RANK) (cons dependent memo) memo)))
+                     (if (equal 0 RANK) (cons dependent memo) memo)))
                  nil
                  (gethash name req-package-reqs-reversed nil))))
     (-each EVALS (lambda (name)
@@ -474,7 +474,7 @@
              (req-package-providers-prepare key (gethash key req-package-loaders nil)))
            req-package-ranks)
   (maphash (lambda (key value)
-             (if (eq (gethash key req-package-ranks 0) 0)
+             (if (equal (gethash key req-package-ranks 0) 0)
                  (progn (puthash key -1 req-package-ranks)
                         (req-package-eval key))))
            req-package-ranks))
