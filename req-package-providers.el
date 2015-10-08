@@ -70,7 +70,6 @@
 
 (defun req-package-providers-prepare (package &optional loader)
   "Prepare PACKAGE - install if it is present using LOADER if specified."
-  (req-package--log-debug (format "installing package %s" package))
   (condition-case e
       (if (functionp loader)
           (funcall loader package)
@@ -84,7 +83,9 @@
                                           (ht-keys providers)))))
                (installer (car (ht-get providers provider))))
           (if installer
-              (funcall installer package)
+              (progn
+                (req-package--log-debug (format "installing package %s" package))
+                (funcall installer package))
             (when (not (require package nil t))
               (error "neither provider nor file found")))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
