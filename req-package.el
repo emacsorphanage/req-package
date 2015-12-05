@@ -245,7 +245,9 @@
 ;; 1.10.1 v1.0
 ;; ╌╌╌╌╌╌╌╌╌╌╌
 
-;;   • proper errors handling. see `req-package–log-open-log` for messages
+;;   • once you called `req-package-finish' you are able reload package
+;;     just by reload `req-package' form
+;;   • proper errors handling. see `req-package--log-open-log' for messages
 ;;   • smart add-hook which invokes function if mode is loaded
 ;;   • refactor providers system
 ;;   • no need to use progn in :init and :config sections
@@ -431,18 +433,22 @@
           (INIT (cons 'progn (car SPLIT3)))
           (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
           (REST (cadr SPLIT4))
-          (EVAL (req-package-gen-eval NAME INIT CONFIG REST)))
+          (EVAL (req-package-gen-eval NAME INIT CONFIG REST))
+          (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
      (req-package--log-debug "package requested: %s" NAME)
-     (-each DEPS
-       (lambda (req)
-         (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
-                (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
-           (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
-           (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
-           (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left))))
      (puthash NAME LOADER req-package-loaders)
      (puthash NAME EVAL req-package-evals)
-     (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)))
+     (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
+     (if (= DEPS-LEFT -1)
+         (progn (eval EVAL)
+                DEPS-LEFT)
+       (-each DEPS
+         (lambda (req)
+           (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                  (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
+             (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
+             (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+             (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left)))))))
 
 (defmacro req-package-force (name &rest args)
   "Immediatly load package NAME with ARGS."
