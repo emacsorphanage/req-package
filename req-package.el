@@ -442,13 +442,17 @@
      (if (= DEPS-LEFT -1)
          (progn (eval EVAL)
                 DEPS-LEFT)
-       (-each DEPS
-         (lambda (req)
-           (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
-                  (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
-             (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
-             (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
-             (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left)))))))
+       (progn
+         (puthash NAME 0 req-package-deps-left)
+         (-each DEPS
+           (lambda (req)
+             (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                    (DEPS-LEFT (gethash NAME req-package-deps-left 0))
+                    (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
+               (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+               (when (not (equal -1 REQ-DEPS-LEFT))
+                 (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
+                 (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left)))))))))
 
 (defmacro req-package-force (name &rest args)
   "Immediatly load package NAME with ARGS."
