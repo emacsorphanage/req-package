@@ -19,9 +19,9 @@
   :type 'list)
 
 (defcustom req-package-providers-priority
-  (ht ('elpa 0)
-      ('el-get 1)
-      ('built-in 2))
+  (ht (:elpa 0)
+      (:el-get 1)
+      (:built-in 2))
   "Priority system for package providers."
   :group 'req-package
   :type 'list)
@@ -74,12 +74,12 @@
       (if (functionp loader)
           (funcall loader package)
         (let* ((providers (req-package-providers-get-map))
-               (provider (if (and loader (symbolp loader))
+               (provider (if (and loader (keywordp loader))
                              loader
                            (-first (lambda (elem)
                                      (funcall (second (ht-get providers elem)) package))
                                    (-sort (lambda (a b) (< (ht-get req-package-providers-priority a -1)
-                                                      (ht-get req-package-providers-priority b -1)))
+                                                           (ht-get req-package-providers-priority b -1)))
                                           (ht-keys providers)))))
                (installer (car (ht-get providers provider))))
           (if installer
