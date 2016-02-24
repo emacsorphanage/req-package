@@ -11,9 +11,9 @@
   "You can check this for el get presense.")
 
 (defcustom req-package-providers-map
-  (ht ('elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
-      ('el-get '(req-package-providers-install-el-get req-package-providers-present-el-get))
-      ('built-in '(req-package-providers-install-built-in req-package-providers-present-built-in)))
+  (ht (:elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
+      (:el-get '(req-package-providers-install-el-get req-package-providers-present-el-get))
+      (:built-in '(req-package-providers-install-built-in req-package-providers-present-built-in)))
   "Providers map provider -> (installer avaible-checker)."
   :group 'req-package
   :type 'list)
