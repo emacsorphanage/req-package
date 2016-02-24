@@ -4,8 +4,13 @@
 
 (require 'dash)
 
+(defconst req-package-keywords '(:loader :require))
+
 (defun req-package-args-take-args (args acc)
-  (cond ((or (null args) (keywordp (car args))) (list (reverse acc) args))
+  (cond ((or (null args)
+             (and (keywordp (car args))
+                  (or (-contains? use-package-keywords (car args))
+                      (-contains? req-package-keywords (car args))))) (list (reverse acc) args))
         (t (req-package-args-take-args (cdr args) (cons (car args) acc)))))
 
 (defun req-package-args-extract-arg (key args acc)
