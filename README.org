@@ -131,7 +131,7 @@
 
 ** Changelog
 
-*** v1.0
+*** =v1.0=
 
     - once you called =req-package-finish= you are able reload package just by reload =req-package= form
     - proper errors handling. see =req-package--log-open-log= for messages
@@ -141,25 +141,25 @@
     - no need to use list literal in :require section
     - =:loader= keyword now accepts loaders as keywords or as functions. e.g. =:el-get=, =:elpa=, =my-loader-fn=
 
-*** v0.9
+*** =v0.9=
 
     - =:loader= keyword support
 
-*** v0.8
+*** =v0.8=
 
     - bugfixes
 
-*** v0.7
+*** =v0.7=
 
     - fixed some issues with packages installation. all packages will be installed at bootstrap time
     - custom package providers support by =req-package-providers=
     - priority feature for cross provider packages loading. you can choose, what to try first - elpa, el-get, or something else
 
-*** v0.6
+*** =v0.6=
 
     - =el-get= support
 
-*** v0.5
+*** =v0.5=
 
     - Major system refactoring.
     - Fixed bugs with defered loading.
@@ -167,26 +167,26 @@
     - =max-specpdl-size=, =max-lisp-eval-depth= issues completely solved.
     - Flexible =:require= keyword parsing.
 
-*** v0.4.2
+*** =v0.4.2=
 
     - Bug fixes.
 
-*** v0.4.1
+*** =v0.4.1=
 
     - Various tweaks and bug fixes.
 
-*** v0.4-all-cycles
+*** =v0.4-all-cycles=
 
     - All cycles of your dependencies will be printed now.
     - Also there are more handy log messages and some bug fixes.
 
-*** v0.3-cycles
+*** =v0.3-cycles=
 
     - There are nice error messages about cycled dependencies now.
     - Cycles printed in a way: =pkg1 -> [pkg2 -> ...] pkg1=.
     - It means there is a cycle around =pkg1=.
 
-*** v0.2-auto-fetch
+*** =v0.2-auto-fetch=
 
     - There is no need of explicit =:ensure= in your code now.
     - When you req-package it adds =:ensure= if package is available in your repos.

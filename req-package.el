@@ -42,17 +42,17 @@
 ;; ..... 1.9.1 TODO take package dependencies from it's meta data
 ;; ..... 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
 ;; .. 1.10 Changelog
-;; ..... 1.10.1 v1.0
-;; ..... 1.10.2 v0.9
-;; ..... 1.10.3 v0.8
-;; ..... 1.10.4 v0.7
-;; ..... 1.10.5 v0.6
-;; ..... 1.10.6 v0.5
-;; ..... 1.10.7 v0.4.2
-;; ..... 1.10.8 v0.4.1
-;; ..... 1.10.9 v0.4-all-cycles
-;; ..... 1.10.10 v0.3-cycles
-;; ..... 1.10.11 v0.2-auto-fetch
+;; ..... 1.10.1 `v1.0'
+;; ..... 1.10.2 `v0.9'
+;; ..... 1.10.3 `v0.8'
+;; ..... 1.10.4 `v0.7'
+;; ..... 1.10.5 `v0.6'
+;; ..... 1.10.6 `v0.5'
+;; ..... 1.10.7 `v0.4.2'
+;; ..... 1.10.8 `v0.4.1'
+;; ..... 1.10.9 `v0.4-all-cycles'
+;; ..... 1.10.10 `v0.3-cycles'
+;; ..... 1.10.11 `v0.2-auto-fetch'
 
 
 ;; 1 req-package
@@ -242,8 +242,8 @@
 ;; 1.10 Changelog
 ;; ──────────────
 
-;; 1.10.1 v1.0
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.1 `v1.0'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • once you called `req-package-finish' you are able reload package
 ;;     just by reload `req-package' form
@@ -256,20 +256,20 @@
 ;;     functions. e.g. `:el-get', `:elpa', `my-loader-fn'
 
 
-;; 1.10.2 v0.9
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.2 `v0.9'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `:loader' keyword support
 
 
-;; 1.10.3 v0.8
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.3 `v0.8'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • bugfixes
 
 
-;; 1.10.4 v0.7
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.4 `v0.7'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
@@ -278,14 +278,14 @@
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
-;; 1.10.5 v0.6
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.5 `v0.6'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `el-get' support
 
 
-;; 1.10.6 v0.5
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.6 `v0.5'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Major system refactoring.
 ;;   • Fixed bugs with defered loading.
@@ -294,35 +294,35 @@
 ;;   • Flexible `:require' keyword parsing.
 
 
-;; 1.10.7 v0.4.2
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.7 `v0.4.2'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Bug fixes.
 
 
-;; 1.10.8 v0.4.1
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.8 `v0.4.1'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Various tweaks and bug fixes.
 
 
-;; 1.10.9 v0.4-all-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.9 `v0.4-all-cycles'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • All cycles of your dependencies will be printed now.
 ;;   • Also there are more handy log messages and some bug fixes.
 
 
-;; 1.10.10 v0.3-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.10 `v0.3-cycles'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There are nice error messages about cycled dependencies now.
 ;;   • Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.
 ;;   • It means there is a cycle around `pkg1'.
 
 
-;; 1.10.11 v0.2-auto-fetch
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.10.11 `v0.2-auto-fetch'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There is no need of explicit `:ensure' in your code now.
 ;;   • When you req-package it adds `:ensure' if package is available in
