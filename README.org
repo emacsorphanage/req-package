@@ -47,10 +47,10 @@
      :require dired
      :config (...))
 
-   (req-package lua-mode
+   (req-package lua-mode :loader :elpa
      :config (...))
 
-   (req-package flymake)
+   (req-package flymake :loader :el-get)
 
    (req-package flymake-lua
      :require flymake lua-mode
