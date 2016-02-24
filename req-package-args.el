@@ -7,6 +7,7 @@
 (defconst req-package-keywords '(:loader :require))
 
 (defun req-package-args-take-args (args acc)
+  "Take all args until next keyword."
   (cond ((or (null args)
              (and (keywordp (car args))
                   (or (-contains? use-package-keywords (car args))
