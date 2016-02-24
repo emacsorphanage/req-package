@@ -133,10 +133,10 @@
 ;;   │   :require dired
 ;;   │   :config (...))
 ;;   │
-;;   │ (req-package lua-mode
+;;   │ (req-package lua-mode :loader :elpa
 ;;   │   :config (...))
 ;;   │
-;;   │ (req-package flymake)
+;;   │ (req-package flymake :loader :el-get)
 ;;   │
 ;;   │ (req-package flymake-lua
 ;;   │   :require flymake lua-mode
@@ -252,6 +252,8 @@
 ;;   • refactor providers system
 ;;   • no need to use progn in :init and :config sections
 ;;   • no need to use list literal in :require section
+;;   • `:loader' keyword now accepts loaders as keywords or as
+;;     functions. e.g. `:el-get', `:elpa', `my-loader-fn'
 
 
 ;; 1.10.2 v0.9
