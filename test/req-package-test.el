@@ -33,6 +33,8 @@
   (desc "req-package-args-extract-arg should extract value specified after keyword")
   (expect '(6) (car (req-package-args-extract-arg :init '(:config 5 :init 6) nil)))
   (expect '(5) (car (req-package-args-extract-arg :config'(:config 5 :init 6) nil)))
+  (expect '(6 :hello) (car (req-package-args-extract-arg :init '(:config 5 :world :init 6 :hello) nil)))
+  (expect '(:world 5) (car (req-package-args-extract-arg :config'(:config :world 5 :init 6 :hello) nil)))
   (desc "req-package-patch-config should include req-package-loaded callback in :config")
   (expect '(progn (req-package-handle-loading (quote foo) (lambda nil nil)) (req-package-loaded (quote foo)))
     (req-package-patch-config 'foo '()))
