@@ -84,7 +84,7 @@
                (installer (car (ht-get providers provider))))
           (if installer
               (progn
-                (req-package--log-debug (format "installing package %s" package))
+                (req-package--log-info (format "installing package %s" package))
                 (funcall installer package))
             (when (not (require package nil t))
               (error "neither provider nor file found")))))

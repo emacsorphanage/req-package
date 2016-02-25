@@ -366,7 +366,7 @@
   "A package loading system"
   :group 'emacs)
 
-(defcustom req-package-log-level 'warn
+(defcustom req-package-log-level 'info
   "Minimal log level, may be any level supported by log4e."
   :group 'req-package)
 
