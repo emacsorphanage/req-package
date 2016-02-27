@@ -22,7 +22,8 @@
    req-package creates this graph for you and makes a correct traverse on it.
    The syntax is almost the same as with use-package, but it provides a few additional keywords:
    1) :require - a parameter to specify dependencies
-   2) :loader - an optional parameter to specify where to get package (el-get, elpa, etc.)
+   2) :loader - an optional parameter to specify where to get package
+      (=:el-get=, =:elpa=, =:built-in=, or =my-loader-fn=)
 
    Interesting thing is that packages are installed automatically once req-package-finish function is executed.
    So there is no need for things like cask or save-packages.
