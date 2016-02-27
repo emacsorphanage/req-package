@@ -14,7 +14,7 @@
   (ht (:elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
       (:el-get '(req-package-providers-install-el-get req-package-providers-present-el-get))
       (:built-in '(req-package-providers-install-built-in req-package-providers-present-built-in)))
-  "Providers map provider -> (installer avaible-checker)."
+  "Providers map provider -> (installer available-checker)."
   :group 'req-package
   :type 'list)
 
