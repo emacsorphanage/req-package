@@ -107,7 +107,7 @@
    However, there is no need for the =:ensure= keyword; req-package will add it automatically if needed.
 
    For each package you can manually specify loader function by =:loader= keyword.
-   It can be any key for =req-package-providers= map.
+   It can be any key in =req-package-providers= map.
 
    Also there is a =req-package-force= function which simulates plain old use-package behavior.
 
