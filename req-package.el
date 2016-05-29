@@ -385,6 +385,27 @@
           (list :config config)
           rest))
 
+(defun req-package-insert (PKG LOADER EVAL)
+  (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0)))
+    (req-package--log-debug "package requested: %s %s" PKG ARGS)
+    (puthash PKG LOADER req-package-loaders)
+    (puthash PKG EVAL req-package-evals)
+    (if (= DEPS-LEFT -1)
+        (progn ;; package already been loaded before, just eval again
+          (req-package-handle-loading PKG (lambda () (eval EVAL)))
+          DEPS-LEFT)
+      (progn ;; insert package in dependency tree
+        (puthash PKG 0 req-package-deps-left)
+        (-each DEPS
+          (lambda (req)
+            (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                   (DEPS-LEFT (gethash PKG req-package-deps-left 0))
+                   (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
+              (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+              (when (not (equal -1 REQ-DEPS-LEFT))
+                (puthash req (cons PKG REQUIRED-BY) req-package-required-by)
+                (puthash PKG (+ DEPS-LEFT 1) req-package-deps-left)))))))))
+
 (defmacro req-package (pkg &rest args)
   "Add package PKG with ARGS to target list."
   `(let* ((PKG ',pkg)
@@ -404,8 +425,7 @@
           (DEP-INIT (caar SPLIT6))
           (DEP-CONFIG (caar SPLIT7))
           (REST (cadr SPLIT7))
-          (EVAL (req-package-gen-eval PKG INIT CONFIG REST))
-          (DEPS-LEFT (gethash PKG req-package-deps-left 0)))
+          (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
      (if (and LOADER
               (not (ht-get (req-package-providers-get-map) LOADER)))
          (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
@@ -416,25 +436,7 @@
                               (lambda ()
                                 (req-package-providers-prepare PKG LOADER)
                                 (eval EVAL))))
-         (progn
-           (req-package--log-debug "package requested: %s %s" PKG ARGS)
-           (puthash PKG LOADER req-package-loaders)
-           (puthash PKG EVAL req-package-evals)
-           (if (= DEPS-LEFT -1)
-               (progn ;; package already been loaded before, just eval again
-                 (req-package-handle-loading PKG (lambda () (eval EVAL)))
-                 DEPS-LEFT)
-             (progn ;; insert package in dependency tree
-               (puthash PKG 0 req-package-deps-left)
-               (-each DEPS
-                 (lambda (req)
-                   (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
-                          (DEPS-LEFT (gethash PKG req-package-deps-left 0))
-                          (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
-                     (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
-                     (when (not (equal -1 REQ-DEPS-LEFT))
-                       (puthash req (cons PKG REQUIRED-BY) req-package-required-by)
-                       (puthash PKG (+ DEPS-LEFT 1) req-package-deps-left))))))))))))
+         (req-package-insert PKG LOADER EVAL)))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
@@ -445,9 +447,9 @@
              (req-package-providers-prepare key (gethash key req-package-loaders nil)))
            req-package-deps-left)
   (maphash (lambda (key value)
-             (if (equal (gethash key req-package-deps-left 0) 0)
-                 (progn (puthash key -1 req-package-deps-left)
-                        (req-package-eval key))))
+             (when (equal (gethash key req-package-deps-left 0) 0)
+               (puthash key -1 req-package-deps-left)
+               (req-package-eval key)))
            req-package-deps-left))
 
 (put 'req-package 'lisp-indent-function 'defun)
