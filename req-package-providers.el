@@ -98,7 +98,7 @@
           (if installer
               (funcall installer package)
             (when (not (require package nil t))
-              (error "neither provider nor file found")))))
+              (error "cannot prepare package %s. no provider, no build-in, no file on load-path" package)))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
 (provide 'req-package-providers)
