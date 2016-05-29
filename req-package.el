@@ -337,7 +337,7 @@
   "Package symbol -> list of packages dependent on it.")
 
 (defvar req-package-deps-left (make-hash-table :size 200 :test 'equal)
-  "Package symbol -> list of packages dependent on it.")
+  "Package symbol -> loaded dependencies counter.")
 
 (defvar req-package-evals (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loading code prepared for evaluation.")
