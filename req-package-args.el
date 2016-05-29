@@ -4,7 +4,7 @@
 
 (require 'dash)
 
-(defconst req-package-keywords '(:loader :require))
+(defconst req-package-keywords '(:loader :require :force))
 
 (defun req-package-args-take-args (args acc)
   "Take all args until next keyword."

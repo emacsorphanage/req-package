@@ -65,21 +65,20 @@
 ;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
 
 
-;;   [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
-;;   http://www.gnu.org/licenses/gpl-3.0.txt
+;; [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
+;; http://www.gnu.org/licenses/gpl-3.0.txt
 
-;;   [[file:http://melpa.org/packages/req-package-badge.svg]]
-;;   http://melpa.org/#/req-package
+;; [[file:http://melpa.org/packages/req-package-badge.svg]]
+;; http://melpa.org/#/req-package
 
-;;   [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
-;;   http://stable.melpa.org/#/req-package
+;; [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
+;; http://stable.melpa.org/#/req-package
 
-;;   [[file:https://travis-ci.org/edvorg/req-package.svg]]
-;;   https://travis-ci.org/edvorg/req-package
+;; [[file:https://travis-ci.org/edvorg/req-package.svg]]
+;; https://travis-ci.org/edvorg/req-package
 
-;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
-;;   https://coveralls.io/github/edvorg/req-package?branch=develop
-
+;; [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+;; https://coveralls.io/github/edvorg/req-package?branch=develop
 
 ;; 1.1 Description
 ;; ───────────────
@@ -102,7 +101,7 @@
 ;;   provides a few additional keywords:
 ;;   1) :require - a parameter to specify dependencies
 ;;   2) :loader - an optional parameter to specify where to get package
-;;      (el-get, elpa, etc.)
+;;      (`:el-get', `:elpa', `:built-in', or `my-loader-fn')
 
 ;;   Interesting thing is that packages are installed automatically once
 ;;   req-package-finish function is executed.  So there is no need for
@@ -112,7 +111,7 @@
 ;;   install your packages.
 
 
-;;   [use-package] https://github.com/jwiegley/use-package
+;; [use-package] https://github.com/jwiegley/use-package
 
 
 ;; 1.2 Usage
@@ -160,7 +159,8 @@
 ;;   ┌────
 ;;   │ (require 'req-package)
 ;;   │
-;;   │ (req-package-force el-get
+;;   │ (req-package el-get
+;;   │   :force
 ;;   │   :init
 ;;   │   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
 ;;   │   (el-get 'sync))
@@ -203,10 +203,10 @@
 ;;   add it automatically if needed.
 
 ;;   For each package you can manually specify loader function by `:loader'
-;;   keyword.  It can be any key for `req-package-providers' map.
+;;   keyword.  It can be any key in `req-package-providers' map.
 
-;;   Also there is a `req-package-force' function which simulates plain old
-;;   use-package behavior.
+;;   Also there is a `:force' keyword which simulates plain old use-package
+;;   behavior.
 
 ;;   More complex req-package usage example can be found at
 ;;   [http://github.com/edvorg/emacs-configs].
@@ -254,6 +254,7 @@
 ;;   • no need to use list literal in :require section
 ;;   • `:loader' keyword now accepts loaders as keywords or as
 ;;     functions. e.g. `:el-get', `:elpa', `my-loader-fn'
+;;   • `req-package-force' replaced with `:force' keyword
 
 
 ;; 1.10.2 `v0.9'
@@ -430,51 +431,40 @@
           (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
           (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
           (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
+          (SPLIT5 (req-package-args-extract-arg :force (car (cdr SPLIT4)) nil))
           (DEPS (-flatten (car SPLIT1)))
           (LOADER (caar SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
           (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
-          (REST (cadr SPLIT4))
+          (FORCE (caar SPLIT5))
+          (REST (cadr SPLIT5))
           (EVAL (req-package-gen-eval NAME INIT CONFIG REST))
           (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
-     (req-package--log-debug "package requested: %s" NAME)
-     (puthash NAME LOADER req-package-loaders)
-     (puthash NAME EVAL req-package-evals)
-     (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
-     (if (= DEPS-LEFT -1)
-         (progn (eval EVAL)
-                DEPS-LEFT)
+     (if FORCE
+         (progn (req-package--log-debug "package force-requested: %s %s" NAME ARGS)
+                (req-package-handle-loading NAME
+                                 (lambda ()
+                                   (req-package-providers-prepare NAME LOADER)
+                                   (eval EVAL))))
        (progn
-         (puthash NAME 0 req-package-deps-left)
-         (-each DEPS
-           (lambda (req)
-             (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
-                    (DEPS-LEFT (gethash NAME req-package-deps-left 0))
-                    (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
-               (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
-               (when (not (equal -1 REQ-DEPS-LEFT))
-                 (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
-                 (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left)))))))))
-
-(defmacro req-package-force (name &rest args)
-  "Immediatly load package NAME with ARGS."
-  `(let* ((NAME ',name)
-          (ARGS ',args)
-          (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
-          (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
-          (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
-          (DEPS (-flatten (car SPLIT1)))
-          (LOADER (caar SPLIT2))
-          (INIT (cons 'progn (car SPLIT3)))
-          (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
-          (REST (cadr SPLIT4))
-          (EVAL (req-package-gen-eval NAME INIT CONFIG REST)))
-     (req-package--log-debug "package force-requested: %s" NAME)
-     (req-package-handle-loading NAME
-                      (lambda ()
-                        (req-package-providers-prepare NAME LOADER)
-                        (eval EVAL)))))
+         (req-package--log-debug "package requested: %s %s" NAME ARGS)
+         (puthash NAME LOADER req-package-loaders)
+         (puthash NAME EVAL req-package-evals)
+         (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
+         (if (= DEPS-LEFT -1)
+             (progn (eval EVAL)
+                    DEPS-LEFT)
+           (progn
+             (puthash NAME 0 req-package-deps-left)
+             (-each DEPS
+               (lambda (req)
+                 (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                        (DEPS-LEFT (gethash NAME req-package-deps-left 0))
+                        (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
+                   (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+                   (when (not (equal -1 REQ-DEPS-LEFT))
+                     (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
+                     (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left)))))))))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
@@ -491,12 +481,11 @@
            req-package-deps-left))
 
 (put 'req-package 'lisp-indent-function 'defun)
-(put 'req-package-force 'lisp-indent-function 'defun)
 (put 'req-package-hooks-add-execute 'lisp-indent-function 'defun)
 (put 'req-package-hooks-add-execute-impl 'lisp-indent-function 'defun)
 
 (defconst req-package-font-lock-keywords
-  '(("(\\(req-package\\|req-package-force\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
+  '(("(\\(req-package\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
      (1 font-lock-keyword-face)
      (2 font-lock-constant-face nil t))))
 

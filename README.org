@@ -74,7 +74,8 @@
    #+BEGIN_SRC emacs-lisp
     (require 'req-package)
 
-    (req-package-force el-get
+    (req-package el-get
+      :force
       :init
       (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
       (el-get 'sync))
@@ -109,7 +110,7 @@
    For each package you can manually specify loader function by =:loader= keyword.
    It can be any key in =req-package-providers= map.
 
-   Also there is a =req-package-force= function which simulates plain old use-package behavior.
+   Also there is a =:force= keyword which simulates plain old use-package behavior.
 
    More complex req-package usage example can be found at http://github.com/edvorg/emacs-configs.
 
@@ -141,6 +142,7 @@
     - no need to use progn in :init and :config sections
     - no need to use list literal in :require section
     - =:loader= keyword now accepts loaders as keywords or as functions. e.g. =:el-get=, =:elpa=, =my-loader-fn=
+    - =req-package-force= replaced with =:force= keyword
 
 *** =v0.9=
 
