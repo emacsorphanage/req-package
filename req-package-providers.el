@@ -45,7 +45,9 @@
   "Install PACKAGE with elpa."
   (let ((INSTALLED (package-installed-p package))) ;; TODO check that it's not a built in one
     (if (not INSTALLED)
-        (package-install package)
+        (progn
+          (req-package--log-info (format "installing package %s" package))
+          (package-install package))
       INSTALLED)))
 
 (defun req-package-providers-present-el-get (package)
@@ -58,7 +60,9 @@
   (when req-package-providers-el-get-present
     (let* ((INSTALLED (el-get-package-installed-p package)))
       (if (not INSTALLED)
-          (el-get 'sync package)
+          (progn
+            (req-package--log-info (format "installing package %s" package))
+            (el-get 'sync package))
         INSTALLED))))
 
 (defun req-package-providers-present-built-in (package)
@@ -83,9 +87,7 @@
                                           (ht-keys providers)))))
                (installer (car (ht-get providers provider))))
           (if installer
-              (progn
-                (req-package--log-info (format "installing package %s" package))
-                (funcall installer package))
+              (funcall installer package)
             (when (not (require package nil t))
               (error "neither provider nor file found")))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
