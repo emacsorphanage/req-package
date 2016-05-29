@@ -99,6 +99,7 @@
 ** Migrate from use-package
 
    Just replace all =(use-package ...)= with =(req-package [:require DEPS] ...)= and add =(req-package-finish)= at the end of your configuration file.
+   Do not use :ensure keyword, use providers system that is more powerful instead.
 
 ** Note
 

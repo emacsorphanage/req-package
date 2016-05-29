@@ -191,6 +191,8 @@
 ;;   Just replace all `(use-package ...)' with `(req-package [:require
 ;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
 ;;   configuration file.
+;;   Do not use :ensure keyword, use providers system that is more
+;;   powerful instead.
 
 
 ;; 1.6 Note
@@ -500,6 +502,7 @@
 (req-package--log-set-level req-package-log-level)
 (req-package--log-enable-logging)
 (req-package--log-clear-log)
+(setq use-package-always-ensure nil)
 
 (provide 'req-package)
 
