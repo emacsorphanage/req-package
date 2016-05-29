@@ -454,7 +454,7 @@
          (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
          (if (= DEPS-LEFT -1)
              (progn ;; package already been loaded before, just eval again
-               (eval EVAL)
+               (req-package-handle-loading NAME (lambda () (eval EVAL)))
                DEPS-LEFT)
            (progn ;; insert package in dependency tree
              (puthash NAME 0 req-package-deps-left)
