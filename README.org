@@ -126,12 +126,6 @@
    Please, commit and pull-request your changes to =develop= branch.
    Master is used for automatic repo package builds by melpa's travis-ci.
 
-** Things to be done
-
-*** TODO take package dependencies from it's meta data
-
-*** TODO el-get/elpa packages must be in priority over builtin ones
-
 ** Changelog
 
 *** =v1.0=
