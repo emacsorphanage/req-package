@@ -32,24 +32,23 @@
 ;; 1 req-package
 ;; .. 1.1 Description
 ;; .. 1.2 Usage
-;; .. 1.3 El Get
-;; .. 1.4 More?
+;; .. 1.3 Providers
+;; .. 1.4 Logging
 ;; .. 1.5 Migrate from use-package
 ;; .. 1.6 Note
-;; .. 1.7 Logging
-;; .. 1.8 Contribute
-;; .. 1.9 Changelog
-;; ..... 1.9.1 `v1.0'
-;; ..... 1.9.2 `v0.9'
-;; ..... 1.9.3 `v0.8'
-;; ..... 1.9.4 `v0.7'
-;; ..... 1.9.5 `v0.6'
-;; ..... 1.9.6 `v0.5'
-;; ..... 1.9.7 `v0.4.2'
-;; ..... 1.9.8 `v0.4.1'
-;; ..... 1.9.9 `v0.4-all-cycles'
-;; ..... 1.9.10 `v0.3-cycles'
-;; ..... 1.9.11 `v0.2-auto-fetch'
+;; .. 1.7 Contribute
+;; .. 1.8 Changelog
+;; ..... 1.8.1 `v1.0'
+;; ..... 1.8.2 `v0.9'
+;; ..... 1.8.3 `v0.8'
+;; ..... 1.8.4 `v0.7'
+;; ..... 1.8.5 `v0.6'
+;; ..... 1.8.6 `v0.5'
+;; ..... 1.8.7 `v0.4.2'
+;; ..... 1.8.8 `v0.4.1'
+;; ..... 1.8.9 `v0.4-all-cycles'
+;; ..... 1.8.10 `v0.3-cycles'
+;; ..... 1.8.11 `v0.2-auto-fetch'
 
 
 ;; 1 req-package
@@ -80,35 +79,9 @@
 ;; 1.1 Description
 ;; ───────────────
 
-;;   req-package solves one single problem - make order of package
-;;   configurations in your init.el right without continuous reordering
-;;   your code while still providing ambrosian [use-package] goodness.  It
-;;   makes your .emacs.d code more strict and modular, and less error
-;;   prone.  You can look here, how I divided my code in separate modules
-;;   and how simple it looks
-;;   [https://github.com/edvorg/emacs-configs/tree/master/init.d] .
-
-;;   Remember, how often you tackled into problem, when you need to require
-;;   one package, do some configuration, then the same with second and so
-;;   on. Sometimes it becomes too complex.  Especially in cases when one
-;;   package have more than one dependency.  You can draw a graph of
-;;   dependencies in your configuration, and, I'm sure, it's complex.
-;;   req-package creates this graph for you and makes a correct traverse on
-;;   it.  The syntax is almost the same as with use-package, but it
-;;   provides a few additional keywords:
-;;   1) :require - a parameter to specify dependencies
-;;   2) :loader - an optional parameter to specify where to get package
-;;      (`:el-get', `:elpa', `:built-in', `:path', or `my-loader-fn')
-
-;;   Interesting thing is that packages are installed automatically once
-;;   req-package-finish function is executed.  So there is no need for
-;;   things like cask or save-packages.  You just write a configuration
-;;   with packages you need and they will be there.  req-package will try
-;;   to use elpa, el-get or any package system provided by you to find and
-;;   install your packages.
-
-
-;; [use-package] https://github.com/jwiegley/use-package
+;;   req-package provides dependency management for use-package.  this
+;;   allows to write simple and modular configs.  migration from
+;;   use-package is simple and syntax is almost same.
 
 
 ;; 1.2 Usage
@@ -118,99 +91,81 @@
 
 ;;   ┌────
 ;;   │ (require 'req-package)
+;;   │
+;;   │ (req-package el-get ;; prepare el-get (optional)
+;;   │   :force t ;; load package immediately, no dependency resolution
+;;   │   :config
+;;   │   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;   │   (el-get 'sync))
 ;;   └────
 
-;;   Define required packages with dependencies using `:require' like this:
+;;   Define required packages with dependencies using `:require'.
+;;   Optionally provide preferred installation source with `:loader'
+;;   keyword.  Use `:force t' if you want to avoid dependency management
+;;   and load right now.
 
 ;;   ┌────
-;;   │ (req-package dired) ;; you can omit this empty requirement because of dired-single
+;;   │ ;; init-dired.el
+;;   │
+;;   │ (req-package dired) ;; this form is optional as it doesn't have any configuration
 ;;   │
 ;;   │ (req-package dired-single
-;;   │   :require dired
+;;   │   :require dired ;; depends on dired
 ;;   │   :config (...))
 ;;   │
-;;   │ (req-package lua-mode :loader :elpa
+;;   │ (req-package dired-isearch
+;;   │   :require dired ;; depends on dired
 ;;   │   :config (...))
 ;;   │
-;;   │ (req-package flymake :loader :el-get)
+;;   │ ;; init-lua.el
+;;   │
+;;   │ (req-package lua-mode
+;;   │   :loader :elpa ;; installed from elpa
+;;   │   :config (...))
 ;;   │
 ;;   │ (req-package flymake-lua
 ;;   │   :require flymake lua-mode
 ;;   │   :config (...))
+;;   │
+;;   │ ;; init-flymake.el
+;;   │
+;;   │ (req-package flymake
+;;   │   :loader :built-in ;; use emacs built-in version
+;;   │   :config (...))
+;;   │
+;;   │ (req-package flymake-cursor
+;;   │   :loader :el-get ;; installed from el-get
+;;   │   :require flymake
+;;   │   :config (...))
+;;   │
+;;   │ (req-package flymake-custom
+;;   │   :require flymake
+;;   │   :loader :path ;; use package that is on load-path
+;;   │   :config (...))
 ;;   └────
 
-;;   To start loading packages in right order:
+;;   Solve dependencies, install and load packages in right order:
 
 ;;   ┌────
+;;   │ ;; order doesn't matter here
+;;   │ (require 'init-dired)
+;;   │ (require 'init-lua)
+;;   │ (require 'init-flymake)
 ;;   │ (req-package-finish)
 ;;   └────
 
 
-;; 1.3 El Get
-;; ──────────
+;; 1.3 Providers
+;; ─────────────
 
-;;   There is another benefit over use-package - `el-get' support.  No more
-;;   thinking about sources for your packages.  Just install, configure
-;;   your el-get and make sure it's on load-path.  Here is example:
-
-;;   ┌────
-;;   │ (require 'req-package)
-;;   │
-;;   │ (req-package el-get
-;;   │   :force
-;;   │   :init
-;;   │   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-;;   │   (el-get 'sync))
-;;   │
-;;   │ (req-package gotham-theme
-;;   │   :config
-;;   │   (print "gotham theme is here and installed from el-get"))
-;;   │
-;;   │ (req-package-finish)
-;;   └────
-
-;;   Also, of course, there could be dependencies between el-get and elpa
-;;   packages
+;;   `req-package' supports extensible package providers system.  This is
+;;   alternative to `:ensure' keyword in `use-package'.  Use `:loader'
+;;   keyword with `:el-get', `:elpa', `:build-in' or `:path' value.  Extend
+;;   `req-package-providers-map' if you want to introduce new provider.
+;;   Tweak provider priorities using `req-package-providers-priority' map.
 
 
-;; 1.4 More?
-;; ─────────
-
-;;   You can always extend list of package providers or change priorities
-;;   if you want.  in which your packages are being installed.  It can be
-;;   done by customizing `req-package-providers' map.  It's a mapping
-;;   loader-symbol -> (list install-function package-present-p-function)
-
-
-;; 1.5 Migrate from use-package
-;; ────────────────────────────
-
-;;   Just replace all `(use-package ...)' with `(req-package [:require
-;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
-;;   configuration file.  Do not use :ensure keyword, use providers system
-;;   that is more powerful instead.
-
-
-;; 1.6 Note
-;; ────────
-
-;;   All use-package parameters are supported, see use-package manual.  for
-;;   additional info.
-
-;;   However, there is no need for the `:ensure' keyword; req-package will
-;;   add it automatically if needed.
-
-;;   For each package you can manually specify loader function by `:loader'
-;;   keyword.  It can be any key in `req-package-providers' map.
-
-;;   Also there is a `:force' keyword which simulates plain old use-package
-;;   behavior.
-
-;;   More complex req-package usage example can be found at
-;;   [http://github.com/edvorg/emacs-configs].
-
-
-;; 1.7 Logging
+;; 1.4 Logging
 ;; ───────────
 
 ;;   You can use `req-package--log-open-log' to see, what is happening with
@@ -219,17 +174,37 @@
 ;;   `fatal', `error', `warn', `info', `debug', `trace'.
 
 
-;; 1.8 Contribute
+;; 1.5 Migrate from use-package
+;; ────────────────────────────
+
+;;   Just replace all `(use-package ...)' with `(req-package [:require
+;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
+;;   configuration file.  Do not use `:ensure' keyword, use providers
+;;   system that is more powerful.  There is a `:force' keyword which
+;;   simulates plain old use-package behavior.
+
+
+;; 1.6 Note
+;; ────────
+
+;;   More complex req-package usage example can be found at
+;;   [https://github.com/edvorg/emacs-configs].
+
+;;   Use `load-dir' package to load all `*.el' files from a dir (e.g
+;;   `~/.emacs.d/init.d')
+
+
+;; 1.7 Contribute
 ;; ──────────────
 
-;;   Please, commit and pull-request your changes to `develop' branch.
-;;   Master is used for automatic repo package builds by melpa's travis-ci.
+;;   Please, pull-request your changes to `develop' branch.  Master is used
+;;   for automatic *release* package builds by travis-ci.
 
 
-;; 1.9 Changelog
+;; 1.8 Changelog
 ;; ─────────────
 
-;; 1.9.1 `v1.0'
+;; 1.8.1 `v1.0'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • once you called `req-package-finish' you are able reload package
@@ -244,19 +219,19 @@
 ;;   • `req-package-force' replaced with `:force' keyword
 
 
-;; 1.9.2 `v0.9'
+;; 1.8.2 `v0.9'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `:loader' keyword support
 
 
-;; 1.9.3 `v0.8'
+;; 1.8.3 `v0.8'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • bugfixes
 
 
-;; 1.9.4 `v0.7'
+;; 1.8.4 `v0.7'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation. all packages will be
@@ -266,13 +241,13 @@
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
-;; 1.9.5 `v0.6'
+;; 1.8.5 `v0.6'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `el-get' support
 
 
-;; 1.9.6 `v0.5'
+;; 1.8.6 `v0.5'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Major system refactoring.
@@ -282,26 +257,26 @@
 ;;   • Flexible `:require' keyword parsing.
 
 
-;; 1.9.7 `v0.4.2'
+;; 1.8.7 `v0.4.2'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Bug fixes.
 
 
-;; 1.9.8 `v0.4.1'
+;; 1.8.8 `v0.4.1'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Various tweaks and bug fixes.
 
 
-;; 1.9.9 `v0.4-all-cycles'
+;; 1.8.9 `v0.4-all-cycles'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • All cycles of your dependencies will be printed now.
 ;;   • Also there are more handy log messages and some bug fixes.
 
 
-;; 1.9.10 `v0.3-cycles'
+;; 1.8.10 `v0.3-cycles'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There are nice error messages about cycled dependencies now.
@@ -309,7 +284,7 @@
 ;;   • It means there is a cycle around `pkg1'.
 
 
-;; 1.9.11 `v0.2-auto-fetch'
+;; 1.8.11 `v0.2-auto-fetch'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There is no need of explicit `:ensure' in your code now.
