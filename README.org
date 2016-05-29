@@ -68,7 +68,7 @@
 
    There is another benefit over use-package - =el-get= support.
    No more thinking about sources for your packages.
-   Just install and configure your el-get.
+   Just install, configure your el-get and make sure it's on load-path.
    Here is example:
 
    #+BEGIN_SRC emacs-lisp

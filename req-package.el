@@ -153,8 +153,9 @@
 ;; ──────────
 
 ;;   There is another benefit over use-package - `el-get' support.  No more
-;;   thinking about sources for your packages.  Just install and configure
-;;   your el-get.  Here is example:
+;;   thinking about sources for your packages.  Just install, configure
+;;   your el-get and make sure it's on load-path.
+;;   Here is example:
 
 ;;   ┌────
 ;;   │ (require 'req-package)
