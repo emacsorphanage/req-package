@@ -1,4 +1,3 @@
-(source gnu)
 (source melpa)
 
 (package-file "req-package.el")
