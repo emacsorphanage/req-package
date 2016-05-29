@@ -101,7 +101,7 @@
 ;;   provides a few additional keywords:
 ;;   1) :require - a parameter to specify dependencies
 ;;   2) :loader - an optional parameter to specify where to get package
-;;      (`:el-get', `:elpa', `:built-in', or `my-loader-fn')
+;;      (`:el-get', `:elpa', `:built-in', `:path', or `my-loader-fn')
 
 ;;   Interesting thing is that packages are installed automatically once
 ;;   req-package-finish function is executed.  So there is no need for
@@ -190,9 +190,8 @@
 
 ;;   Just replace all `(use-package ...)' with `(req-package [:require
 ;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
-;;   configuration file.
-;;   Do not use :ensure keyword, use providers system that is more
-;;   powerful instead.
+;;   configuration file.  Do not use :ensure keyword, use providers system
+;;   that is more powerful instead.
 
 
 ;; 1.6 Note
@@ -254,8 +253,8 @@
 ;;   • refactor providers system
 ;;   • no need to use progn in :init and :config sections
 ;;   • no need to use list literal in :require section
-;;   • `:loader' keyword now accepts loaders as keywords or as
-;;     functions. e.g. `:el-get', `:elpa', `my-loader-fn'
+;;   • `:loader' keyword now accepts loaders as keywords or as functions.
+;;     e.g. `:el-get', `:elpa', `:build-int', `:path' and `my-loader-fn'
 ;;   • `req-package-force' replaced with `:force' keyword
 
 

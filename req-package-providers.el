@@ -13,7 +13,8 @@
 (defcustom req-package-providers-map
   (ht (:elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
       (:el-get '(req-package-providers-install-el-get req-package-providers-present-el-get))
-      (:built-in '(req-package-providers-install-built-in req-package-providers-present-built-in)))
+      (:built-in '(req-package-providers-install-built-in req-package-providers-present-built-in))
+      (:path '(req-package-providers-install-path req-package-providers-present-path)))
   "Providers map provider -> (installer available-checker)."
   :group 'req-package
   :type 'list)
@@ -71,6 +72,13 @@
 (defun req-package-providers-install-built-in (package)
   (unless (package-built-in-p package)
     (error "package is not built-in")))
+
+(defun req-package-providers-present-path (package)
+  (locate-file (symbol-name package) path '(".el" ".elc")))
+
+(defun req-package-providers-install-path (package)
+  (unless (locate-file (symbol-name package) path '(".el" ".elc"))
+    (error "package is not on load path")))
 
 (defun req-package-providers-prepare (package &optional loader)
   "Prepare PACKAGE - install if it is present using LOADER if specified."
