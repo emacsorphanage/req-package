@@ -17,5 +17,10 @@
   (let ((h (intern (concat (symbol-name m) "-hook"))))
     (req-package-hooks-add-execute-impl m h f)))
 
+(defun add-hook-exec (m f &optional ff)
+  (if ff
+      (req-package-hooks-add-execute-impl m f ff)
+    (req-package-hooks-add-execute m f)))
+
 (provide 'req-package-hooks)
 ;;; req-package-hooks ends here
