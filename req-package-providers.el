@@ -75,10 +75,10 @@
     (error "package is not built-in")))
 
 (defun req-package-providers-present-path (package)
-  (if (locate-file (symbol-name package) path '(".el" ".elc")) t nil))
+  (if (locate-file (symbol-name package) load-path '(".el" ".elc")) t nil))
 
 (defun req-package-providers-install-path (package)
-  (unless (locate-file (symbol-name package) path '(".el" ".elc"))
+  (unless (locate-file (symbol-name package) load-path '(".el" ".elc"))
     (error "package is not on load path")))
 
 (defun req-package-providers-prepare (package &optional loader)
