@@ -440,33 +440,36 @@
           (REST (cadr SPLIT5))
           (EVAL (req-package-gen-eval NAME INIT CONFIG REST))
           (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
-     (if FORCE
-         (progn ;; load avoiding dependency management
-           (req-package--log-debug "package force-requested: %s %s" NAME ARGS)
-           (req-package-handle-loading NAME
-                            (lambda ()
-                              (req-package-providers-prepare NAME LOADER)
-                              (eval EVAL))))
-       (progn
-         (req-package--log-debug "package requested: %s %s" NAME ARGS)
-         (puthash NAME LOADER req-package-loaders)
-         (puthash NAME EVAL req-package-evals)
-         (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
-         (if (= DEPS-LEFT -1)
-             (progn ;; package already been loaded before, just eval again
-               (req-package-handle-loading NAME (lambda () (eval EVAL)))
-               DEPS-LEFT)
-           (progn ;; insert package in dependency tree
-             (puthash NAME 0 req-package-deps-left)
-             (-each DEPS
-               (lambda (req)
-                 (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
-                        (DEPS-LEFT (gethash NAME req-package-deps-left 0))
-                        (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
-                   (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
-                   (when (not (equal -1 REQ-DEPS-LEFT))
-                     (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
-                     (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left)))))))))))
+     (if (and LOADER
+              (not (ht-get (req-package-providers-get-map) LOADER)))
+         (req-package--log-error "unable to find loader %s for package %s" LOADER NAME)
+       (if FORCE
+           (progn ;; load avoiding dependency management
+             (req-package--log-debug "package force-requested: %s %s" NAME ARGS)
+             (req-package-handle-loading NAME
+                              (lambda ()
+                                (req-package-providers-prepare NAME LOADER)
+                                (eval EVAL))))
+         (progn
+           (req-package--log-debug "package requested: %s %s" NAME ARGS)
+           (puthash NAME LOADER req-package-loaders)
+           (puthash NAME EVAL req-package-evals)
+           (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
+           (if (= DEPS-LEFT -1)
+               (progn ;; package already been loaded before, just eval again
+                 (req-package-handle-loading NAME (lambda () (eval EVAL)))
+                 DEPS-LEFT)
+             (progn ;; insert package in dependency tree
+               (puthash NAME 0 req-package-deps-left)
+               (-each DEPS
+                 (lambda (req)
+                   (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                          (DEPS-LEFT (gethash NAME req-package-deps-left 0))
+                          (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
+                     (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+                     (when (not (equal -1 REQ-DEPS-LEFT))
+                       (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
+                       (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left))))))))))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
