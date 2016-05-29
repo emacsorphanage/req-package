@@ -43,11 +43,11 @@
 
 (defun req-package-providers-install-elpa (package)
   "Install PACKAGE with elpa."
-  (let ((INSTALLED (package-installed-p package))) ;; TODO check that it's not a built in one
+  (let ((INSTALLED (assq package package-alist)))
     (if (not INSTALLED)
-        (progn
+        (let* ((PKG (second (assq package package-archive-contents))))
           (req-package--log-info (format "installing package %s" package))
-          (package-install package))
+          (package-install PKG))
       INSTALLED)))
 
 (defun req-package-providers-present-el-get (package)
