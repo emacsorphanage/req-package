@@ -337,7 +337,7 @@
   "Package symbol -> list of packages dependent on it.")
 
 (defvar req-package-deps-left (make-hash-table :size 200 :test 'equal)
-  "Package symbol -> list of packages dependent on it.")
+  "Package symbol -> loaded dependencies counter.")
 
 (defvar req-package-evals (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loading code prepared for evaluation.")
@@ -345,106 +345,123 @@
 (defvar req-package-loaders (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loader function to load package by.")
 
-(defun req-package-patch-config (name form)
-  "Wrap package NAME :config FORM into progn with callbacks."
+(defvar req-package-branches (make-hash-table :size 200 :test 'equal))
+
+(defun req-package-patch-config (pkg form)
+  "Wrap package PKG :config FORM into progn with callbacks."
   (list 'progn
-        (list 'req-package-handle-loading (list 'quote name) (list 'lambda () form))
-        (list 'req-package-loaded (list 'quote name))))
+        (list 'req-package-handle-loading (list 'quote pkg) (list 'lambda () form))
+        (list 'req-package-loaded (list 'quote pkg))))
 
-(defun req-package-eval (name)
-  "Evaluate package NAME request."
-  (let* ((DEFAULT (req-package-gen-eval name (list 'progn) (req-package-patch-config name nil) nil))
-         (EVAL (gethash name req-package-evals DEFAULT))
-         (NAME name))
-    (req-package-handle-loading NAME (lambda () (eval EVAL)))))
+(defun req-package-eval (pkg)
+  "Evaluate package PKG request."
+  (let* ((DEFAULT (req-package-gen-eval pkg (list 'progn) (req-package-patch-config pkg nil) nil))
+         (EVAL (gethash pkg req-package-evals DEFAULT))
+         (PKG pkg))
+    (req-package-handle-loading PKG (lambda () (eval EVAL)))))
 
-(defun req-package-loaded (name)
-  "Called after package NAME loaded to continue dependency graph traverse."
-  (req-package--log-info "package loaded: %s" name)
+(defun req-package-loaded (pkg)
+  "Called after package PKG loaded to continue dependency graph traverse."
+  (req-package--log-info "package loaded: %s" pkg)
   (let* ((EVALS (-reduce-from
                  (lambda (memo dependent)
                    (let* ((DEPS-LEFT (- (gethash dependent req-package-deps-left 0) 1)))
                      (puthash dependent DEPS-LEFT req-package-deps-left)
-                     (if (equal 0 DEPS-LEFT) (cons dependent memo) memo)))
+                     (if (equal 0 DEPS-LEFT)
+                         (cons dependent memo)
+                       memo)))
                  nil
-                 (gethash name req-package-required-by nil))))
-    (-each EVALS (lambda (name)
-                   (puthash name -1 req-package-deps-left)
-                   (req-package-eval name)))))
+                 (gethash (car pkg) req-package-required-by nil))))
+    (-each EVALS (lambda (pkg)
+                   (puthash pkg -1 req-package-deps-left)
+                   (req-package-eval pkg)))))
 
-(defun req-package-handle-loading (name f)
-  "Error handle for package NAME loading process by calling F."
+(defun req-package-handle-loading (pkg f)
+  "Error handle for package PKG loading process by calling F."
   (condition-case-unless-debug e
       (funcall f)
-    (error (req-package--log-error (format "Unable to load package %s -- %s" name e)))))
+    (error (req-package--log-error (format "Unable to load package %s -- %s" pkg e)))))
 
 (defun req-package-gen-eval (package init config rest)
   "Generate eval for PACKAGE."
-  (append (list 'use-package package)
-          (list :init init)
-          (list :config config)
-          rest))
+  (let* ((package (car package)))
+    (append (list 'use-package package)
+            (list :init init)
+            (list :config config)
+            rest)))
 
-(defmacro req-package (name &rest args)
-  "Add package NAME with ARGS to target list."
-  `(let* ((NAME ',name)
+(defun req-package-schedule (PKG LOADER EVAL)
+  (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0))
+         (BRANCHES (ht-get req-package-branches (car PKG))))
+    (req-package--log-debug "package requested: %s %s" PKG EVAL)
+    (puthash (car PKG) LOADER req-package-loaders)
+    (puthash PKG EVAL req-package-evals)
+    (ht-set req-package-branches (car PKG) (cons PKG BRANCHES))
+    (if (= DEPS-LEFT -1)
+        (progn ;; package already been loaded before, just eval again
+          (req-package-handle-loading PKG (lambda () (eval EVAL)))
+          DEPS-LEFT)
+      (progn ;; insert package in dependency tree
+        (puthash PKG 0 req-package-deps-left)
+        (-each DEPS
+          (lambda (req)
+            (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                   (DEPS-LEFT (gethash PKG req-package-deps-left 0))
+                   (REQ-DEPS-LEFT (gethash req req-package-deps-left 0))
+                   (BRANCHES (ht-get req-package-branches req)))
+              (ht-set req-package-branches req BRANCHES)
+              (when (not (equal -1 REQ-DEPS-LEFT))
+                (puthash req (cons PKG REQUIRED-BY) req-package-required-by)
+                (puthash PKG (+ DEPS-LEFT 1) req-package-deps-left)))))))))
+
+(defmacro req-package (pkg &rest args)
+  "Add package PKG with ARGS to target list."
+  `(let* ((PKG ',pkg)
           (ARGS ',args)
           (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-args-extract-arg :loader (car (cdr SPLIT1)) nil))
-          (SPLIT3 (req-package-args-extract-arg :init (car (cdr SPLIT2)) nil))
-          (SPLIT4 (req-package-args-extract-arg :config (car (cdr SPLIT3)) nil))
-          (SPLIT5 (req-package-args-extract-arg :force (car (cdr SPLIT4)) nil))
+          (SPLIT2 (req-package-args-extract-arg :loader (cadr SPLIT1) nil))
+          (SPLIT3 (req-package-args-extract-arg :init (cadr SPLIT2) nil))
+          (SPLIT4 (req-package-args-extract-arg :config (cadr SPLIT3) nil))
+          (SPLIT5 (req-package-args-extract-arg :force (cadr SPLIT4) nil))
+          (SPLIT6 (req-package-args-extract-arg :dep-init (cadr SPLIT5) nil))
+          (SPLIT7 (req-package-args-extract-arg :dep-config (cadr SPLIT6) nil))
           (DEPS (-flatten (car SPLIT1)))
           (LOADER (caar SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
-          (CONFIG (req-package-patch-config NAME (cons 'progn (car SPLIT4))))
+          (PKG (list PKG DEPS))
+          (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT4))))
           (FORCE (caar SPLIT5))
-          (REST (cadr SPLIT5))
-          (EVAL (req-package-gen-eval NAME INIT CONFIG REST))
-          (DEPS-LEFT (gethash NAME req-package-deps-left 0)))
-     (if (and LOADER
-              (not (ht-get (req-package-providers-get-map) LOADER)))
-         (req-package--log-error "unable to find loader %s for package %s" LOADER NAME)
+          (DEP-INIT (caar SPLIT6))
+          (DEP-CONFIG (caar SPLIT7))
+          (REST (cadr SPLIT7))
+          (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
+     (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
+         (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
        (if FORCE
            (progn ;; load avoiding dependency management
-             (req-package--log-debug "package force-requested: %s %s" NAME ARGS)
-             (req-package-handle-loading NAME
-                              (lambda ()
-                                (req-package-providers-prepare NAME LOADER)
-                                (eval EVAL))))
-         (progn
-           (req-package--log-debug "package requested: %s %s" NAME ARGS)
-           (puthash NAME LOADER req-package-loaders)
-           (puthash NAME EVAL req-package-evals)
-           (puthash NAME (gethash NAME req-package-deps-left 0) req-package-deps-left)
-           (if (= DEPS-LEFT -1)
-               (progn ;; package already been loaded before, just eval again
-                 (req-package-handle-loading NAME (lambda () (eval EVAL)))
-                 DEPS-LEFT)
-             (progn ;; insert package in dependency tree
-               (puthash NAME 0 req-package-deps-left)
-               (-each DEPS
-                 (lambda (req)
-                   (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
-                          (DEPS-LEFT (gethash NAME req-package-deps-left 0))
-                          (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
-                     (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
-                     (when (not (equal -1 REQ-DEPS-LEFT))
-                       (puthash req (cons NAME REQUIRED-BY) req-package-required-by)
-                       (puthash NAME (+ DEPS-LEFT 1) req-package-deps-left))))))))))))
+             (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
+             (req-package-handle-loading PKG
+                                         (lambda ()
+                                           (req-package-providers-prepare (car PKG) LOADER)
+                                           (eval EVAL))))
+         (req-package-schedule PKG LOADER EVAL)))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
-  (req-package-cycles-detect req-package-required-by)
+  ;; (req-package-cycles-detect req-package-required-by) ;; FIXME
   (req-package--log-debug "package requests finished: %s packages are waiting"
-               (hash-table-count req-package-deps-left))
+                          (hash-table-count req-package-branches))
+  (maphash (lambda (req branches)
+             (when (not branches)
+               (let* ((REQ-PKG (list req nil))
+                      (CURRENT (gethash REQ-PKG req-package-deps-left 0)))
+                 (puthash REQ-PKG CURRENT req-package-deps-left)))
+             (req-package-providers-prepare req (gethash req req-package-loaders nil)))
+           req-package-branches)
   (maphash (lambda (key value)
-             (req-package-providers-prepare key (gethash key req-package-loaders nil)))
-           req-package-deps-left)
-  (maphash (lambda (key value)
-             (if (equal (gethash key req-package-deps-left 0) 0)
-                 (progn (puthash key -1 req-package-deps-left)
-                        (req-package-eval key))))
+             (when (equal (gethash key req-package-deps-left 0) 0)
+               (puthash key -1 req-package-deps-left)
+               (req-package-eval key)))
            req-package-deps-left))
 
 (put 'req-package 'lisp-indent-function 'defun)

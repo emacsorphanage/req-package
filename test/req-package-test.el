@@ -35,12 +35,12 @@
   (expect '(5) (car (req-package-args-extract-arg :config'(:config 5 :init 6) nil)))
   (expect '(6 :hello) (car (req-package-args-extract-arg :init '(:config 5 :world :init 6 :hello) nil)))
   (expect '(:world 5) (car (req-package-args-extract-arg :config'(:config :world 5 :init 6 :hello) nil)))
-  (desc "req-package-patch-config should include req-package-loaded callback in :config")
-  (expect '(progn (req-package-handle-loading (quote foo) (lambda nil nil)) (req-package-loaded (quote foo)))
-    (req-package-patch-config 'foo '()))
+  ;; (desc "req-package-patch-config should include req-package-loaded callback in :config")
+  (expect '(progn (req-package-handle-loading (quote (foo nil)) (lambda nil nil)) (req-package-loaded (quote (foo nil))))
+    (req-package-patch-config '(foo nil) '()))
   (desc "req-package-gen-eval should generate valid use-package form")
   (expect '(use-package bar :init nil :config nil)
-    (req-package-gen-eval 'bar nil nil nil))
+    (req-package-gen-eval '(bar nil) nil nil nil))
   (desc "req-package-handle-loading should return eval value")
   (expect 1
     (req-package-handle-loading 'foo (lambda () 1)))
@@ -53,7 +53,7 @@
   (expect "joker"
     (with-mock
       (stub gethash => "joker")
-      (req-package-eval 'evil)))
+      (req-package-eval '(evil niil))))
   (desc "req-package-hooks-add-execute should return hook value if invoked")
   (expect "loaded"
     (with-mock
