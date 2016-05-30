@@ -345,6 +345,8 @@
 (defvar req-package-loaders (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loader function to load package by.")
 
+(defvar req-package-branches (make-hash-table :size 200 :test 'equal))
+
 (defun req-package-patch-config (pkg form)
   "Wrap package PKG :config FORM into progn with callbacks."
   (list 'progn
@@ -365,9 +367,11 @@
                  (lambda (memo dependent)
                    (let* ((DEPS-LEFT (- (gethash dependent req-package-deps-left 0) 1)))
                      (puthash dependent DEPS-LEFT req-package-deps-left)
-                     (if (equal 0 DEPS-LEFT) (cons dependent memo) memo)))
+                     (if (equal 0 DEPS-LEFT)
+                         (cons dependent memo)
+                       memo)))
                  nil
-                 (gethash pkg req-package-required-by nil))))
+                 (gethash (car pkg) req-package-required-by nil))))
     (-each EVALS (lambda (pkg)
                    (puthash pkg -1 req-package-deps-left)
                    (req-package-eval pkg)))))
@@ -380,16 +384,19 @@
 
 (defun req-package-gen-eval (package init config rest)
   "Generate eval for PACKAGE."
-  (append (list 'use-package package)
-          (list :init init)
-          (list :config config)
-          rest))
+  (let* ((package (car package)))
+    (append (list 'use-package package)
+            (list :init init)
+            (list :config config)
+            rest)))
 
-(defun req-package-insert (PKG LOADER EVAL)
-  (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0)))
-    (req-package--log-debug "package requested: %s %s" PKG ARGS)
-    (puthash PKG LOADER req-package-loaders)
+(defun req-package-schedule (PKG LOADER EVAL)
+  (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0))
+         (BRANCHES (ht-get req-package-branches (car PKG))))
+    (req-package--log-debug "package requested: %s %s" PKG EVAL)
+    (puthash (car PKG) LOADER req-package-loaders)
     (puthash PKG EVAL req-package-evals)
+    (ht-set req-package-branches (car PKG) (cons PKG BRANCHES))
     (if (= DEPS-LEFT -1)
         (progn ;; package already been loaded before, just eval again
           (req-package-handle-loading PKG (lambda () (eval EVAL)))
@@ -400,8 +407,9 @@
           (lambda (req)
             (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
                    (DEPS-LEFT (gethash PKG req-package-deps-left 0))
-                   (REQ-DEPS-LEFT (gethash req req-package-deps-left 0)))
-              (puthash req (gethash req req-package-deps-left 0) req-package-deps-left)
+                   (REQ-DEPS-LEFT (gethash req req-package-deps-left 0))
+                   (BRANCHES (ht-get req-package-branches req)))
+              (ht-set req-package-branches req BRANCHES)
               (when (not (equal -1 REQ-DEPS-LEFT))
                 (puthash req (cons PKG REQUIRED-BY) req-package-required-by)
                 (puthash PKG (+ DEPS-LEFT 1) req-package-deps-left)))))))))
@@ -420,32 +428,36 @@
           (DEPS (-flatten (car SPLIT1)))
           (LOADER (caar SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
+          (PKG (list PKG DEPS))
           (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT4))))
           (FORCE (caar SPLIT5))
           (DEP-INIT (caar SPLIT6))
           (DEP-CONFIG (caar SPLIT7))
           (REST (cadr SPLIT7))
           (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
-     (if (and LOADER
-              (not (ht-get (req-package-providers-get-map) LOADER)))
+     (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
          (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
        (if FORCE
            (progn ;; load avoiding dependency management
-             (req-package--log-debug "package force-requested: %s %s" PKG ARGS)
+             (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
              (req-package-handle-loading PKG
-                              (lambda ()
-                                (req-package-providers-prepare PKG LOADER)
-                                (eval EVAL))))
-         (req-package-insert PKG LOADER EVAL)))))
+                                         (lambda ()
+                                           (req-package-providers-prepare (car PKG) LOADER)
+                                           (eval EVAL))))
+         (req-package-schedule PKG LOADER EVAL)))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
-  (req-package-cycles-detect req-package-required-by)
+  ;; (req-package-cycles-detect req-package-required-by) ;; FIXME
   (req-package--log-debug "package requests finished: %s packages are waiting"
-               (hash-table-count req-package-deps-left))
-  (maphash (lambda (key value)
-             (req-package-providers-prepare key (gethash key req-package-loaders nil)))
-           req-package-deps-left)
+                          (hash-table-count req-package-branches))
+  (maphash (lambda (req branches)
+             (when (not branches)
+               (let* ((REQ-PKG (list req nil))
+                      (CURRENT (gethash REQ-PKG req-package-deps-left 0)))
+                 (puthash REQ-PKG CURRENT req-package-deps-left)))
+             (req-package-providers-prepare req (gethash req req-package-loaders nil)))
+           req-package-branches)
   (maphash (lambda (key value)
              (when (equal (gethash key req-package-deps-left 0) 0)
                (puthash key -1 req-package-deps-left)
