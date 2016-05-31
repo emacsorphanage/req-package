@@ -390,7 +390,7 @@
             (list :config config)
             rest)))
 
-(defun req-package-schedule (PKG LOADER EVAL)
+(defun req-package-schedule (PKG DEPS LOADER EVAL)
   (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0))
          (BRANCHES (ht-get req-package-branches (car PKG))))
     (req-package--log-debug "package requested: %s %s" PKG EVAL)
@@ -444,7 +444,7 @@
                                          (lambda ()
                                            (req-package-providers-prepare (car PKG) LOADER)
                                            (eval EVAL))))
-         (req-package-schedule PKG LOADER EVAL)))))
+         (req-package-schedule PKG DEPS LOADER EVAL)))))
 
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
