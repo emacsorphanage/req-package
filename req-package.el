@@ -353,12 +353,17 @@
         (list 'req-package-handle-loading (list 'quote pkg) (list 'lambda () form))
         (list 'req-package-loaded (list 'quote pkg))))
 
+(defun req-package-eval-form (EVAL)
+  "Logs, macroexpands and evaluates EVAL form."
+  (req-package--log-trace "eval %s" EVAL)
+  (eval (macroexpand-all EVAL)))
+
 (defun req-package-eval (pkg)
   "Evaluate package PKG request."
   (let* ((DEFAULT (req-package-gen-eval pkg (list 'progn) (req-package-patch-config pkg nil) nil))
          (EVAL (gethash pkg req-package-evals DEFAULT))
          (PKG pkg))
-    (req-package-handle-loading PKG (lambda () (eval EVAL)))))
+    (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))))
 
 (defun req-package-loaded (pkg)
   "Called after package PKG loaded to continue dependency graph traverse."
@@ -399,7 +404,7 @@
     (ht-set req-package-branches (car PKG) (cons PKG BRANCHES))
     (if (= DEPS-LEFT -1)
         (progn ;; package already been loaded before, just eval again
-          (req-package-handle-loading PKG (lambda () (eval EVAL)))
+          (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))
           DEPS-LEFT)
       (progn ;; insert package in dependency tree
         (puthash PKG 0 req-package-deps-left)
@@ -440,10 +445,8 @@
        (if FORCE
            (progn ;; load avoiding dependency management
              (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
-             (req-package-handle-loading PKG
-                                         (lambda ()
-                                           (req-package-providers-prepare (car PKG) LOADER)
-                                           (eval EVAL))))
+             (req-package-providers-prepare (car PKG) LOADER)
+             (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
          (req-package-schedule PKG DEPS LOADER EVAL)))))
 
 (defun req-package-finish ()
