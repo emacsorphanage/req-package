@@ -449,6 +449,11 @@
              (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
          (req-package-schedule PKG DEPS LOADER EVAL)))))
 
+(defmacro req-package-force (pkg &rest args)
+  `(let* ((PKG ',pkg)
+          (ARGS ',args))
+     (eval (macroexpand-all (apply 'list 'req-package PKG :force t ARGS)))))
+
 (defun req-package-finish ()
   "Start loading process, call this after all req-package invocations."
   ;; (req-package-cycles-detect req-package-required-by) ;; FIXME
@@ -468,11 +473,12 @@
            req-package-deps-left))
 
 (put 'req-package 'lisp-indent-function 'defun)
+(put 'req-package-force 'lisp-indent-function 'defun)
 (put 'req-package-hooks-add-execute 'lisp-indent-function 'defun)
 (put 'req-package-hooks-add-execute-impl 'lisp-indent-function 'defun)
 
 (defconst req-package-font-lock-keywords
-  '(("(\\(req-package\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
+  '(("(\\(req-package\\|req-package-force\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
      (1 font-lock-keyword-face)
      (2 font-lock-constant-face nil t))))
 
