@@ -395,13 +395,16 @@
             (list :config config)
             rest)))
 
-(defun req-package-schedule (PKG DEPS LOADER EVAL)
+(defun req-package-schedule (PKG DEPS LOADER EVAL LOAD-PATH)
   (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0))
          (BRANCHES (ht-get req-package-branches (car PKG))))
     (req-package--log-debug "package requested: %s %s" PKG EVAL)
     (puthash (car PKG) LOADER req-package-loaders)
     (puthash PKG EVAL req-package-evals)
     (ht-set req-package-branches (car PKG) (cons PKG BRANCHES))
+    (when LOAD-PATH
+      (ht-set req-package-paths (car PKG)
+              (use-package-normalize-paths :load-path LOAD-PATH)))
     (if (= DEPS-LEFT -1)
         (progn ;; package already been loaded before, just eval again
           (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))
@@ -430,6 +433,7 @@
           (SPLIT5 (req-package-args-extract-arg :force (cadr SPLIT4) nil))
           (SPLIT6 (req-package-args-extract-arg :dep-init (cadr SPLIT5) nil))
           (SPLIT7 (req-package-args-extract-arg :dep-config (cadr SPLIT6) nil))
+          (SPLIT8 (req-package-args-extract-arg :load-path (cadr SPLIT7) nil))
           (DEPS (-flatten (car SPLIT1)))
           (LOADER (caar SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
@@ -439,6 +443,7 @@
           (DEP-INIT (caar SPLIT6))
           (DEP-CONFIG (caar SPLIT7))
           (REST (cadr SPLIT7))
+          (LOAD-PATH (-flatten (car SPLIT8)))
           (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
      (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
          (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
@@ -447,7 +452,7 @@
              (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
              (req-package-providers-prepare (car PKG) LOADER)
              (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
-         (req-package-schedule PKG DEPS LOADER EVAL)))))
+         (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH)))))
 
 (defmacro req-package-force (pkg &rest args)
   `(let* ((PKG ',pkg)
