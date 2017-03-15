@@ -141,6 +141,7 @@
 ;;   │ (req-package flymake-custom
 ;;   │   :require flymake
 ;;   │   :loader :path ;; use package that is on load-path
+;;   │   :load-path "/path/to/file/directory"
 ;;   │   :config (...))
 ;;   └────
 
@@ -409,7 +410,7 @@
         (progn ;; package already been loaded before, just eval again
           (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))
           DEPS-LEFT)
-      (progn ;; insert package in dependency tree
+      (progn ;; insert package in dependency graph
         (puthash PKG 0 req-package-deps-left)
         (-each DEPS
           (lambda (req)

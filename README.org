@@ -67,6 +67,7 @@
    (req-package flymake-custom
      :require flymake
      :loader :path ;; use package that is on load-path
+     :load-path "/path/to/file/directory"
      :config (...))
    #+END_SRC
 
