@@ -435,6 +435,7 @@
           (SPLIT6 (req-package-args-extract-arg :dep-init (cadr SPLIT5) nil))
           (SPLIT7 (req-package-args-extract-arg :dep-config (cadr SPLIT6) nil))
           (SPLIT8 (req-package-args-extract-arg :load-path (cadr SPLIT7) nil))
+          (SPLIT9 (req-package-args-extract-arg :disabled (cadr SPLIT8) nil))
           (DEPS (-flatten (car SPLIT1)))
           (LOADER (caar SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
@@ -445,15 +446,18 @@
           (DEP-CONFIG (caar SPLIT7))
           (REST (cadr SPLIT7))
           (LOAD-PATH (-flatten (car SPLIT8)))
+          (DISABLED (-flatten (car SPLIT9)))
           (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
-     (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
-         (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
-       (if FORCE
-           (progn ;; load avoiding dependency management
-             (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
-             (req-package-providers-prepare (car PKG) LOADER)
-             (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
-         (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH)))))
+     (if DISABLED
+         (req-package--log-info "package %s is disabled. skipping" (car PKG))
+       (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
+           (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
+         (if FORCE
+             (progn ;; load avoiding dependency management
+               (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
+               (req-package-providers-prepare (car PKG) LOADER)
+               (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
+           (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH))))))
 
 (defmacro req-package-force (pkg &rest args)
   `(let* ((PKG ',pkg)
