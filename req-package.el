@@ -4,8 +4,8 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 0.9
-;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0"))
+;; Version: 1.0
+;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0") (ht "0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
 
@@ -26,54 +26,62 @@
 
 ;;; Commentary:
 
-;; 							━━━━━━━━━━━━━━━━
-;; 							  REQ-PACKAGE
-
-
-;; 							 Edward Knyshov
-;; 							━━━━━━━━━━━━━━━━
-
-
 ;; Table of Contents
 ;; ─────────────────
 
 ;; 1 req-package
 ;; .. 1.1 Description
 ;; .. 1.2 Usage
-;; .. 1.3 El Get
-;; .. 1.4 More?
+;; .. 1.3 Providers
+;; .. 1.4 Logging
 ;; .. 1.5 Migrate from use-package
 ;; .. 1.6 Note
-;; .. 1.7 Logging
-;; .. 1.8 Contribute
-;; .. 1.9 Things to be done
-;; ..... 1.9.1 TODO take package dependencies from it's meta data
-;; ..... 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
-;; .. 1.10 Changelog
-;; ..... 1.10.1 v0.9
-;; ..... 1.10.2 v0.8
-;; ..... 1.10.3 v0.7
-;; ..... 1.10.4 v0.6
-;; ..... 1.10.5 v0.5
-;; ..... 1.10.6 v0.4.2
-;; ..... 1.10.7 v0.4.1
-;; ..... 1.10.8 v0.4-all-cycles
-;; ..... 1.10.9 v0.3-cycles
-;; ..... 1.10.10 v0.2-auto-fetch
+;; .. 1.7 Contribute
+;; .. 1.8 Changelog
+;; ..... 1.8.1 `v1.0'
+;; ..... 1.8.2 `v0.9'
+;; ..... 1.8.3 `v0.8'
+;; ..... 1.8.4 `v0.7'
+;; ..... 1.8.5 `v0.6'
+;; ..... 1.8.6 `v0.5'
+;; ..... 1.8.7 `v0.4.2'
+;; ..... 1.8.8 `v0.4.1'
+;; ..... 1.8.9 `v0.4-all-cycles'
+;; ..... 1.8.10 `v0.3-cycles'
+;; ..... 1.8.11 `v0.2-auto-fetch'
 
 
 ;; 1 req-package
 ;; ═════════════
 
+;;   [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
+;;   [[file:http://melpa.org/packages/req-package-badge.svg]]
+;;   [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
+;;   [[file:https://travis-ci.org/edvorg/req-package.svg]]
+;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+
+
+;; [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
+;; http://www.gnu.org/licenses/gpl-3.0.txt
+
+;; [[file:http://melpa.org/packages/req-package-badge.svg]]
+;; http://melpa.org/#/req-package
+
+;; [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
+;; http://stable.melpa.org/#/req-package
+
+;; [[file:https://travis-ci.org/edvorg/req-package.svg]]
+;; https://travis-ci.org/edvorg/req-package
+
+;; [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+;; https://coveralls.io/github/edvorg/req-package?branch=develop
+
 ;; 1.1 Description
 ;; ───────────────
 
-;;   req-package is a macro wrapper on top of [use-package].  It's goal is
-;;   to simplify package dependencies management, when using use-package
-;;   for your .emacs.
-
-
-;;   [use-package] https://github.com/jwiegley/use-package
+;;   req-package provides dependency management for use-package.  this
+;;   allows to write simple and modular configs.  migration from
+;;   use-package is simple and syntax is almost same.
 
 
 ;; 1.2 Usage
@@ -83,73 +91,88 @@
 
 ;;   ┌────
 ;;   │ (require 'req-package)
+;;   │
+;;   │ (req-package el-get ;; prepare el-get (optional)
+;;   │   :force t ;; load package immediately, no dependency resolution
+;;   │   :config
+;;   │   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
+;;   │   (el-get 'sync))
 ;;   └────
 
-;;   Define required packages with dependencies using `:require' like this:
+;;   Define required packages with dependencies using `:require'.
+;;   Optionally provide preferred installation source with `:loader'
+;;   keyword.  Use `:force t' if you want to avoid dependency management
+;;   and load right now.
 
 ;;   ┌────
-;;   │ (req-package dired) ;; you can omit this empty requirement because of dired-single
+;;   │ ;; init-dired.el
+;;   │
+;;   │ (req-package dired) ;; this form is optional as it doesn't have any configuration
 ;;   │
 ;;   │ (req-package dired-single
-;;   │   :require dired
+;;   │   :require dired ;; depends on dired
 ;;   │   :config (...))
+;;   │
+;;   │ (req-package dired-isearch
+;;   │   :require dired ;; depends on dired
+;;   │   :config (...))
+;;   │
+;;   │ ;; init-lua.el
 ;;   │
 ;;   │ (req-package lua-mode
+;;   │   :loader :elpa ;; installed from elpa
 ;;   │   :config (...))
-;;   │
-;;   │ (req-package flymake)
 ;;   │
 ;;   │ (req-package flymake-lua
-;;   │   :require (flymake lua-mode)
+;;   │   :require flymake lua-mode
+;;   │   :config (...))
+;;   │
+;;   │ ;; init-flymake.el
+;;   │
+;;   │ (req-package flymake
+;;   │   :loader :built-in ;; use emacs built-in version
+;;   │   :config (...))
+;;   │
+;;   │ (req-package flymake-cursor
+;;   │   :loader :el-get ;; installed from el-get
+;;   │   :require flymake
+;;   │   :config (...))
+;;   │
+;;   │ (req-package flymake-custom
+;;   │   :require flymake
+;;   │   :loader :path ;; use package that is on load-path
+;;   │   :load-path "/path/to/file/directory"
 ;;   │   :config (...))
 ;;   └────
 
-;;   To start loading packages in right order:
+;;   Solve dependencies, install and load packages in right order:
 
 ;;   ┌────
+;;   │ ;; order doesn't matter here
+;;   │ (require 'init-dired)
+;;   │ (require 'init-lua)
+;;   │ (require 'init-flymake)
 ;;   │ (req-package-finish)
 ;;   └────
 
 
-;; 1.3 El Get
-;; ──────────
+;; 1.3 Providers
+;; ─────────────
 
-;;   There is another benefit over use-package - `el-get' support.  No more
-;;   thinking about sources for your packages.  Just install and configure
-;;   your el-get.  Here is example:
-
-;;   ┌────
-;;   │ (require 'req-package'')
-;;   │
-;;   │ (req-package-force el-get
-;;   │   :init (progn (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-;;   │ 			   (el-get 'sync)))
-;;   │
-;;   │ (req-package gotham-theme
-;;   │   :config (print "gotham theme is here and installed from el-get"))
-;;   │
-;;   │ (req-package-finish)
-;;   └────
-
-;;   Also, of course, there could be dependencies between el-get and elpa
-;;   packages
+;;   `req-package' supports extensible package providers system.  This is
+;;   alternative to `:ensure' keyword in `use-package'.  Use `:loader'
+;;   keyword with `:el-get', `:elpa', `:built-in' or `:path' value.  Extend
+;;   `req-package-providers-map' if you want to introduce new provider.
+;;   Tweak provider priorities using `req-package-providers-priority' map.
 
 
-;; 1.4 More?
-;; ─────────
+;; 1.4 Logging
+;; ───────────
 
-;;   You can always extend list of package providers or change priorities
-;;   if you want.  in which your packages are being installed.  It can be
-;;   done by customizing `req-package-providers' list.  It's list of
-;;   functions, which can install packages.
-
-;;   Here are some rules for one such function:
-
-;;   • check package presence at corresponding repo
-;;   • check whether it installed or not
-;;   • install that package if it is available and not installed
-;;   • return nonnil only if package is installed already or successfully
-;;     installed by this function"
+;;   You can use `req-package--log-open-log' to see, what is happening with
+;;   your configuration.  You can choose log level in `req-package' group
+;;   by `req-package-log-level' custom.  These log levels are supported:
+;;   `fatal', `error', `warn', `info', `debug', `trace'.
 
 
 ;; 1.5 Migrate from use-package
@@ -157,73 +180,60 @@
 
 ;;   Just replace all `(use-package ...)' with `(req-package [:require
 ;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
-;;   configuration file.
+;;   configuration file.  Do not use `:ensure' keyword, use providers
+;;   system that is more powerful.  There is a `:force' keyword which
+;;   simulates plain old use-package behavior.
 
 
 ;; 1.6 Note
 ;; ────────
 
-;;   All use-package parameters are supported, see use-package manual.  for
-;;   additional info.
-
-;;   However, there is no need for the `:ensure' keyword; req-package will
-;;   add it automatically if needed.
-
-;;   For each package you can manually specify loader fuction by `:loader'
-;;   keyword.  It can be any acceptable item for `req-package-providers'
-;;   list.
-
-;;   Also there is a `req-package-force' function which simulates plain old
-;;   use-package behavior.
-
 ;;   More complex req-package usage example can be found at
-;;   [http://github.com/edvorg/emacs-configs].
+;;   [https://github.com/edvorg/emacs-configs].
+
+;;   Use `load-dir' package to load all `*.el' files from a dir (e.g
+;;   `~/.emacs.d/init.d')
 
 
-;; 1.7 Logging
-;; ───────────
-
-;;   You cand use `req-package--log-open-log' to see, what is happening
-;;   with your configuration.  You can choose log level in `req-package'
-;;   group by `req-package-log-level' custom.  These log levels are
-;;   supported: `fatal', `error', `warn', `info', `debug', `trace'.
-
-
-;; 1.8 Contribute
+;; 1.7 Contribute
 ;; ──────────────
 
-;;   Please, commit and pull-request your changes to `develop' branch.
-;;   Master is used for automatic repo package builds by melpa's travis-ci.
+;;   Please, pull-request your changes to `develop' branch.  Master is used
+;;   for automatic *release* package builds by travis-ci.
 
 
-;; 1.9 Things to be done
-;; ─────────────────────
+;; 1.8 Changelog
+;; ─────────────
 
-;; 1.9.1 TODO take package dependencies from it's meta data
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.1 `v1.0'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • once you called `req-package-finish' you are able reload package
+;;     just by reload `req-package' form
+;;   • proper errors handling. see `req-package--log-open-log' for messages
+;;   • smart add-hook which invokes function if mode is loaded
+;;   • refactor providers system
+;;   • no need to use progn in :init and :config sections
+;;   • no need to use list literal in :require section
+;;   • `:loader' keyword now accepts loaders as keywords or as functions.
+;;     e.g. `:el-get', `:elpa', `:built-in', `:path' and `my-loader-fn'
+;;   • `req-package-force' replaced with `:force' keyword
 
 
-;; 1.9.2 TODO el-get/elpa packages must be in priority over builtin ones
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-
-
-;; 1.10 Changelog
-;; ──────────────
-
-;; 1.10.1 v0.9
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.2 `v0.9'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `:loader' keyword support
 
 
-;; 1.10.2 v0.8
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.3 `v0.8'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • bugfixes
 
 
-;; 1.10.3 v0.7
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.4 `v0.7'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation. all packages will be
 ;;     installed at bootstrap time
@@ -232,14 +242,14 @@
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
-;; 1.10.4 v0.6
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.5 `v0.6'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `el-get' support
 
 
-;; 1.10.5 v0.5
-;; ╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.6 `v0.5'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Major system refactoring.
 ;;   • Fixed bugs with defered loading.
@@ -248,35 +258,35 @@
 ;;   • Flexible `:require' keyword parsing.
 
 
-;; 1.10.6 v0.4.2
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.7 `v0.4.2'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Bug fixes.
 
 
-;; 1.10.7 v0.4.1
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.8 `v0.4.1'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Various tweaks and bug fixes.
 
 
-;; 1.10.8 v0.4-all-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.9 `v0.4-all-cycles'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • All cycles of your dependencies will be printed now.
 ;;   • Also there are more handy log messages and some bug fixes.
 
 
-;; 1.10.9 v0.3-cycles
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.10 `v0.3-cycles'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There are nice error messages about cycled dependencies now.
 ;;   • Cycles printed in a way: `pkg1 -> [pkg2 -> ...] pkg1'.
 ;;   • It means there is a cycle around `pkg1'.
 
 
-;; 1.10.10 v0.2-auto-fetch
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.8.11 `v0.2-auto-fetch'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There is no need of explicit `:ensure' in your code now.
 ;;   • When you req-package it adds `:ensure' if package is available in
@@ -288,228 +298,194 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-(require 'use-package)
 (require 'package)
+
+(defun req-package-bootstrap (package)
+  "Refresh package archives, check PACKAGE presence and install if it's not installed."
+  (if (null (require package nil t))
+      (progn (let* ((ARCHIVES (if (null package-archive-contents)
+                                  (progn (package-refresh-contents)
+                                         package-archive-contents)
+                                package-archive-contents))
+                    (AVAIL (assoc package ARCHIVES)))
+               (if AVAIL
+                   (package-install package))))))
+
+(req-package-bootstrap 'use-package)
+(req-package-bootstrap 'dash)
+(req-package-bootstrap 'log4e)
+(req-package-bootstrap 'ht)
+
+(require 'use-package)
 (require 'dash)
 (require 'log4e)
+(require 'ht)
+
+(require 'req-package-providers)
+(require 'req-package-hooks)
+(require 'req-package-args)
+(require 'req-package-cycles)
 
 (defgroup req-package nil
   "A package loading system"
   :group 'emacs)
 
-(defcustom req-package-log-level 'warn
-  "minimal log level. can be 'fatal, 'error, 'warn, 'info, 'debug, 'trace"
+(defcustom req-package-log-level 'info
+  "Minimal log level, may be any level supported by log4e."
   :group 'req-package)
 
-(defcustom req-package-detect-cycles t
-  "detect dependency cycles"
-  :group 'req-package
-  :type 'boolean)
+(defvar req-package-required-by (make-hash-table :size 200 :test 'equal)
+  "Package symbol -> list of packages dependent on it.")
 
-(defcustom req-package-error-on-cycle t
-  "throw error if cycle is detected"
-  :group 'req-package
-  :type 'boolean)
+(defvar req-package-deps-left (make-hash-table :size 200 :test 'equal)
+  "Package symbol -> loaded dependencies counter.")
 
-(defcustom req-package-providers '(req-package-try-elpa req-package-try-el-get)
-  "list of functions to prepare packages installation
-one such function should
-1) check package presence at corresponding repo
-2) check whether it installed or not
-3) install that package if it available and not installed
-4) return nonnil only if package is installed already or
-   successfully installed by this function"
-  :group 'req-package
-  :type 'list)
+(defvar req-package-evals (make-hash-table :size 200 :test 'equal)
+  "Package symbol -> loading code prepared for evaluation.")
 
-(defvar req-package-reqs-reversed (make-hash-table :size 200)
-  "package symbol -> list of packages dependent on it")
+(defvar req-package-loaders (make-hash-table :size 200 :test 'equal)
+  "Package symbol -> loader function to load package by.")
 
-(defvar req-package-ranks (make-hash-table :size 200)
-  "package symbol -> list of packages dependent on it")
+(defvar req-package-branches (make-hash-table :size 200 :test 'equal))
 
-(defvar req-package-evals (make-hash-table :size 200)
-  "package symbol -> loading code prepared for evaluation")
+(defun req-package-patch-config (pkg form)
+  "Wrap package PKG :config FORM into progn with callbacks."
+  (list 'progn
+        (list 'req-package-handle-loading (list 'quote pkg) (list 'lambda () form))
+        (list 'req-package-loaded (list 'quote pkg))))
 
-(defvar req-package-visited (make-hash-table :size 200)
-  "package symbol -> is it visited by cycle checktraversal")
+(defun req-package-eval-form (EVAL)
+  "Logs, macroexpands and evaluates EVAL form."
+  (req-package--log-trace "eval %s" EVAL)
+  (eval (macroexpand-all EVAL)))
 
-(defvar req-package-loaders (make-hash-table :size 200)
-  "package symbol -> loader function to load package by")
+(defun req-package-eval (pkg)
+  "Evaluate package PKG request."
+  (let* ((DEFAULT (req-package-gen-eval pkg (list 'progn) (req-package-patch-config pkg nil) nil))
+         (EVAL (gethash pkg req-package-evals DEFAULT))
+         (PKG pkg))
+    (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))))
 
-(defvar req-package-cycles-count 0
-  "number of cycles detected")
-
-(defconst req-package-el-get-present (if (require 'el-get nil t) t nil)
-  "you can check this for el get presense")
-
-(defun req-package-wrap-args (reqs)
-  "listify passed dependencies"
-  (if (atom reqs) (list reqs) reqs))
-
-(defun req-package-extract-arg (key args acc)
-  "extract dependencies from arg list"
-  (if (null args)
-      (list nil (reverse acc))
-    (if (eq (car args) key)
-        (list (req-package-wrap-args (car (cdr args)))
-              (append (reverse acc) (cddr args)))
-      (req-package-extract-arg key (cdr args) (cons (car args) acc)))))
-
-(defun req-package-patch-config (name args)
-  "patch :config section to invoke our callback"
-  (if (null args)
-      (list ':config (list 'req-package-loaded (list 'quote name)))
-    (if (eq (car args) :config)
-        (cons ':config
-              (cons (list 'progn
-                          (car (cdr args))
-                          (list 'req-package-loaded (list 'quote name)))
-                    (cddr args)))
-      (cons (car args) (req-package-patch-config name (cdr args))))))
-
-(defun req-package-eval (name)
-  "evaluate package request"
-  (let* ((EVAL (gethash name
-                        req-package-evals
-                        (append (req-package-gen-eval name)
-                                (req-package-patch-config name
-                                                          nil)))))
-    (eval EVAL)))
-
-(defun req-package-loaded (name)
-  "callback for dependency graph load continuation"
-  (req-package--log-info "package loaded: %s" name)
+(defun req-package-loaded (pkg)
+  "Called after package PKG loaded to continue dependency graph traverse."
+  (req-package--log-info "package loaded: %s" pkg)
   (let* ((EVALS (-reduce-from
                  (lambda (memo dependent)
-                   (let* ((RANK (- (gethash dependent req-package-ranks 0) 1)))
-                     (puthash dependent RANK req-package-ranks)
-                     (if (eq 0 RANK) (cons dependent memo) memo)))
+                   (let* ((DEPS-LEFT (- (gethash dependent req-package-deps-left 0) 1)))
+                     (puthash dependent DEPS-LEFT req-package-deps-left)
+                     (if (equal 0 DEPS-LEFT)
+                         (cons dependent memo)
+                       memo)))
                  nil
-                 (gethash name req-package-reqs-reversed nil))))
-    (-each EVALS (lambda (name)
-                   (puthash name -1 req-package-ranks)
-                   (req-package-eval name)))))
+                 (gethash (car pkg) req-package-required-by nil))))
+    (-each EVALS (lambda (pkg)
+                   (puthash pkg -1 req-package-deps-left)
+                   (req-package-eval pkg)))))
 
-(defmacro req-package (name &rest args)
-  "add package to target list"
-  `(let* ((NAME ',name)
+(defun req-package-handle-loading (pkg f)
+  "Error handle for package PKG loading process by calling F."
+  (condition-case-unless-debug e
+      (funcall f)
+    (error (req-package--log-error (format "Unable to load package %s -- %s" pkg e)))))
+
+(defun req-package-gen-eval (package init config rest)
+  "Generate eval for PACKAGE."
+  (let* ((package (car package)))
+    (append (list 'use-package package)
+            (list :init init)
+            (list :config config)
+            rest)))
+
+(defun req-package-schedule (PKG DEPS LOADER EVAL LOAD-PATH)
+  (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0))
+         (BRANCHES (ht-get req-package-branches (car PKG))))
+    (req-package--log-debug "package requested: %s %s" PKG EVAL)
+    (puthash (car PKG) LOADER req-package-loaders)
+    (puthash PKG EVAL req-package-evals)
+    (ht-set req-package-branches (car PKG) (cons PKG BRANCHES))
+    (when LOAD-PATH
+      (ht-set req-package-paths (car PKG)
+              (use-package-normalize-paths :load-path LOAD-PATH)))
+    (if (= DEPS-LEFT -1)
+        (progn ;; package already been loaded before, just eval again
+          (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))
+          DEPS-LEFT)
+      (progn ;; insert package in dependency graph
+        (puthash PKG 0 req-package-deps-left)
+        (-each DEPS
+          (lambda (req)
+            (let* ((REQUIRED-BY (gethash req req-package-required-by nil))
+                   (DEPS-LEFT (gethash PKG req-package-deps-left 0))
+                   (REQ-DEPS-LEFT (gethash req req-package-deps-left 0))
+                   (BRANCHES (ht-get req-package-branches req)))
+              (ht-set req-package-branches req BRANCHES)
+              (when (not (equal -1 REQ-DEPS-LEFT))
+                (puthash req (cons PKG REQUIRED-BY) req-package-required-by)
+                (puthash PKG (+ DEPS-LEFT 1) req-package-deps-left)))))))))
+
+(defmacro req-package (pkg &rest args)
+  "Add package PKG with ARGS to target list."
+  `(let* ((PKG ',pkg)
           (ARGS ',args)
-          (SPLIT1 (req-package-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
-          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
-          (REQS (car SPLIT1))
-          (LOADER (car SPLIT2)))
+          (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
+          (SPLIT2 (req-package-args-extract-arg :loader (cadr SPLIT1) nil))
+          (SPLIT3 (req-package-args-extract-arg :init (cadr SPLIT2) nil))
+          (SPLIT4 (req-package-args-extract-arg :config (cadr SPLIT3) nil))
+          (SPLIT5 (req-package-args-extract-arg :force (cadr SPLIT4) nil))
+          (SPLIT6 (req-package-args-extract-arg :dep-init (cadr SPLIT5) nil))
+          (SPLIT7 (req-package-args-extract-arg :dep-config (cadr SPLIT6) nil))
+          (SPLIT8 (req-package-args-extract-arg :load-path (cadr SPLIT7) nil))
+          (SPLIT9 (req-package-args-extract-arg :disabled (cadr SPLIT8) nil))
+          (DEPS (-flatten (car SPLIT1)))
+          (LOADER (caar SPLIT2))
+          (INIT (cons 'progn (car SPLIT3)))
+          (PKG (list PKG DEPS))
+          (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT4))))
+          (FORCE (caar SPLIT5))
+          (DEP-INIT (caar SPLIT6))
+          (DEP-CONFIG (caar SPLIT7))
+          (REST (cadr SPLIT7))
+          (LOAD-PATH (-flatten (car SPLIT8)))
+          (DISABLED (-flatten (car SPLIT9)))
+          (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
+     (if DISABLED
+         (req-package--log-info "package %s is disabled. skipping" (car PKG))
+       (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
+           (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
+         (if FORCE
+             (progn ;; load avoiding dependency management
+               (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
+               (req-package-providers-prepare (car PKG) LOADER)
+               (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
+           (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH))))))
 
-     (req-package--log-debug "package requested: %s" NAME)
-
-     (-each REQS
-       (lambda (req)
-         (let* ((CURREQREV (gethash req req-package-reqs-reversed nil))
-                (CURRANK (gethash NAME req-package-ranks 0)))
-           (puthash req (cons NAME CURREQREV) req-package-reqs-reversed)
-           (puthash req (gethash req req-package-ranks 0) req-package-ranks)
-           (puthash NAME (+ CURRANK 1) req-package-ranks))))
-     (puthash NAME LOADER req-package-loaders)
-     (puthash NAME (append (req-package-gen-eval NAME) USEPACKARGS) req-package-evals)
-     (puthash NAME (gethash NAME req-package-ranks 0) req-package-ranks)
-     (puthash NAME (gethash NAME req-package-reqs-reversed nil) req-package-reqs-reversed)))
-
-(defmacro req-package-force (name &rest args)
-  "immediatly load some package"
-  `(let* ((NAME ',name)
-          (ARGS ',args)
-          (SPLIT1 (req-package-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-extract-arg :loader (car (cdr SPLIT1)) nil))
-          (USEPACKARGS (req-package-patch-config NAME (car (cdr SPLIT2))))
-          (REQS (car SPLIT1))
-          (LOADER (car SPLIT2)))
-
-     (req-package--log-debug "package force-requested: %s" NAME)
-     (req-package-prepare NAME LOADER)
-     (eval (append (req-package-gen-eval NAME) USEPACKARGS))))
-
-(defun req-package-try-elpa (package)
-  (let* ((ARCHIVES (if (null package-archive-contents)
-                       (progn (package-refresh-contents)
-                              package-archive-contents)
-                     package-archive-contents))
-         (AVAIL (-any? (lambda (elem)
-                         (eq (car elem) package))
-                       ARCHIVES))
-         (INSTALLED (package-installed-p package)))
-    (if (and AVAIL (not INSTALLED))
-        (if (package-install package) t nil)
-      INSTALLED)))
-
-(defun req-package-try-el-get (package)
-  (if req-package-el-get-present
-      (let* ((AVAIL (if (el-get-recipe-filename package) t nil))
-             (INSTALLED (package-installed-p package)))
-        (if (and AVAIL (not INSTALLED))
-            (or (el-get 'sync package) t) ;; TODO check for success
-          INSTALLED))
-    nil))
-
-(defun req-package-prepare (package &optional loader)
-  "prepare package - install if it is present"
-  (if (not (and loader (funcall (car loader) package)))
-      (-any? (lambda (elem)
-               (funcall elem package))
-             req-package-providers)))
-
-(defun req-package-gen-eval (package)
-  "generate eval for package and install it if present at el-get/elpa"
-  (list 'use-package package))
-
-(defun req-package-detect-cycles-traverse-impl (cur path)
-  "traverse for cycles look up implementation"
-  (puthash cur t req-package-visited)
-  (if (not (-contains? path cur))
-      (-each (gethash cur req-package-reqs-reversed nil)
-        (lambda (dependent)
-          (req-package-detect-cycles-traverse-impl dependent (cons cur path))))
-    (progn (setq req-package-cycles-count (+ req-package-cycles-count 1))
-           (req-package--log-error "cycle detected: %s" (cons cur path)))))
-
-(defun req-package-detect-cycles-traverse ()
-  "traverse for cycles look up"
-  (maphash (lambda (key value)
-             (if (null (gethash key req-package-visited nil))
-                 (req-package-detect-cycles-traverse-impl key nil)))
-           req-package-reqs-reversed)
-
-  (if (and req-package-error-on-cycle (not (eq 0 req-package-cycles-count)))
-      (error "%s cycle(s) detected. see M-x req-package--log-open-log"
-             req-package-cycles-count)))
+(defmacro req-package-force (pkg &rest args)
+  `(let* ((PKG ',pkg)
+          (ARGS ',args))
+     (eval (macroexpand-all (apply 'list 'req-package PKG :force t ARGS)))))
 
 (defun req-package-finish ()
-  "start loading process, call this after all req-package invocations"
-  ;; (maphash (lambda (key value)
-  ;;            (if (eq (gethash key req-package-ranks) -1)
-  ;;                (progn (remhash key req-package-ranks)
-  ;;                       (remhash key req-package-evals)
-  ;;                       (remhash key req-package-loaders)
-  ;;                       (remhash key req-package-reqs-reversed))))
-  ;;          req-package-ranks)
-
-  (if req-package-detect-cycles
-      (progn (clrhash req-package-visited)
-             (setq req-package-cycles-count 0)
-             (req-package-detect-cycles-traverse)))
-
+  "Start loading process, call this after all req-package invocations."
+  ;; (req-package-cycles-detect req-package-required-by) ;; FIXME
   (req-package--log-debug "package requests finished: %s packages are waiting"
-                          (hash-table-count req-package-ranks))
-
+                          (hash-table-count req-package-branches))
+  (maphash (lambda (req branches)
+             (when (not branches)
+               (let* ((REQ-PKG (list req nil))
+                      (CURRENT (gethash REQ-PKG req-package-deps-left 0)))
+                 (puthash REQ-PKG CURRENT req-package-deps-left)))
+             (req-package-providers-prepare req (gethash req req-package-loaders nil)))
+           req-package-branches)
   (maphash (lambda (key value)
-             (req-package-prepare key (gethash key req-package-loaders nil))
-             (if (eq (gethash key req-package-ranks 0) 0)
-                 (progn (puthash key -1 req-package-ranks)
-                        (req-package-eval key))))
-           req-package-ranks))
+             (when (equal (gethash key req-package-deps-left 0) 0)
+               (puthash key -1 req-package-deps-left)
+               (req-package-eval key)))
+           req-package-deps-left))
 
 (put 'req-package 'lisp-indent-function 'defun)
 (put 'req-package-force 'lisp-indent-function 'defun)
+(put 'req-package-hooks-add-execute 'lisp-indent-function 'defun)
+(put 'req-package-hooks-add-execute-impl 'lisp-indent-function 'defun)
 
 (defconst req-package-font-lock-keywords
   '(("(\\(req-package\\|req-package-force\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
@@ -522,6 +498,7 @@ one such function should
 (req-package--log-set-level req-package-log-level)
 (req-package--log-enable-logging)
 (req-package--log-clear-log)
+(setq use-package-always-ensure nil)
 
 (provide 'req-package)
 
