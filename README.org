@@ -84,7 +84,7 @@
 
    =req-package= supports extensible package providers system.
    This is alternative to =:ensure= keyword in =use-package=.
-   Use =:loader= keyword with =:el-get=, =:elpa=, =:build-in= or =:path= value.
+   Use =:loader= keyword with =:el-get=, =:elpa=, =:built-in= or =:path= value.
    Extend =req-package-providers-map= if you want to introduce new provider.
    Tweak provider priorities using =req-package-providers-priority= map.
 
@@ -122,7 +122,7 @@
     - no need to use progn in :init and :config sections
     - no need to use list literal in :require section
     - =:loader= keyword now accepts loaders as keywords or as functions.
-      e.g. =:el-get=, =:elpa=, =:build-int=, =:path= and =my-loader-fn=
+      e.g. =:el-get=, =:elpa=, =:built-in=, =:path= and =my-loader-fn=
     - =req-package-force= replaced with =:force= keyword
 
 *** =v0.9=
