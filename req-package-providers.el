@@ -6,7 +6,6 @@
 (require 'dash)
 (require 'ht)
 (require 'package)
-(require 'subr-x)
 
 (defcustom req-package-providers-map
   (ht (:elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
@@ -44,11 +43,10 @@
 
 (defun req-package-providers-install-elpa (package)
   "Install PACKAGE with elpa."
-  (if-let (INSTALLED (assq package package-alist))
-      INSTALLED
-    (let ((PKG (cl-second (assq package package-archive-contents))))
-      (req-package--log-info (format "installing package %s" package))
-      (package-install PKG))))
+  (or (assq package package-alist)
+      (progn
+        (req-package--log-info (format "installing package %s" package))
+        (package-install (cl-second (assq package package-archive-contents))))))
 
 (defun req-package-providers-el-get-present ()
   (if (require 'el-get nil t) t nil))
