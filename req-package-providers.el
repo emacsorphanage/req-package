@@ -2,9 +2,11 @@
 ;;; commentary:
 ;;; code:
 
-(require 'ht)
+(require 'cl-lib)
 (require 'dash)
+(require 'ht)
 (require 'package)
+(require 'subr-x)
 
 (defcustom req-package-providers-map
   (ht (:elpa '(req-package-providers-install-elpa req-package-providers-present-elpa))
@@ -36,23 +38,17 @@
 
 (defun req-package-providers-present-elpa (package)
   "Return t if PACKAGE is available for installation."
-  (let* ((ARCHIVES (if (null package-archive-contents)
-                       (progn (package-refresh-contents)
-                              package-archive-contents)
-                     package-archive-contents))
-         (AVAIL (-any? (lambda (elem)
-                         (eq (car elem) package))
-                       ARCHIVES)))
-    AVAIL))
+  (unless package-archive-contents
+    (package-refresh-contents))
+  (-any? (lambda (elem) (eq (car elem) package)) package-archive-contents))
 
 (defun req-package-providers-install-elpa (package)
   "Install PACKAGE with elpa."
-  (let ((INSTALLED (assq package package-alist)))
-    (if (not INSTALLED)
-        (let* ((PKG (second (assq package package-archive-contents))))
-          (req-package--log-info (format "installing package %s" package))
-          (package-install PKG))
-      INSTALLED)))
+  (if-let (INSTALLED (assq package package-alist))
+      INSTALLED
+    (let ((PKG (cl-second (assq package package-archive-contents))))
+      (req-package--log-info (format "installing package %s" package))
+      (package-install PKG))))
 
 (defun req-package-providers-el-get-present ()
   (if (require 'el-get nil t) t nil))
@@ -64,14 +60,12 @@
 
 (defun req-package-providers-install-el-get (package)
   "Install PACKAGE with el-get."
-  (if (req-package-providers-el-get-present)
-      (let* ((INSTALLED (el-get-package-installed-p package)))
-        (if (not INSTALLED)
-            (progn
-              (req-package--log-info (format "installing package %s" package))
-              (el-get 'sync package))
-          INSTALLED))
-    (req-package--log-error "can not find el-get to install package %s" package)))
+  (if (not (req-package-providers-el-get-present))
+      (req-package--log-error "can not find el-get to install package %s" package)
+    (if-let (INSTALLED (el-get-package-installed-p package))
+        INSTALLED
+      (req-package--log-info (format "installing package %s" package))
+      (el-get 'sync package))))
 
 (defun req-package-providers-present-built-in (package)
   (package-built-in-p package))
@@ -99,14 +93,14 @@
                (provider (if (and loader (keywordp loader))
                              loader
                            (-first (lambda (elem)
-                                     (funcall (second (ht-get providers elem)) package))
+                                     (funcall (cl-second (ht-get providers elem)) package))
                                    (-sort (lambda (a b) (< (ht-get req-package-providers-priority a -1)
                                                            (ht-get req-package-providers-priority b -1)))
                                           (ht-keys providers)))))
                (installer (car (ht-get providers provider))))
           (if installer
               (funcall installer package)
-            (when (not (require package nil t))
+            (unless (require package nil t)
               (error "cannot prepare package %s. no provider, no built-in, no file on load-path" package)))))
     (error (req-package--log-error (format "unable to install package %s : %s" package e)))))
 
