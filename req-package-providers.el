@@ -58,12 +58,12 @@
 
 (defun req-package-providers-install-el-get (package)
   "Install PACKAGE with el-get."
-  (if (not (req-package-providers-el-get-present))
-      (req-package--log-error "can not find el-get to install package %s" package)
-    (if-let (INSTALLED (el-get-package-installed-p package))
-        INSTALLED
-      (req-package--log-info (format "installing package %s" package))
-      (el-get 'sync package))))
+  (if (req-package-providers-el-get-present)
+      (or (el-get-package-installed-p package)
+          (progn
+            (req-package--log-info (format "installing package %s" package))
+            (el-get 'sync package)))
+    (req-package--log-error "can not find el-get to install package %s" package)))
 
 (defun req-package-providers-present-built-in (package)
   (package-built-in-p package))
