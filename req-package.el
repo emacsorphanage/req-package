@@ -442,8 +442,6 @@
           (PKG (list PKG DEPS))
           (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT4))))
           (FORCE (caar SPLIT5))
-          (DEP-INIT (caar SPLIT6))
-          (DEP-CONFIG (caar SPLIT7))
           (REST (cadr SPLIT7))
           (LOAD-PATH (-flatten (car SPLIT8)))
           (DISABLED (-flatten (car SPLIT9)))
