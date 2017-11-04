@@ -300,16 +300,18 @@
 (eval-when-compile (require 'cl))
 (require 'package)
 
+(defun req-package-get-archive-contents ()
+  (when (null package-archive-contents)
+    (package-refresh-contents))
+  package-archive-contents)
+
 (defun req-package-bootstrap (package)
   "Refresh package archives, check PACKAGE presence and install if it's not installed."
-  (if (null (require package nil t))
-      (progn (let* ((ARCHIVES (if (null package-archive-contents)
-                                  (progn (package-refresh-contents)
-                                         package-archive-contents)
-                                package-archive-contents))
-                    (AVAIL (assoc package ARCHIVES)))
-               (if AVAIL
-                   (package-install package))))))
+  (when (null (require package nil t))
+    (let* ((archives (req-package-get-archive-contents))
+           (available (assoc package archives)))
+      (when available
+        (package-install package)))))
 
 (req-package-bootstrap 'use-package)
 (req-package-bootstrap 'dash)
@@ -464,7 +466,7 @@
   "Start loading process, call this after all req-package invocations."
   ;; (req-package-cycles-detect req-package-required-by) ;; FIXME
   (req-package--log-debug "package requests finished: %s packages are waiting"
-                          (hash-table-count req-package-branches))
+               (hash-table-count req-package-branches))
   (maphash (lambda (req branches)
              (when (not branches)
                (let* ((REQ-PKG (list req nil))
