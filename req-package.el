@@ -100,9 +100,8 @@
 ;;   └────
 
 ;;   Define required packages with dependencies using `:require'.
-;;   Optionally provide preferred installation source with `:loader'
-;;   keyword.  Use `:force t' if you want to avoid dependency management
-;;   and load right now.
+;;   Use `:force t' if you want to avoid dependency management and load right now.
+;;   Use `:el-get t' or `:el-get package-name' if you want to install from el-get.
 
 ;;   ┌────
 ;;   │ ;; init-dired.el
@@ -120,7 +119,6 @@
 ;;   │ ;; init-lua.el
 ;;   │
 ;;   │ (req-package lua-mode
-;;   │   :loader :elpa ;; installed from elpa
 ;;   │   :config (...))
 ;;   │
 ;;   │ (req-package flymake-lua
@@ -130,17 +128,14 @@
 ;;   │ ;; init-flymake.el
 ;;   │
 ;;   │ (req-package flymake
-;;   │   :loader :built-in ;; use emacs built-in version
 ;;   │   :config (...))
 ;;   │
 ;;   │ (req-package flymake-cursor
-;;   │   :loader :el-get ;; installed from el-get
 ;;   │   :require flymake
 ;;   │   :config (...))
 ;;   │
 ;;   │ (req-package flymake-custom
 ;;   │   :require flymake
-;;   │   :loader :path ;; use package that is on load-path
 ;;   │   :load-path "/path/to/file/directory"
 ;;   │   :config (...))
 ;;   └────
@@ -307,11 +302,13 @@
                    (package-install package))))))
 
 (req-package-bootstrap 'use-package)
+(req-package-bootstrap 'el-get)
 (req-package-bootstrap 'dash)
 (req-package-bootstrap 'log4e)
 (req-package-bootstrap 'ht)
 
 (require 'use-package)
+(require 'el-get)
 (require 'dash)
 (require 'log4e)
 (require 'ht)
@@ -341,6 +338,29 @@
   "Package symbol -> loader function to load package by.")
 
 (defvar req-package-branches (make-hash-table :size 200 :test 'equal))
+
+(add-to-list 'use-package-keywords :el-get)
+
+(defun use-package-normalize/:el-get (name-symbol keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (label arg)
+      (cond
+       ((booleanp arg) name-symbol)
+       ((symbolp arg) arg)
+       (t
+        (use-package-error
+         ":el-get wants an package name or boolean value"))))))
+
+(defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
+  (message "%s %s %s %s" name-symbol keyword archive-name rest state)
+  (let ((body (use-package-process-keywords name-symbol rest state)))
+    ;; This happens at macro expansion time, not when the expanded code is
+    ;; compiled or evaluated.
+    (print body)
+    (if (null archive-name)
+        body
+      (el-get-install archive-name)
+      body)))
 
 (defun req-package-patch-config (pkg form)
   "Wrap package PKG :config FORM into progn with callbacks."

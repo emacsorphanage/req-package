@@ -26,7 +26,6 @@
   (desc "with-debug-on-error should return function call value")
   (expect "foo" (with-debug-on-error nil (lambda () "foo")))
   (desc "req-package-args-take-args should take all arguments until next keyword")
-  (expect '((1 2 :hello) (:loader 4)) (req-package-args-take-args '(1 2 :hello :loader 4) nil))
   (expect '(nil nil) (req-package-args-take-args '() nil))
   (expect '(nil (:require 4)) (req-package-args-take-args '(:require 4) nil))
   (expect '((1 2 3 4) nil) (req-package-args-take-args '(1 2 3 4) nil))
@@ -64,25 +63,6 @@
     (with-mock
       (stub add-hook)
       (mock (req-package-hooks-mode-loaded-p 'supermode) => nil)
-      (req-package-hooks-add-execute 'supermode (lambda () "loaded"))))
-  (desc "req-package-providers-get-map is just a getter for req-package-providers-map")
-  (expect req-package-providers-map (req-package-providers-get-map))
-  (desc "req-package-providers-prepare should install package with recommended provider")
-  (expect "package-1 installed"
-    (req-package-providers-prepare 'package-1 (lambda (p) (format "%s installed" p))))
-  (expect "package-2 installed"
-    (with-mock
-      (stub req-package-providers-get-map => (ht (:foo-provider (list (lambda (p) (format "%s installed" p))))))
-      (req-package-providers-prepare 'package-2 :foo-provider)))
-  (desc "req-package-providers-prepare should install package with one of req-package-providers")
-  (expect "package-3 installed"
-    (with-mock
-      (stub req-package-providers-get-map => (ht (:foo-provider (list (lambda (p) (format "%s installed" p)) (lambda (p) t)))))
-      (req-package-providers-prepare 'package-3)))
-  (desc "req-package-providers-prepare should return nil if no providers found")
-  (expect nil
-    (with-mock
-      (stub req-package-providers-get-map => (ht-create))
-      (req-package-providers-prepare 'package-4))))
+      (req-package-hooks-add-execute 'supermode (lambda () "loaded")))))
 
 (provide 'req-package-test)
