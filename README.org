@@ -101,6 +101,10 @@
 
 ** Changelog
 
+*** =v1.2=
+
+    - add :el-get keyword
+
 *** =v1.1=
 
     - due to use-package being mature enough drop providers system

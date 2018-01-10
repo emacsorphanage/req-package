@@ -352,11 +352,9 @@
          ":el-get wants an package name or boolean value"))))))
 
 (defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
-  (message "%s %s %s %s" name-symbol keyword archive-name rest state)
   (let ((body (use-package-process-keywords name-symbol rest state)))
     ;; This happens at macro expansion time, not when the expanded code is
     ;; compiled or evaluated.
-    (print body)
     (if (null archive-name)
         body
       (el-get-install archive-name)
