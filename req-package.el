@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 1.0
+;; Version: 1.1
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0") (ht "0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -32,55 +32,55 @@
 ;; 1 req-package
 ;; .. 1.1 Description
 ;; .. 1.2 Usage
-;; .. 1.3 Providers
-;; .. 1.4 Logging
-;; .. 1.5 Migrate from use-package
-;; .. 1.6 Note
-;; .. 1.7 Contribute
-;; .. 1.8 Changelog
-;; ..... 1.8.1 `v1.0'
-;; ..... 1.8.2 `v0.9'
-;; ..... 1.8.3 `v0.8'
-;; ..... 1.8.4 `v0.7'
-;; ..... 1.8.5 `v0.6'
-;; ..... 1.8.6 `v0.5'
-;; ..... 1.8.7 `v0.4.2'
-;; ..... 1.8.8 `v0.4.1'
-;; ..... 1.8.9 `v0.4-all-cycles'
-;; ..... 1.8.10 `v0.3-cycles'
-;; ..... 1.8.11 `v0.2-auto-fetch'
+;; .. 1.3 Logging
+;; .. 1.4 Migrate from use-package
+;; .. 1.5 Note
+;; .. 1.6 Contribute
+;; .. 1.7 Changelog
+;; ..... 1.7.1 `v1.1'
+;; ..... 1.7.2 `v1.0'
+;; ..... 1.7.3 `v0.9'
+;; ..... 1.7.4 `v0.8'
+;; ..... 1.7.5 `v0.7'
+;; ..... 1.7.6 `v0.6'
+;; ..... 1.7.7 `v0.5'
+;; ..... 1.7.8 `v0.4.2'
+;; ..... 1.7.9 `v0.4.1'
+;; ..... 1.7.10 `v0.4-all-cycles'
+;; ..... 1.7.11 `v0.3-cycles'
+;; ..... 1.7.12 `v0.2-auto-fetch'
 
 
 ;; 1 req-package
 ;; ═════════════
 
-;;   [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
-;;   [[file:http://melpa.org/packages/req-package-badge.svg]]
-;;   [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
-;;   [[file:https://travis-ci.org/edvorg/req-package.svg]]
-;;   [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+;;   [file:https://img.shields.io/badge/license-GPL_3-green.svg]
+;;   [file:http://melpa.org/packages/req-package-badge.svg]
+;;   [file:http://stable.melpa.org/packages/req-package-badge.svg]
+;;   [file:https://travis-ci.org/edvorg/req-package.svg]
+;;   [file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]
 
 
-;; [[file:https://img.shields.io/badge/license-GPL_3-green.svg]]
+;; [file:https://img.shields.io/badge/license-GPL_3-green.svg]
 ;; http://www.gnu.org/licenses/gpl-3.0.txt
 
-;; [[file:http://melpa.org/packages/req-package-badge.svg]]
+;; [file:http://melpa.org/packages/req-package-badge.svg]
 ;; http://melpa.org/#/req-package
 
-;; [[file:http://stable.melpa.org/packages/req-package-badge.svg]]
+;; [file:http://stable.melpa.org/packages/req-package-badge.svg]
 ;; http://stable.melpa.org/#/req-package
 
-;; [[file:https://travis-ci.org/edvorg/req-package.svg]]
+;; [file:https://travis-ci.org/edvorg/req-package.svg]
 ;; https://travis-ci.org/edvorg/req-package
 
-;; [[file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]]
+;; [file:https://coveralls.io/repos/edvorg/req-package/badge.svg?branch=develop&service=github]
 ;; https://coveralls.io/github/edvorg/req-package?branch=develop
 
 ;; 1.1 Description
 ;; ───────────────
 
-;;   req-package provides dependency management for use-package.  this
-;;   allows to write simple and modular configs.  migration from
+;;   `req-package' provides dependency management for use-package.  This
+;;   allows to write simple and modular configs.  Migration from
 ;;   use-package is simple and syntax is almost same.
 
 
@@ -156,17 +156,7 @@
 ;;   └────
 
 
-;; 1.3 Providers
-;; ─────────────
-
-;;   `req-package' supports extensible package providers system.  This is
-;;   alternative to `:ensure' keyword in `use-package'.  Use `:loader'
-;;   keyword with `:el-get', `:elpa', `:built-in' or `:path' value.  Extend
-;;   `req-package-providers-map' if you want to introduce new provider.
-;;   Tweak provider priorities using `req-package-providers-priority' map.
-
-
-;; 1.4 Logging
+;; 1.3 Logging
 ;; ───────────
 
 ;;   You can use `req-package--log-open-log' to see, what is happening with
@@ -175,37 +165,42 @@
 ;;   `fatal', `error', `warn', `info', `debug', `trace'.
 
 
-;; 1.5 Migrate from use-package
+;; 1.4 Migrate from use-package
 ;; ────────────────────────────
 
 ;;   Just replace all `(use-package ...)' with `(req-package [:require
 ;;   DEPS] ...)' and add `(req-package-finish)' at the end of your
-;;   configuration file.  Do not use `:ensure' keyword, use providers
-;;   system that is more powerful.  There is a `:force' keyword which
-;;   simulates plain old use-package behavior.
+;;   configuration file.  There is a `:force' keyword which simulates plain
+;;   old use-package behavior.
 
 
-;; 1.6 Note
+;; 1.5 Note
 ;; ────────
 
 ;;   More complex req-package usage example can be found at
 ;;   [https://github.com/edvorg/emacs-configs].
 
-;;   Use `load-dir' package to load all `*.el' files from a dir (e.g
+;;   Use `load-dir' package to load all `*.el' files in a dir (e.g
 ;;   `~/.emacs.d/init.d')
 
 
-;; 1.7 Contribute
+;; 1.6 Contribute
 ;; ──────────────
 
 ;;   Please, pull-request your changes to `develop' branch.  Master is used
 ;;   for automatic *release* package builds by travis-ci.
 
 
-;; 1.8 Changelog
+;; 1.7 Changelog
 ;; ─────────────
 
-;; 1.8.1 `v1.0'
+;; 1.7.1 `v1.1'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • due to use-package being mature enough drop providers system
+
+
+;; 1.7.2 `v1.0'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • once you called `req-package-finish' you are able reload package
@@ -220,19 +215,19 @@
 ;;   • `req-package-force' replaced with `:force' keyword
 
 
-;; 1.8.2 `v0.9'
+;; 1.7.3 `v0.9'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `:loader' keyword support
 
 
-;; 1.8.3 `v0.8'
+;; 1.7.4 `v0.8'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • bugfixes
 
 
-;; 1.8.4 `v0.7'
+;; 1.7.5 `v0.7'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation. all packages will be
@@ -242,13 +237,13 @@
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
-;; 1.8.5 `v0.6'
+;; 1.7.6 `v0.6'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `el-get' support
 
 
-;; 1.8.6 `v0.5'
+;; 1.7.7 `v0.5'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Major system refactoring.
@@ -258,26 +253,26 @@
 ;;   • Flexible `:require' keyword parsing.
 
 
-;; 1.8.7 `v0.4.2'
+;; 1.7.8 `v0.4.2'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Bug fixes.
 
 
-;; 1.8.8 `v0.4.1'
+;; 1.7.9 `v0.4.1'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Various tweaks and bug fixes.
 
 
-;; 1.8.9 `v0.4-all-cycles'
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.7.10 `v0.4-all-cycles'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • All cycles of your dependencies will be printed now.
 ;;   • Also there are more handy log messages and some bug fixes.
 
 
-;; 1.8.10 `v0.3-cycles'
+;; 1.7.11 `v0.3-cycles'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There are nice error messages about cycled dependencies now.
@@ -285,7 +280,7 @@
 ;;   • It means there is a cycle around `pkg1'.
 
 
-;; 1.8.11 `v0.2-auto-fetch'
+;; 1.7.12 `v0.2-auto-fetch'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There is no need of explicit `:ensure' in your code now.
@@ -321,7 +316,6 @@
 (require 'log4e)
 (require 'ht)
 
-(require 'req-package-providers)
 (require 'req-package-hooks)
 (require 'req-package-args)
 (require 'req-package-cycles)
@@ -432,32 +426,25 @@
           (SPLIT3 (req-package-args-extract-arg :init (cadr SPLIT2) nil))
           (SPLIT4 (req-package-args-extract-arg :config (cadr SPLIT3) nil))
           (SPLIT5 (req-package-args-extract-arg :force (cadr SPLIT4) nil))
-          (SPLIT6 (req-package-args-extract-arg :dep-init (cadr SPLIT5) nil))
-          (SPLIT7 (req-package-args-extract-arg :dep-config (cadr SPLIT6) nil))
-          (SPLIT8 (req-package-args-extract-arg :load-path (cadr SPLIT7) nil))
-          (SPLIT9 (req-package-args-extract-arg :disabled (cadr SPLIT8) nil))
+          (SPLIT6 (req-package-args-extract-arg :load-path (cadr SPLIT5) nil))
+          (SPLIT7 (req-package-args-extract-arg :disabled (cadr SPLIT6) nil))
           (DEPS (-flatten (car SPLIT1)))
           (LOADER (caar SPLIT2))
           (INIT (cons 'progn (car SPLIT3)))
           (PKG (list PKG DEPS))
           (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT4))))
           (FORCE (caar SPLIT5))
-          (DEP-INIT (caar SPLIT6))
-          (DEP-CONFIG (caar SPLIT7))
-          (REST (cadr SPLIT7))
-          (LOAD-PATH (-flatten (car SPLIT8)))
-          (DISABLED (-flatten (car SPLIT9)))
+          (REST (cadr SPLIT5))
+          (LOAD-PATH (-flatten (car SPLIT6)))
+          (DISABLED (-flatten (car SPLIT7)))
           (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
      (if DISABLED
          (req-package--log-info "package %s is disabled. skipping" (car PKG))
-       (if (and LOADER (not (ht-get (req-package-providers-get-map) LOADER)))
-           (req-package--log-error "unable to find loader %s for package %s" LOADER PKG)
-         (if FORCE
-             (progn ;; load avoiding dependency management
-               (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
-               (req-package-providers-prepare (car PKG) LOADER)
-               (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
-           (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH))))))
+       (if FORCE
+           (progn ;; load avoiding dependency management
+             (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
+             (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
+         (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH)))))
 
 (defmacro req-package-force (pkg &rest args)
   `(let* ((PKG ',pkg)
@@ -468,13 +455,12 @@
   "Start loading process, call this after all req-package invocations."
   ;; (req-package-cycles-detect req-package-required-by) ;; FIXME
   (req-package--log-debug "package requests finished: %s packages are waiting"
-                          (hash-table-count req-package-branches))
+               (hash-table-count req-package-branches))
   (maphash (lambda (req branches)
              (when (not branches)
                (let* ((REQ-PKG (list req nil))
                       (CURRENT (gethash REQ-PKG req-package-deps-left 0)))
-                 (puthash REQ-PKG CURRENT req-package-deps-left)))
-             (req-package-providers-prepare req (gethash req req-package-loaders nil)))
+                 (puthash REQ-PKG CURRENT req-package-deps-left))))
            req-package-branches)
   (maphash (lambda (key value)
              (when (equal (gethash key req-package-deps-left 0) 0)

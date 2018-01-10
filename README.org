@@ -81,14 +81,6 @@
    (req-package-finish)
    #+END_SRC
 
-** Providers
-
-   =req-package= supports extensible package providers system.
-   This is alternative to =:ensure= keyword in =use-package=.
-   Use =:loader= keyword with =:el-get=, =:elpa=, =:built-in= or =:path= value.
-   Extend =req-package-providers-map= if you want to introduce new provider.
-   Tweak provider priorities using =req-package-providers-priority= map.
-
 ** Logging
 
    You can use =req-package--log-open-log= to see, what is happening with your configuration.
@@ -98,7 +90,6 @@
 ** Migrate from use-package
 
    Just replace all =(use-package ...)= with =(req-package [:require DEPS] ...)= and add =(req-package-finish)= at the end of your configuration file.
-   Do not use =:ensure= keyword, use providers system that is more powerful.
    There is a =:force= keyword which simulates plain old use-package behavior.
 
 ** Note
@@ -113,6 +104,10 @@
    Master is used for automatic *release* package builds by travis-ci.
 
 ** Changelog
+
+*** =v1.1=
+
+    - due to use-package being mature enough drop providers system
 
 *** =v1.0=
 
