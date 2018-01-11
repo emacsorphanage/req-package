@@ -334,9 +334,6 @@
 (defvar req-package-evals (make-hash-table :size 200 :test 'equal)
   "Package symbol -> loading code prepared for evaluation.")
 
-(defvar req-package-loaders (make-hash-table :size 200 :test 'equal)
-  "Package symbol -> loader function to load package by.")
-
 (defvar req-package-branches (make-hash-table :size 200 :test 'equal))
 
 (add-to-list 'use-package-keywords :el-get)
@@ -408,16 +405,12 @@
             (list :config config)
             rest)))
 
-(defun req-package-schedule (PKG DEPS LOADER EVAL LOAD-PATH)
+(defun req-package-schedule (PKG DEPS EVAL)
   (let* ((DEPS-LEFT (gethash PKG req-package-deps-left 0))
          (BRANCHES (ht-get req-package-branches (car PKG))))
     (req-package--log-debug "package requested: %s %s" PKG EVAL)
-    (puthash (car PKG) LOADER req-package-loaders)
     (puthash PKG EVAL req-package-evals)
     (ht-set req-package-branches (car PKG) (cons PKG BRANCHES))
-    (when LOAD-PATH
-      (ht-set req-package-paths (car PKG)
-              (use-package-normalize-paths :load-path LOAD-PATH)))
     (if (= DEPS-LEFT -1)
         (progn ;; package already been loaded before, just eval again
           (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL)))
@@ -440,29 +433,21 @@
   `(let* ((PKG ',pkg)
           (ARGS ',args)
           (SPLIT1 (req-package-args-extract-arg :require ARGS nil))
-          (SPLIT2 (req-package-args-extract-arg :loader (cadr SPLIT1) nil))
-          (SPLIT3 (req-package-args-extract-arg :init (cadr SPLIT2) nil))
-          (SPLIT4 (req-package-args-extract-arg :config (cadr SPLIT3) nil))
-          (SPLIT5 (req-package-args-extract-arg :force (cadr SPLIT4) nil))
-          (SPLIT6 (req-package-args-extract-arg :load-path (cadr SPLIT5) nil))
-          (SPLIT7 (req-package-args-extract-arg :disabled (cadr SPLIT6) nil))
+          (SPLIT2 (req-package-args-extract-arg :init (cadr SPLIT1) nil))
+          (SPLIT3 (req-package-args-extract-arg :config (cadr SPLIT2) nil))
+          (SPLIT4 (req-package-args-extract-arg :force (cadr SPLIT3) nil))
           (DEPS (-flatten (car SPLIT1)))
-          (LOADER (caar SPLIT2))
-          (INIT (cons 'progn (car SPLIT3)))
+          (INIT (cons 'progn (car SPLIT2)))
           (PKG (list PKG DEPS))
-          (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT4))))
-          (FORCE (caar SPLIT5))
-          (REST (cadr SPLIT5))
-          (LOAD-PATH (-flatten (car SPLIT6)))
-          (DISABLED (-flatten (car SPLIT7)))
+          (CONFIG (req-package-patch-config PKG (cons 'progn (car SPLIT3))))
+          (FORCE (caar SPLIT4))
+          (REST (cadr SPLIT4))
           (EVAL (req-package-gen-eval PKG INIT CONFIG REST)))
-     (if DISABLED
-         (req-package--log-info "package %s is disabled. skipping" (car PKG))
-       (if FORCE
-           (progn ;; load avoiding dependency management
-             (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
-             (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
-         (req-package-schedule PKG DEPS LOADER EVAL LOAD-PATH)))))
+     (if FORCE
+         (progn ;; load avoiding dependency management
+           (req-package--log-debug "package force-requested: %s %s" PKG EVAL)
+           (req-package-handle-loading PKG (lambda () (req-package-eval-form EVAL))))
+       (req-package-schedule PKG DEPS EVAL))))
 
 (defmacro req-package-force (pkg &rest args)
   `(let* ((PKG ',pkg)
