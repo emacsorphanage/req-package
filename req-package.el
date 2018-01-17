@@ -466,7 +466,6 @@
 (req-package--log-set-level req-package-log-level)
 (req-package--log-enable-logging)
 (req-package--log-clear-log)
-(setq use-package-always-ensure nil)
 
 (provide 'req-package)
 
