@@ -4,7 +4,7 @@
 
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
-;; Version: 1.2
+;; Version: 1.3
 ;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0") (ht "0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
@@ -37,18 +37,20 @@
 ;; .. 1.5 Note
 ;; .. 1.6 Contribute
 ;; .. 1.7 Changelog
-;; ..... 1.7.1 `v1.1'
-;; ..... 1.7.2 `v1.0'
-;; ..... 1.7.3 `v0.9'
-;; ..... 1.7.4 `v0.8'
-;; ..... 1.7.5 `v0.7'
-;; ..... 1.7.6 `v0.6'
-;; ..... 1.7.7 `v0.5'
-;; ..... 1.7.8 `v0.4.2'
-;; ..... 1.7.9 `v0.4.1'
-;; ..... 1.7.10 `v0.4-all-cycles'
-;; ..... 1.7.11 `v0.3-cycles'
-;; ..... 1.7.12 `v0.2-auto-fetch'
+;; ..... 1.7.1 `v1.3'
+;; ..... 1.7.2 `v1.2'
+;; ..... 1.7.3 `v1.1'
+;; ..... 1.7.4 `v1.0'
+;; ..... 1.7.5 `v0.9'
+;; ..... 1.7.6 `v0.8'
+;; ..... 1.7.7 `v0.7'
+;; ..... 1.7.8 `v0.6'
+;; ..... 1.7.9 `v0.5'
+;; ..... 1.7.10 `v0.4.2'
+;; ..... 1.7.11 `v0.4.1'
+;; ..... 1.7.12 `v0.4-all-cycles'
+;; ..... 1.7.13 `v0.3-cycles'
+;; ..... 1.7.14 `v0.2-auto-fetch'
 
 
 ;; 1 req-package
@@ -92,16 +94,19 @@
 ;;   ┌────
 ;;   │ (require 'req-package)
 ;;   │
-;;   │ (req-package el-get ;; prepare el-get (optional)
+;;   │ (req-package use-package-el-get ;; prepare el-get support for use-package (optional)
 ;;   │   :force t ;; load package immediately, no dependency resolution
 ;;   │   :config
 ;;   │   (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-;;   │   (el-get 'sync))
+;;   │   (el-get 'sync)
+;;   │   (use-package-el-get-setup))
 ;;   └────
 
-;;   Define required packages with dependencies using `:require'.
-;;   Use `:force t' if you want to avoid dependency management and load right now.
-;;   Use `:el-get t' or `:el-get package-name' if you want to install from el-get.
+;;   Define required packages with dependencies using `:require'.  Use
+;;   `:force t' if you want to avoid dependency management and load right
+;;   now.  Use `:el-get t' or `:el-get package-name' if you want to install
+;;   from el-get (Requires `use-package-el-get' package setup like
+;;   described above).
 
 ;;   ┌────
 ;;   │ ;; init-dired.el
@@ -189,13 +194,29 @@
 ;; 1.7 Changelog
 ;; ─────────────
 
-;; 1.7.1 `v1.1'
+;; 1.7.1 `v1.3'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • :el-get keyword support moved to separate package
+;;     [use-package-el-get]
+
+
+;; [use-package-el-get] https://github.com/edvorg/use-package-el-get
+
+
+;; 1.7.2 `v1.2'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌
+
+;;   • add :el-get keyword
+
+
+;; 1.7.3 `v1.1'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • due to use-package being mature enough drop providers system
 
 
-;; 1.7.2 `v1.0'
+;; 1.7.4 `v1.0'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • once you called `req-package-finish' you are able reload package
@@ -210,19 +231,19 @@
 ;;   • `req-package-force' replaced with `:force' keyword
 
 
-;; 1.7.3 `v0.9'
+;; 1.7.5 `v0.9'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `:loader' keyword support
 
 
-;; 1.7.4 `v0.8'
+;; 1.7.6 `v0.8'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • bugfixes
 
 
-;; 1.7.5 `v0.7'
+;; 1.7.7 `v0.7'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • fixed some issues with packages installation. all packages will be
@@ -232,13 +253,13 @@
 ;;     choose, what to try first - elpa, el-get, or something else
 
 
-;; 1.7.6 `v0.6'
+;; 1.7.8 `v0.6'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • `el-get' support
 
 
-;; 1.7.7 `v0.5'
+;; 1.7.9 `v0.5'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Major system refactoring.
@@ -248,26 +269,26 @@
 ;;   • Flexible `:require' keyword parsing.
 
 
-;; 1.7.8 `v0.4.2'
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.7.10 `v0.4.2'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Bug fixes.
 
 
-;; 1.7.9 `v0.4.1'
-;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+;; 1.7.11 `v0.4.1'
+;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • Various tweaks and bug fixes.
 
 
-;; 1.7.10 `v0.4-all-cycles'
+;; 1.7.12 `v0.4-all-cycles'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • All cycles of your dependencies will be printed now.
 ;;   • Also there are more handy log messages and some bug fixes.
 
 
-;; 1.7.11 `v0.3-cycles'
+;; 1.7.13 `v0.3-cycles'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There are nice error messages about cycled dependencies now.
@@ -275,7 +296,7 @@
 ;;   • It means there is a cycle around `pkg1'.
 
 
-;; 1.7.12 `v0.2-auto-fetch'
+;; 1.7.14 `v0.2-auto-fetch'
 ;; ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
 
 ;;   • There is no need of explicit `:ensure' in your code now.
@@ -333,28 +354,6 @@
   "Package symbol -> loading code prepared for evaluation.")
 
 (defvar req-package-branches (make-hash-table :size 200 :test 'equal))
-
-(when (require 'el-get nil t)
-  (add-to-list 'use-package-keywords :el-get)
-
-  (defun use-package-normalize/:el-get (name-symbol keyword args)
-    (use-package-only-one (symbol-name keyword) args
-      (lambda (label arg)
-        (cond
-         ((booleanp arg) name-symbol)
-         ((symbolp arg) arg)
-         (t
-          (use-package-error
-           ":el-get wants an package name or boolean value"))))))
-
-  (defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
-    (let ((body (use-package-process-keywords name-symbol rest state)))
-      ;; This happens at macro expansion time, not when the expanded code is
-      ;; compiled or evaluated.
-      (if (null archive-name)
-          body
-        (el-get-install archive-name)
-        body))))
 
 (defun req-package-patch-config (pkg form)
   "Wrap package PKG :config FORM into progn with callbacks."

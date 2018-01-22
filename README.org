@@ -19,16 +19,18 @@
    #+BEGIN_SRC emacs-lisp
    (require 'req-package)
 
-   (req-package el-get ;; prepare el-get (optional)
+   (req-package use-package-el-get ;; prepare el-get support for use-package (optional)
      :force t ;; load package immediately, no dependency resolution
      :config
      (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get/el-get/recipes")
-     (el-get 'sync))
+     (el-get 'sync)
+     (use-package-el-get-setup))
    #+END_SRC
 
    Define required packages with dependencies using =:require=.
    Use =:force t= if you want to avoid dependency management and load right now.
-   Use =:el-get t= or =:el-get package-name= if you want to install from el-get.
+   Use =:el-get t= or =:el-get package-name= if you want to install from el-get
+   (Requires =use-package-el-get= package setup like described above).
 
    #+BEGIN_SRC emacs-lisp
    ;; init-dired.el
@@ -100,6 +102,10 @@
    Master is used for automatic *release* package builds by travis-ci.
 
 ** Changelog
+
+*** =v1.3=
+
+    - :el-get keyword support moved to separate package [[https://github.com/edvorg/use-package-el-get][use-package-el-get]]
 
 *** =v1.2=
 
