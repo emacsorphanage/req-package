@@ -336,6 +336,27 @@
 
 (defvar req-package-branches (make-hash-table :size 200 :test 'equal))
 
+(add-to-list 'use-package-keywords :el-get)
+
+(defun use-package-normalize/:el-get (name-symbol keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (label arg)
+      (cond
+       ((booleanp arg) name-symbol)
+       ((symbolp arg) arg)
+       (t
+        (use-package-error
+         ":el-get wants an package name or boolean value"))))))
+
+(defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
+  (let ((body (use-package-process-keywords name-symbol rest state)))
+    ;; This happens at macro expansion time, not when the expanded code is
+    ;; compiled or evaluated.
+    (if (null archive-name)
+        body
+      (el-get-install archive-name)
+      body)))
+
 (defun req-package-patch-config (pkg form)
   "Wrap package PKG :config FORM into progn with callbacks."
   (list 'progn
