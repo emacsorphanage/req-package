@@ -107,7 +107,8 @@
 
 *** =v1.1=
 
-    - due to use-package being mature enough drop providers system
+    - due to use-package being mature enough drop providers system.
+      please refer to [[https://github.com/edvorg/req-package/issues/52][#52]] for migration instructions.
 
 *** =v1.0=
 
