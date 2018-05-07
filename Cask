@@ -8,7 +8,6 @@
 (depends-on "ht")
 (depends-on "use-package")
 (depends-on "dash")
-(depends-on "el-get")
 
 (development
  (depends-on "undercover")

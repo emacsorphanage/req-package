@@ -5,7 +5,7 @@
 ;; Author: Edward Knyshov <edvorg@gmail.com>
 ;; Created: 25 Dec 2013
 ;; Version: 1.2
-;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0") (ht "0") (el-get "5.1"))
+;; Package-Requires: ((use-package "1.0") (dash "2.7.0") (log4e "0.2.0") (ht "0"))
 ;; Keywords: dotemacs startup speed config package
 ;; X-URL: https://github.com/edvorg/req-package
 
@@ -302,13 +302,11 @@
                    (package-install package))))))
 
 (req-package-bootstrap 'use-package)
-(req-package-bootstrap 'el-get)
 (req-package-bootstrap 'dash)
 (req-package-bootstrap 'log4e)
 (req-package-bootstrap 'ht)
 
 (require 'use-package)
-(require 'el-get)
 (require 'dash)
 (require 'log4e)
 (require 'ht)
@@ -336,26 +334,27 @@
 
 (defvar req-package-branches (make-hash-table :size 200 :test 'equal))
 
-(add-to-list 'use-package-keywords :el-get)
+(when (require 'el-get nil t)
+  (add-to-list 'use-package-keywords :el-get)
 
-(defun use-package-normalize/:el-get (name-symbol keyword args)
-  (use-package-only-one (symbol-name keyword) args
-    (lambda (label arg)
-      (cond
-       ((booleanp arg) name-symbol)
-       ((symbolp arg) arg)
-       (t
-        (use-package-error
-         ":el-get wants an package name or boolean value"))))))
+  (defun use-package-normalize/:el-get (name-symbol keyword args)
+    (use-package-only-one (symbol-name keyword) args
+      (lambda (label arg)
+        (cond
+         ((booleanp arg) name-symbol)
+         ((symbolp arg) arg)
+         (t
+          (use-package-error
+           ":el-get wants an package name or boolean value"))))))
 
-(defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
-  (let ((body (use-package-process-keywords name-symbol rest state)))
-    ;; This happens at macro expansion time, not when the expanded code is
-    ;; compiled or evaluated.
-    (if (null archive-name)
-        body
-      (el-get-install archive-name)
-      body)))
+  (defun use-package-handler/:el-get (name-symbol keyword archive-name rest state)
+    (let ((body (use-package-process-keywords name-symbol rest state)))
+      ;; This happens at macro expansion time, not when the expanded code is
+      ;; compiled or evaluated.
+      (if (null archive-name)
+          body
+        (el-get-install archive-name)
+        body))))
 
 (defun req-package-patch-config (pkg form)
   "Wrap package PKG :config FORM into progn with callbacks."
